@@ -120,14 +120,17 @@ zD.ccmap(start=0,stop=n,dist=5, pSize=50)
 ```
 
 </br>
+
 <a id="chapter-5"></a>
-## Available objects and functions 
+## Available objects and functions
+
 * <a href=#docking style="text-decoration: none;"> dockingPP.docking </a>
 * <a href=#stats style="text-decoration: none;">dockingPP.core_stats</a>
 * <a href=#cluster style="text-decoration: none;">dockingPP.core_clustering</a>
 * <a href=#visuals style="text-decoration: none;">dockingPP.core_visuals</a>
 
 </br>
+
 <a id="docking"></a>
 ### dockingPP.docking
 
