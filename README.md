@@ -1,14 +1,16 @@
-## DOCKING POST-PROCESSING Utility Class and functions
+### DOCKING POST-PROCESSING Utility Class and functions
 
 
-### Table of Contents
+# Table of Contents
   * [Dependencies](#chapter-1)
   * [Quick Start](#chapter-2)
   * [The megadock format](#chapter-3)
   * [Getting started](#chapter-4)
   * [Available objects and functions](#chapter-5)
 
-## Dependencies <a id="chapter-1"></a>
+---------------------------------
+<a id="chapter-1"></a>
+## Dependencies 
 dockingPP has the following dependencies:
 
 * **Python 3**
@@ -17,8 +19,12 @@ dockingPP has the following dependencies:
 * ccmap (<https://github.com/glaunay/ccmap>) 
 * NumPy (<http://www.numpy.org/>)
 
-## Quick Start <a id="chapter-2"></a>
 </br>
+
+
+<a id="chapter-2"></a>
+## Quick Start 
+
 
 ```sh
 git clone https://github.com/glaunay/pyproteins.git  LOCAL_PATH_TO_REPO
@@ -27,9 +33,12 @@ Check for dependencies in LOCAL\_PATH\_TO\_REPO/setup.py
 
 ```python
 sys.path.append(LOCAL_PATH_TO_REPO/src)
-```
+``` 
+</br>
 
-## The megadock/zDock format <a id="chapter-3"></a>
+
+<a id="chapter-3"></a>
+## The megadock/zDock format 
 
 A typical megadock results file is derived from the [ZDOCK format](http://zdock.umassmed.edu/zdock_output_format.php). 
 
@@ -69,12 +78,14 @@ So for each pose, the ccmap libray has to:
  
  </br> 
 
-## Getting started with Docking Post-Processing <a id="chapter-4"></a>
+----------------------
+<a id="chapter-4"></a>
+### Getting started with Docking Post-Processing 
 #### Docking prediction Output reading 
 
 ```python
-import megadock
-zD= megadock.parse('/PATH_TO_FILE/1BJ1_r-1BJ1_l.detail', maxPose =45) # maxpose default is 0
+from dockingPP import parse
+zD= parse('/PATH_TO_FILE/1BJ1_r-1BJ1_l.detail', maxPose =45) # maxpose default is 0
 ```
 *Be careful, since docking outputs vary and may even provide near native solutions for the study.*   
 *For now, the program expects 7 near native solutions in the beginning of the file. These are not taken into account for residue or contact statistics. Therefore if maxpose=4000 you will get 7 near native solutions and 3993 computed poses*
@@ -108,13 +119,17 @@ zD.ccmap(start=0,stop=n,dist=5, pSize=50)
 # pSize default : 200
 ```
 
-## Available objects and functions <a id="chapter-5"></a>
+</br>
+<a id="chapter-5"></a>
+## Available objects and functions 
 * <a href=#docking style="text-decoration: none;"> dockingPP.docking </a>
 * <a href=#stats style="text-decoration: none;">dockingPP.core_stats</a>
 * <a href=#cluster style="text-decoration: none;">dockingPP.core_clustering</a>
+* <a href=#visuals style="text-decoration: none;">dockingPP.core_visuals</a>
 
-
-### dockingPP.docking <a id="docking"></a>
+</br>
+<a id="docking"></a>
+### dockingPP.docking
 
 <span style="color:Crimson ;font-weight=500"> *class DockData* </span> _ *Docking results container*
 we will consider as pose_index its original rank 
@@ -168,7 +183,9 @@ we will consider as pose_index its original rank
 	- is_ccmap
 	- ccmap
 
-### dockingPP.core_stats <a id="stats"></a>
+</br>
+<a id="stats"></a>
+### dockingPP.core_stats
 <span style="color:Crimson ;font-weight=500"> *class CmapRes* </span> _ *store residues from ccmap and their counts* 
 
 * Attributes 
@@ -196,6 +213,7 @@ we will consider as pose_index its original rank
 	- addRes
 	- write
 
+</br>
 <span style="color:Crimson ;font-weight=500"> *class ContactStats* </span> _ *storage and transformation or the statistics on the residues of the contact maps in a zDock or MegaDock experiment* 
 
 * Attributes 
@@ -212,9 +230,16 @@ we will consider as pose_index its original rank
 	- render_table
 	- write
 
-### dockingPP.core_clustering <a id="cluster"></a>
+</br>
+<a id="cluster"></a>
+### dockingPP.core_clustering 
 
 </br>
+<a id="visuals"></a>
+### dockingPP.core_visuals 
+
+</br>
+
 -------------------------------
 
 
