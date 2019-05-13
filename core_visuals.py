@@ -7,7 +7,7 @@ from mpl_toolkits.mplot3d import Axes3D
 from core_clustering import rankCluster
 import pickle
 from dockingPP import parse
-
+from math import sqrt
 import plotly.plotly as py
 # Import dependencies
 import plotly
@@ -57,7 +57,7 @@ class Scores(object):
     def rmsds(self):
         if not self.poses :
             raise Exception("Please define poses using setPoses")
-        return [poses.rmsd for pose in self.poses]
+        return [pose.rmsd for pose in self.poses]
 
 
     def rankedRmsds(self, ranked):
@@ -133,6 +133,103 @@ class Scores(object):
         s=stop if stop else len(self.data)-1
         pl.hist(sorted([i[1] for i in self.data[:stop]]))
 
+    def plotly3D(self, rank, size="rmsd", colors="rank"):
+        """ Warning : rank must be in the original order, since positions and rmsds are in the original order """
+        greys_colorscale= [
+        # Let first 10% (0.1) of the values have color rgb(0, 0, 0)
+        # [0, 'rgb(400, 180, 180)'],
+        # [0.1, 'rgb(400, 180, 180)'],
+        [0, 'rgb(400, 0, 0)'],
+        [0.05, 'rgb(400, 0, 0)'],
+        [0.05, 'rgb(400, 100, 40)'],
+        [0.1, 'rgb(400, 100, 40)'],
+        # Let values between 10-20% of the min and max of z
+        # have color rgb(20, 20, 20)
+        [0.1, 'rgb(400, 120, 60)'],
+        [0.2, 'rgb(400, 120, 60)'],
+
+        # Values between 20-30% of the min and max of z
+        # have color rgb(40, 40, 40)
+        [0.2, 'rgb(400, 100, 80)'],
+        [0.3, 'rgb(400, 100, 80)'],
+
+        [0.3, 'rgb(400, 80, 100)'],
+        [0.4, 'rgb(400, 80, 100)'],
+
+        [0.4, 'rgb(300, 80, 120)'],
+        [0.5, 'rgb(300, 80, 120)'],
+
+        [0.5, 'rgb(250, 80, 200)'],
+        [0.6, 'rgb(250, 80, 200)'],
+
+        [0.6, 'rgb(200, 50, 250)'],
+        [0.7, 'rgb(200, 50, 250)'],
+
+        [0.7, 'rgb(150, 50, 300)'],
+        [0.8, 'rgb(150, 50, 300)'],
+
+        [0.8, 'rgb(100, 0, 350)'],
+        [0.9, 'rgb(100, 0, 350)'],
+
+        [0.9, 'rgb(0, 0, 400)'],
+        [1.0, 'rgb(0, 0, 400)'] ]
+        rmsds=self.rmsds
+        pos=self.coordDict(start=0, stop=len(rank)-1)
+        C=[(i - i % 500 ) for i in rank]
+        S=[sqrt((rmsd))*3 for rmsd in rmsds]
+        # Configure Plotly to be rendered inline in the notebook.
+        plotly.offline.init_notebook_mode()
+        # Configure the trace.
+        trace = go.Scatter3d(
+            x=pos['x'], y=pos['y'], z=pos['z'],
+            mode = 'markers',
+            marker={
+                'size': S,
+                'opacity': 1,
+                'color' : C,
+                'colorscale' : greys_colorscale,
+                'colorbar': {'title' : 'Consensus ranking'}
+
+            },
+            text=rank)
+        layout = go.Layout(title='Docking decoys',
+        hovermode= 'closest',)
+        margin={'l': 0, 'r': 0, 'b': 0, 't': 10}
+        data = [trace]
+        plot_figure = go.Figure(data=data, layout=layout)
+        # Render the plot.
+        plotly.offline.iplot(plot_figure,filename='hover-chart-basic')
+
+def true3D(pos, complex):
+    """Make sure the first 7 positions of your dictionnary pos are Native Like Solutions"""
+    # Configure Plotly to be rendered inline in the notebook.
+    plotly.offline.init_notebook_mode()
+    # Configure the trace.
+    decoy = go.Scatter3d(
+        x=pos['x'][7:], y=pos['y'][7:], z=pos['z'][7:],
+        mode = 'markers',
+        marker={
+            'size': 3,
+            'opacity': 1,
+            'color' : "lightblue",
+        },
+        text=[str(i+7) for i in range(len(pos['x'][7:])) ])
+    truepos = go.Scatter3d(
+        x=pos['x'][:7], y=pos['y'][:7], z=pos['z'][:7],
+        mode = 'markers',
+        marker={
+            'size': 5,
+            'opacity': 0.8,
+            'color' : "blue",
+        },
+        text=[str(i) for i in range(7) ])
+    layout = go.Layout(title='Docking decoys and True position of '+complex +"'s ligand'",
+    hovermode= 'closest',)
+    margin={'l': 0, 'r': 0, 'b': 0, 't': 10}
+    data = [decoy,truepos]
+    plot_figure = go.Figure(data=data, layout=layout)
+    # Render the plot.
+    plotly.offline.iplot(plot_figure,filename='hover-chart-basic')
 
 def colorsFromRmsd(rmsds):
     colors=[]
@@ -156,14 +253,15 @@ def countNative(rmsds):
     for i in rmsds:
 
         if i<5:
-            if x<100:
-                firstC+=1
-            if x<1000:
-                firstK+=1
             if x<2000:
                 firstKK+=1
-            if x>2000:
+                if x<1000:
+                    firstK+=1
+                    if x<100:
+                        firstC+=1
+            else:
                 out+=1
+        x+=1
     return [(100,firstC),(1000,firstK),(2000,firstKK),("out",out)]
 
 def countValid(pList):
@@ -188,32 +286,3 @@ def scatter3d(data,groups):
     ax.view_init(45, 45)
     plt.set_cmap('rainbow')
     plt.show()
-
-def plotly3D(pos, S, D):
-    # Configure Plotly to be rendered inline in the notebook.
-    plotly.offline.init_notebook_mode()
-    # Configure the trace.
-    trace = go.Scatter3d(
-        x=pos['x'],  # <-- Put your data instead
-        y=pos['y'],  # <-- Put your data instead
-        z=pos['z'],  # <-- Put your data instead
-        mode = 'markers',
-        marker={
-            'size': S,
-            'opacity': 1,
-            'color' : D,
-            'colorscale' : 'Jet'
-        }
-    )
-
-    # Configure the layout.
-    layout = go.Layout(
-        margin={'l': 0, 'r': 0, 'b': 0, 't': 0}
-    )
-
-    data = [trace]
-
-    plot_figure = go.Figure(data=data, layout=layout)
-
-    # Render the plot.
-    plotly.offline.iplot(plot_figure)

@@ -31,30 +31,35 @@ barycenters in order to generate clusters with different algorithms. """
 
 
 
-def rankCluster(pList, maxd) :
-
+def rankCluster(pList, ranked, maxd, out="list") :
+    """Can return list of pose's belonging if out is "list" or a dictionnary of clusters
+    and the poses they contain if out is "dict"  """
     def calcul_dist(pose1,pose2):
         dist= sqrt(sum([(pose1.translate[i]-pose2.translate[i])**2 for i in range(3)]))
         return dist
+    r_list=[pList[i] for i in ranked]
     groups=[]
     clusters_found=0
     clusters={} #cluster_id : [poses]
-    for i in range(7, len(pList)) :
+    for i in range(7,len(r_list)) :
     #     print(str(pose.id) + str(pose.translate))
         in_cluster = False
         for cluster_id in clusters.keys():
             # For each cluster representative
             representative = clusters[cluster_id][0]
-            if calcul_dist(pList[i],representative) < maxd:
-                clusters[cluster_id].append(pList[i])
+            if calcul_dist(r_list[i],representative) < maxd:
+                clusters[cluster_id].append(r_list[i])
                 in_cluster = True
                 groups.append(cluster_id)
                 break
         if not in_cluster:
             clusters_found += 1
-            clusters[clusters_found] = [pList[i]]
+            clusters[clusters_found] = [r_list[i]]
             groups.append(clusters_found)
-    return clusters
+    if out=="list":
+        return groups
+    if out=="dict":
+        return clusters
 
 def birchCluster(zD, maxd):
     data=zD.dictPos
