@@ -3,7 +3,7 @@
 
 ### Table of Contents
   * [Dependencies](#chapter-1)
-  * [Quick Start] (#chapter-2)
+  * [Quick Start](#chapter-2)
   * [The megadock format](#chapter-3)
   * [Getting started](#chapter-4)
   * [Available objects and functions](#chapter-5)
