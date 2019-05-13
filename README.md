@@ -218,6 +218,7 @@ we will consider as pose_index its original rank
 	- write
 
 </br>
+
 <span style="color:Crimson ;font-weight=500"> *class ContactStats* </span> _ *storage and transformation or the statistics on the residues of the contact maps in a zDock or MegaDock experiment* 
 
 * Attributes 
