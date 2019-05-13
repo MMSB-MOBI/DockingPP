@@ -187,6 +187,7 @@ we will consider as pose_index its original rank
 	- ccmap
 
 </br>
+
 <a id="stats"></a>
 ### dockingPP.core_stats
 <span style="color:Crimson ;font-weight=500"> *class CmapRes* </span> _ *store residues from ccmap and their counts* 
@@ -234,10 +235,12 @@ we will consider as pose_index its original rank
 	- write
 
 </br>
+
 <a id="cluster"></a>
 ### dockingPP.core_clustering 
 
 </br>
+
 <a id="visuals"></a>
 ### dockingPP.core_visuals 
 
