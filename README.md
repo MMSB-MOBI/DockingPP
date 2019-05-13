@@ -27,7 +27,7 @@ dockingPP has the following dependencies:
 
 
 ```sh
-git clone https://github.com/glaunay/pyproteins.git  LOCAL_PATH_TO_REPO
+git clone https://github.com/juliaprieto/dockingPP.git  LOCAL_PATH_TO_REPO
 ``` 
 Check for dependencies in LOCAL\_PATH\_TO\_REPO/setup.py
 
