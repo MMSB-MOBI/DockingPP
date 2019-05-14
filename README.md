@@ -159,32 +159,34 @@ we will consider as pose_index its original rank
 	- **push** : add pose to zList 
 	- **setReceptor** : add PDB reference
 	- **setLigand** : add PDB reference
-	- **dictPos** : returns a dictionnary useful for visualisation { 'x' : , 'y' : } 
+	- **dictPos** : returns a dictionary useful for visualisation { 'x' : , 'y' : } 
 	- **bestPoses** : returns a list of the n best poses according to 1 rescoring method
-	- **poseScores** : returns a dictionnary : { pose_index : score }
+	- **poseScores** : returns a dictionary : { pose_index : score }
 
 <span style="color:Crimson ;font-weight=500"> *class Pose* </span> _ *Ligand Pose information*. 
   
-* Attributes 
-	- id 
-	- euler
-	- translate
-	- ccmap
-	- belongsTo 
+* Attributes
+	- **id**
+	- **euler**
+	- **translate**
+	- **ccmap**:json formatted contact map
+	- **belongsTo** : DockData object
 	- ligOffset 
 	- recOffset
-	- dictorizedReceptor
-	- dictorizedLigand
+	- dictorizedReceptor : positions for the receptors atoms
+	- dictorizedLigand : positions for the ligands atoms
 	- resMapList : returns the list of residues implied in the contact map
-	- resSize
-	- conSize
+	- resSize : number of residues in pose contactmap
+	- conSize : number of contacts in pose contactmap
 * Available Methods
-	- SumScore
-	- SquareSumScore
-	- cmapSumScore
-	- cmapSquareSumScore
-	- is_ccmap
-	- ccmap
+	- **SumScore** :returns the sum of the residues statistics, method can take two values : 'plain' , 'freq'
+	- **MeanScore** : returns the mean of the residues statistics, method can take two values : 'plain' , 'freq'
+	- **SquareSumScore** : returns the square sum of the residues statistics, method can take three values : 'plain' , 'freq' or 'log'</br>
+*And so for contacts*
+	- **cmapSumScore**
+	- **cmapSquareSumScore**
+	- has_ccmap : checks wether pose's ccmap has been calculated
+	- ccmap : calculate contact map
 
 </br>
 
@@ -193,29 +195,29 @@ we will consider as pose_index its original rank
 <span style="color:Crimson ;font-weight=500"> *class CmapRes* </span> _ *store residues from ccmap and their counts* 
 
 * Attributes 
-	- self.chainID
+	- chainID
 	- resID 
-	- role
-	- count
-	- cCount
+	- role : Rec or Lig residue
+	- **count** : number of occurences in residues
+	- **cCount** : number of occurences in contacts
 	- index
 * Available Methods
 	- increase_count
-	- reset_all
+	- **reset_all** : resets all counts to 0
 
-<span style="color:Crimson ;font-weight=500"> *class ResStats* </span> _ *storage and transformation or the statistics on the residues of the contact maps in a zDock or MegaDock experiment* 
+<span style="color:Crimson ;font-weight=500"> *class ResStats* </span> _ *storage and transformation of the statistics on the residues of the contact maps in a zDock or MegaDock experiment* 
 
 * Attributes 
 	- rDict
-	- expSize
+	- expSize : Total number of decoys taken into account for statistical calculation
 	- expName
-	- plainResDict
-	- resFreq
-	- pondResDict
+	- **plainResDict** : counts dictionary {residue : count}
+	- **resFreq** : residue frequency dictionary {residue : frequency}
+	- **pondResDict** : counts in contacts dictionary 
 * Available Methods
 	- setSize
 	- addRes
-	- write
+	- **write** : write the statistics of the experiment to a file. 
 
 </br>
 

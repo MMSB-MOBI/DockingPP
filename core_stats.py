@@ -252,7 +252,7 @@ def writeScores(size, scores , filename="scores.tsv", title='Exp1', header=None)
         f.write("# Experiment_size : " + str(size) + "\n")
         f.write("Pose" + "\t" + "\t".join(header)+ "\n")
 
-        for i in range(len(scores[0])):
-            f.write(str(i)+"\t"+ "\t".join([str(score[i]) for score in scores]) + "\n")
+        for pose in range(len(scores)):
+            f.write(str(pose)+"\t"+ "\t".join([str(i) for i in scores[pose]]) + "\n")
 
     return filename

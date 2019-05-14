@@ -62,7 +62,7 @@ class Pose(object):
     @property
     def resMapList(self):
         """Returns a list of all residues implied in the contact between this Pose and the receptor"""
-        self.is_ccmap()
+        self.has_ccmap()
         residues=[]
         for contact in self._ccmap['data']:
             residues.append(CmapRes(contact['root'], role='Rec').index)
@@ -81,13 +81,13 @@ class Pose(object):
     @property
     def resSize(self):
         """Returns the number of residues in the contact map between this pose and the receptor """
-        self.is_ccmap()
+        self.has_ccmap()
         return len(self.resMapList)
 
     @property
     def conSize(self):
         """Returns the number of contacts between this pose and the receptor """
-        self.is_ccmap()
+        self.has_ccmap()
         consize=0
         for contact in self._ccmap['data']:
             for partner in contact['partners']:
@@ -97,7 +97,7 @@ class Pose(object):
     def SumScore(self, resStats, method='plain'):
         """ This function returns the sum of the residues statistics,
          method can take three values : 'plain' , 'freq' or 'log' """
-        self.is_ccmap()
+        self.has_ccmap()
         if method == 'plain' :
             counts=resStats.plainResDict
             return sum([counts[res] if res in counts else 1 for res in self.resMapList])
@@ -111,9 +111,9 @@ class Pose(object):
             raise Exception("Unknown '" + method + "' method value")
 
     def MeanScore(self, resStats, method='plain'):
-        """ This function returns the sum of the residues statistics,
+        """ This function returns the mean of the residues statistics,
          method can take two values : 'plain' , 'freq'  """
-        self.is_ccmap()
+        self.has_ccmap()
         if method == 'plain' :
             counts=resStats.plainResDict
             return sum([counts[res] if res in counts else 1 for res in self.resMapList])/self.resSize
@@ -127,7 +127,7 @@ class Pose(object):
         """ This function returns the square sum of the residues statistics,
         method can take three values : 'plain' , 'freq' or 'log' """
 
-        self.is_ccmap()
+        self.has_ccmap()
         if method == 'plain' :
             counts=resStats.plainResDict
             return sum([counts[res] if res in counts else 1 for res in self.resMapList])
@@ -143,7 +143,7 @@ class Pose(object):
     def cmapSumScore(self,conStats, method= 'plain'):
         """ This function returns the sum of the contacts statistics,
          method can take three values : 'plain' , 'freq' or 'log' """
-        self.is_ccmap()
+        self.has_ccmap()
         score=0
         if method == 'plain' :
             for contact in self._ccmap['data']:
@@ -168,7 +168,7 @@ class Pose(object):
     def cmapMeanScore(self,conStats, method= 'plain'):
         """ This function returns the sum of the contacts statistics,
          method can take three values : 'plain' , 'freq'"""
-        self.is_ccmap()
+        self.has_ccmap()
         score=0
         if method == 'plain' :
             for contact in self._ccmap['data']:
@@ -186,7 +186,7 @@ class Pose(object):
     def cmapSquareSumScore(self,conStats, method= 'plain') :
         """ This function returns the square sum of the contacts statistics,
         method can take three values : 'plain' , 'freq' or 'log' """
-        self.is_ccmap()
+        self.has_ccmap()
         score=0
         if method == 'plain' :
             for contact in self._ccmap['data']:
@@ -206,7 +206,7 @@ class Pose(object):
         else :
             raise Exception("Unknown '" + method + "' method value")
 
-    def is_ccmap(self):
+    def has_ccmap(self):
         """ Check ccmap has been calculated for this pose """
         if self._ccmap != None :
             return True
@@ -490,29 +490,29 @@ def mpCcmap(datum):
     return zPack
 
 def all_scores(zD,filename) :
-        scores= []
-        resS , conS = zD.getStats
-        resS.write(filename+"_resstats.tab")
-        conS.write(filename+"_constats.tab")
-        size=resS.expSize
-        rfreqs=resS.resFreq
-        cfreqs=conS.contactFreq
-        for i,p in enumerate(zD.pList[:size+7]) :
-            p.is_ccmap()
-            complex=[0,0,0,0,0,0,0,0,0,0]
-            for res in p.resMapList :
-                complex[1] += rfreqs[res] if res in rfreqs else 1/size
-                complex[3] += math.log(rfreqs[res]) if res in rfreqs else math.log(1/size)
-                complex[4] += rfreqs[res]**2 if res in rfreqs else 1/size**2
-            complex[0] = p.resSize
-            complex[2] = complex[1]/p.resSize  # mean freq
-            for contact in p.contactMapList:
-                # print(contact)
-                complex[6] += cfreqs.get(contact[0],contact[1])
-                complex[8] += math.log(cfreqs.get(contact[0],contact[1]))
-                complex[9] += (cfreqs.get(contact[0],contact[1]))**2
-            complex[5] = p.conSize
-            complex[7] = complex[6]/p.conSize # mean contact freq
-            scores.append(complex)
+    scores= []
+    resS , conS = zD.getStats
+    resS.write(filename+"_resstats.tab")
+    conS.write(filename+"_constats.tab")
+    size=resS.expSize
+    rfreqs=resS.resFreq
+    cfreqs=conS.contactFreq
+    for i,p in enumerate(zD.pList[:size+7]) :
+        p.has_ccmap()
+        complex=[0,0,0,0,0,0,0,0,0,0]
+        for res in p.resMapList :
+            complex[1] += rfreqs[res] if res in rfreqs else 1/size
+            complex[3] += math.log(rfreqs[res]) if res in rfreqs else math.log(1/size)
+            complex[4] += rfreqs[res]**2 if res in rfreqs else 1/size**2
+        complex[0] = p.resSize
+        complex[2] = complex[1]/p.resSize  # mean freq
+        for contact in p.contactMapList:
+            # print(contact)
+            complex[6] += cfreqs.get(contact[0],contact[1])
+            complex[8] += math.log(cfreqs.get(contact[0],contact[1]))
+            complex[9] += (cfreqs.get(contact[0],contact[1]))**2
+        complex[5] = p.conSize
+        complex[7] = complex[6]/p.conSize # mean contact freq
+        scores.append(complex)
 
-        return scores
+    return scores
