@@ -505,7 +505,13 @@ def all_scores(zD,filename) :
             complex[3] += math.log(rfreqs[res]) if res in rfreqs else math.log(1/size)
             complex[4] += rfreqs[res]**2 if res in rfreqs else 1/size**2
         complex[0] = p.resSize
-        complex[2] = complex[1]/p.resSize  # mean freq
+        try :
+            complex[2] = complex[1]/p.resSize  # mean freq
+        except ZeroDivisionError:
+            if complex[1]==0:
+                complex[2]==0
+            else :
+                raise Exception("weird pose : " + str(p.id) + " with size 0 resSize and "+ str(p.ccmap))
         for contact in p.contactMapList:
             # print(contact)
             complex[6] += cfreqs.get(contact[0],contact[1])
