@@ -245,6 +245,7 @@ def colorsFromRmsd(rmsds):
     return colors
 
 def countNative(rmsds):
+    firstT=0
     firstC=0
     firstK=0
     firstKK=0
@@ -259,15 +260,22 @@ def countNative(rmsds):
                     firstK+=1
                     if x<100:
                         firstC+=1
+                        if x<10:
+                            firstT+=1
             else:
                 out+=1
         x+=1
-    return [(100,firstC),(1000,firstK),(2000,firstKK),("out",out)]
+    return [(10,firstT),(100,firstC),(1000,firstK),(2000,firstKK),("out",out)]
 
 def countValid(pList):
     for cluster in clusters:
+        valid=False
         for pose in cluster:
-            print(pose)
+            if pose.rmsd<5:
+                valid=True
+        if valid==True:
+            print(cluster + " is valid")
+
 
 
 def multiplePlots(num, size=(20,10)):

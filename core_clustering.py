@@ -44,19 +44,20 @@ def rankCluster(pList, ranked, maxd, out="list") :
     for i in range(7,len(r_list)) :
     #     print(str(pose.id) + str(pose.translate))
         in_cluster = False
-        for cluster_id in clusters.keys():
+        for cluster_id in groups:
             # For each cluster representative
             representative = clusters[cluster_id][0]
             if calcul_dist(r_list[i],representative) < maxd:
                 clusters[cluster_id].append(r_list[i])
                 in_cluster = True
-                groups.append(cluster_id)
+                groups.insert(0,cluster_id)
                 break
         if not in_cluster:
             clusters_found += 1
             clusters[clusters_found] = [r_list[i]]
-            groups.append(clusters_found)
+            groups.insert(0,clusters_found)
     if out=="list":
+        groups.reverse
         return groups
     if out=="dict":
         return clusters
