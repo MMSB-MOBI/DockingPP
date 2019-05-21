@@ -35,8 +35,7 @@ class Scores(object):
         self.data=None
         with open(file,'r') as f:
             self.data=[line.split("\t") for line in f.readlines()[3:]]
-        self.columns={"pose":0,"s_size":1,"res_fr_sum":2,"res_mean_fr": 3, \
-        "res_log_sum": 4, "res_sq_sum": 5, "c_size": 6, "con_fr_sum": 7,"con_mean_fr" : 8,"con_log_sum" : 9,"con_sq_sum" : 10}
+        self.columns={"pose":0,"s_size":1,"res_fr_sum":2,"res_mean_fr": 3, "res_log_sum": 4, "res_sq_sum": 5, "c_size": 6, "con_fr_sum": 7,"con_mean_fr" : 8,"con_log_sum" : 9,"con_sq_sum" : 10, "rmsd": 11}
         self.poses=None
 
     def setPoses(self, pList):
@@ -56,14 +55,19 @@ class Scores(object):
     @property
     def rmsds(self):
         if not self.poses :
-            raise Exception("Please define poses using setPoses")
-        return [pose.rmsd for pose in self.poses]
+            try:
+                return [info[self.columns["rmsd"]] for info in self.data]
+            except KeyError:
+                print(self.columns["rmsd"])
+                raise Exception("Please define poses using setPoses")
+        else :
+            return [pose.rmsd for pose in self.poses]
 
 
     def rankedRmsds(self, ranked):
         rmsds=[]
         for i in ranked:
-            rmsds.append(self.poses[i].rmsd)
+            rmsds.append(self.rmsd[i])
         return rmsds
 
     def coordDict(self, start=0, stop=None):
@@ -118,9 +122,10 @@ class Scores(object):
         return rank
 
     def rankedPoses(self, element="res_mean_fr", start=0, stop=None):
-
-        if not self.poses :
-            raise Exception("Please define poses using setPoses() funciton")
+        try :
+            r=self.rmsds
+        except :
+            raise Exception("Please define poses using setPoses() function")
         if not stop:
             stop=len(self.data)-1
         col=self.columns[element]

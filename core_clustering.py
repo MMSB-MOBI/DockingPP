@@ -24,24 +24,45 @@ barycenters in order to generate clusters with different algorithms. """
 # clustering validation
 # from sklearn.metrics import silhouette_score
 
+class Cluster(object):
+    def __init__(self,poses):
+        self.poses=poses
 
-# f=sys.argv[1]
-# zDock = pickle.load(open(f,'rb'))
-# data= zDock.dictPos
+    @property
+    def size(self):
+        def testInsert(pair, new_val):
+            if not pair :
+                pair=[new_val,new_val]
+                return pair
+            else :
+                if pair[0]>new_val:
+                    pair[0]=new_val
+                if pair[1]<new_val:
+                    pair[1]=new_val
+                return pair
 
+        X=None
+        Y=None
+        Z=None
+        for p in self.poses :
+            x,y,z=p.translate
+            X=testInsert(X,x)
+            Y=testInsert(Y,y)
+            Z=testInsert(Z,z)
+        return (X,Y,Z)
 
-
-def rankCluster(pList, ranked, maxd, out="list") :
+def reverseRankCluster(pList, ranked, maxd=5, out="list") :
     """Can return list of pose's belonging if out is "list" or a dictionnary of clusters
     and the poses they contain if out is "dict"  """
     def calcul_dist(pose1,pose2):
         dist= sqrt(sum([(pose1.translate[i]-pose2.translate[i])**2 for i in range(3)]))
         return dist
+    assert len(ranked)==len(pList)
     r_list=[pList[i] for i in ranked]
     groups=[]
     clusters_found=0
     clusters={} #cluster_id : [poses]
-    for i in range(7,len(r_list)) :
+    for i in range(len(r_list)):
     #     print(str(pose.id) + str(pose.translate))
         in_cluster = False
         for cluster_id in groups:
@@ -57,7 +78,40 @@ def rankCluster(pList, ranked, maxd, out="list") :
             clusters[clusters_found] = [r_list[i]]
             groups.insert(0,clusters_found)
     if out=="list":
-        groups.reverse
+        groups.reverse()
+        return groups
+    if out=="dict":
+        return clusters
+
+def rankCluster(pList, ranked, maxd, out="list") :
+    """Can return list of pose's belonging if out is "list" or a dictionnary of clusters
+    and the poses they contain if out is "dict"  """
+    def calcul_dist(pose1,pose2):
+        dist= sqrt(sum([(pose1.translate[i]-pose2.translate[i])**2 for i in range(3)]))
+        return dist
+    r_list=[pList[i] for i in ranked]
+    groups=[]
+    clusters_found=0
+    clusters={} #cluster_id : [poses]
+    for i in range(len(r_list)) :
+        if i % 10000 ==0:
+            print("Progress : " + str(i))
+    #     print(str(pose.id) + str(pose.translate))
+        in_cluster = False
+        for cluster_id in groups:
+            # For each cluster representative
+            representative = clusters[cluster_id][0]
+            if calcul_dist(r_list[i],representative) < maxd:
+                clusters[cluster_id].append(r_list[i])
+                in_cluster = True
+                groups.append(cluster_id)
+                break
+        if not in_cluster:
+            clusters_found += 1
+            clusters[clusters_found] = [r_list[i]]
+            groups.append(clusters_found)
+
+    if out=="list":
         return groups
     if out=="dict":
         return clusters

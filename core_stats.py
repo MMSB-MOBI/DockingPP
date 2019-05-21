@@ -212,7 +212,7 @@ def writeScore(size, scores , filename="scores.tsv", title='Exp1'):
             elif re=='no':
                 filename=input("new file name (or 'x' to exit):  ")
                 if filename=="x" :
-                    sys.exit()
+                    return
             else :
                 print("Please answer 'yes' or 'no' ")
         else :
@@ -242,7 +242,7 @@ def writeScores(size, scores , filename="scores.tsv", title='Exp1', header=None)
             elif re=='no':
                 filename=input("new file name (or 'x' to exit):  ")
                 if filename=="x" :
-                    sys.exit()
+                    return
             else :
                 print("Please answer 'yes' or 'no' ")
         else :
