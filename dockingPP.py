@@ -390,6 +390,7 @@ class DockData(object):
                 break
 
         return res_stats
+
     def bestPoses(self, stats=None, n=10, criteria = 'residue' , function='sum', method = 'freq') :
         """ criteria can be either 'residue'(default) or 'contact',
         function can take values : 'sum'(default),'square',

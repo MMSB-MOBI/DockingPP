@@ -1,6 +1,7 @@
 #! /usr/bin/env python3
 
 import matplotlib.pyplot as plt
+import math
 import seaborn as sns
 import pandas as pd
 from mpl_toolkits.mplot3d import Axes3D
@@ -44,9 +45,9 @@ class Scores(object):
     @property
     def scoresDict(self):
         scoresdict={}
-        for info in data:
+        for info in self.data:
             scoresdict[int(info[0])]=info[1:]
-        return scoresDict
+        return scoresdict
 
     @property
     def scoresList(self):
@@ -54,20 +55,22 @@ class Scores(object):
 
     @property
     def rmsds(self):
-        if not self.poses :
-            try:
-                return [info[self.columns["rmsd"]] for info in self.data]
-            except KeyError:
-                print(self.columns["rmsd"])
-                raise Exception("Please define poses using setPoses")
-        else :
+        if self.poses :
             return [pose.rmsd for pose in self.poses]
+        else :
+            try:
+                return [float(info[self.columns["rmsd"]].strip('\n')) for info in self.data]
+            except IndexError:
+                raise Exception("Please define poses using setPoses")
 
+
+    def getScore(self,poseid, score):
+        return self.scoresDict[int(poseid)+1][self.columns[score]]
 
     def rankedRmsds(self, ranked):
         rmsds=[]
         for i in ranked:
-            rmsds.append(self.rmsd[i])
+            rmsds.append(self.rmsds[i])
         return rmsds
 
     def coordDict(self, start=0, stop=None):
@@ -91,7 +94,7 @@ class Scores(object):
             stop=len(ranks)-1
         rmsds=self.rankedRmsds(ranks)
         colors=colorsFromRmsd(rmsds)[int(start):int(stop)]
-        x=[i for i in range(len(colors))]
+        x=[i if i!=0 else 0 for i in range(len(colors))]
         y=rmsds[int(start):int(stop)]
         # print(len(x))
         # print(len(y))
@@ -127,7 +130,7 @@ class Scores(object):
         except :
             raise Exception("Please define poses using setPoses() function")
         if not stop:
-            stop=len(self.data)-1
+            stop=len(self.data)
         col=self.columns[element]
         r=sorted(self.data[int(start):int(stop)],key=lambda o:float(o[col]),reverse=True)
         sorted_i=[int(pose[0]) for pose in r]
@@ -135,7 +138,7 @@ class Scores(object):
 
     def histRmsd(self,plot=None, stop=None):
         pl= plot if plot else plt
-        s=stop if stop else len(self.data)-1
+        s=stop if stop else len(self.data)
         pl.hist(sorted([i[1] for i in self.data[:stop]]))
 
     def plotly3D(self, rank, size="rmsd", colors="rank"):
@@ -259,9 +262,9 @@ def countNative(rmsds):
     for i in rmsds:
 
         if i<5:
-            if x<2000:
+            if x<300:
                 firstKK+=1
-                if x<1000:
+                if x<200:
                     firstK+=1
                     if x<100:
                         firstC+=1
@@ -270,7 +273,7 @@ def countNative(rmsds):
             else:
                 out+=1
         x+=1
-    return [(10,firstT),(100,firstC),(1000,firstK),(2000,firstKK),("out",out)]
+    return [(10,firstT),(100,firstC),(200,firstK),(300,firstKK),("out",out)]
 
 def countValid(pList):
     for cluster in clusters:
