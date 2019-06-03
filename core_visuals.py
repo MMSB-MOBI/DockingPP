@@ -65,7 +65,8 @@ class Scores(object):
 
 
     def getScore(self,poseid, score):
-        return self.scoresDict[int(poseid)+1][self.columns[score]]
+        return self.scoresDict[int(poseid)-1][self.columns[score]]
+
 
     def rankedRmsds(self, ranked):
         rmsds=[]
@@ -99,17 +100,7 @@ class Scores(object):
         # print(len(x))
         # print(len(y))
         pl.scatter(x, rmsds[int(start):int(stop)], c=colors)
-        # for i in rmsds[int(start):int(stop)]:
-        #     if self.poses[i].rmsd<5:
-        #         pl.plot(x,self.poses[i].rmsd, 'go')
-        #         pl.annotate('%s' % self.poses[i].id, xy=(x,self.poses[i].rmsd), textcoords='data')
-        #
-        #     elif 5<self.poses[i].rmsd<10 :
-        #         pl.plot(x,self.poses[i].rmsd, 'ro')
-        #     # elif  self.poses[i].rmsd<20 :
-        #     else :
-        #         pl.plot(x,self.poses[i].rmsd, 'bo')
-        #     x+=1
+
 
 
     def rankPoses(self, element="res_mean_fr", start=0, stop=None):
@@ -143,7 +134,7 @@ class Scores(object):
 
     def plotly3D(self, rank, size="rmsd", colors="rank"):
         """ Warning : rank must be in the original order, since positions and rmsds are in the original order """
-        greys_colorscale= [
+        colorscale= [
         # Let first 10% (0.1) of the values have color rgb(0, 0, 0)
         # [0, 'rgb(400, 180, 180)'],
         # [0.1, 'rgb(400, 180, 180)'],
@@ -183,8 +174,11 @@ class Scores(object):
         [1.0, 'rgb(0, 0, 400)'] ]
         rmsds=self.rmsds
         pos=self.coordDict(start=0, stop=len(rank)-1)
-        C=[(i - i % 500 ) for i in rank]
-        S=[sqrt((rmsd))*3 for rmsd in rmsds]
+        C=[(i /max(rank) ) for i in rank]
+        # print(C)
+
+        S=[sqrt((rmsd/max(rmsds)))*20 for rmsd in rmsds]
+        # print(S)
         # Configure Plotly to be rendered inline in the notebook.
         plotly.offline.init_notebook_mode()
         # Configure the trace.
@@ -195,18 +189,17 @@ class Scores(object):
                 'size': S,
                 'opacity': 1,
                 'color' : C,
-                'colorscale' : greys_colorscale,
+                'colorscale' : colorscale,
                 'colorbar': {'title' : 'Consensus ranking'}
 
             },
             text=rank)
-        layout = go.Layout(title='Docking decoys',
-        hovermode= 'closest',)
+        layout = go.Layout(title='Docking decoys', hovermode= 'closest',)
         margin={'l': 0, 'r': 0, 'b': 0, 't': 10}
         data = [trace]
         plot_figure = go.Figure(data=data, layout=layout)
         # Render the plot.
-        plotly.offline.iplot(plot_figure,filename='hover-chart-basic')
+        plotly.offline.iplot(plot_figure,filename='Docking Decoys')
 
 def true3D(pos, complex):
     """Make sure the first 7 positions of your dictionnary pos are Native Like Solutions"""
@@ -253,27 +246,25 @@ def colorsFromRmsd(rmsds):
     return colors
 
 def countNative(rmsds):
-    firstT=0
-    firstC=0
-    firstK=0
-    firstKK=0
-    out=0
+    counts={5:0, 10:0, 20:0, 100:0, 200:0, "out":0}
     x=0
     for i in rmsds:
 
         if i<5:
-            if x<300:
-                firstKK+=1
-                if x<200:
-                    firstK+=1
-                    if x<100:
-                        firstC+=1
+            if x<200:
+                counts[200]+=1
+                if x<100:
+                    counts[100]+=1
+                    if x<20:
+                        counts[20]+=1
                         if x<10:
-                            firstT+=1
+                            counts[10]+=1
+                            if x<5 :
+                                counts[5]+=1
             else:
-                out+=1
+                counts["out"]+=1
         x+=1
-    return [(10,firstT),(100,firstC),(200,firstK),(300,firstKK),("out",out)]
+    return counts
 
 def countValid(pList):
     for cluster in clusters:
