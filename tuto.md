@@ -6,7 +6,7 @@
 import sys
 sys.path.append("/Users/jprieto/DockingPP")
 from dockingPP import parse, zParse
-from core_scores import Scores, countNative
+from core_scores import Scores, countNative, eval_natives
 from core_clustering import rankCluster as rC, sortCluster, birchCluster
 %load_ext autoreload
 ```
@@ -45,6 +45,9 @@ DD.write_all_scores(filename="/Users/jprieto/docking/Resultats/mycomplex")
 ```
 
     Warning : only 500 poses could be analysed
+    Warning : File /Users/jprieto/docking/Resultats/mycomplex_resstats.tab already exists, do you wish to continue anyway and replace it ? (yes/no)yes
+    Warning : File /Users/jprieto/docking/Resultats/mycomplex_constats.tab already exists, do you wish to continue anyway and replace it ? (yes/no)yes
+    Warning : File /Users/jprieto/docking/Resultats/mycomplex.tsv already exists, do you wish to continue anyway and replace it ? (yes/no)yes
 
 
 
@@ -122,9 +125,9 @@ for p in a :
 
     [175, 315, 166, 81, 360, 450, 394, 29, 295, 455, 28, 420, 240, 11, 113, 426, 203, 148, 94, 109, 283, 324, 75, 194, 22, 40, 99, 180, 247, 382, 105, 453, 397, 95, 70, 464, 425, 372, 344, 476, 254, 427, 216, 257, 458, 227, 380, 356, 87, 150, 359, 333, 483]
     [387, 293, 143, 367, 326, 352, 457, 278, 451, 222, 173, 337, 166, 378, 13, 91, 80, 38, 484, 23, 74, 21, 209, 100, 469, 155, 92, 33, 8, 5, 156, 130, 4, 17, 129, 1, 42, 104, 3, 12, 2, 317, 71, 45, 365, 220, 70, 443, 48, 79, 211, 107, 171, 373, 349, 448, 476]
-    476) (-2.83, 1.53, -0.3) (22.8, 4.8, 19.2)
-    166) (-0.42, 1.83, -0.47) (-4.8, -12.0, -14.399999999999999)
     70) (0.42, 2.66, -2.19) (2.4, -21.599999999999998, -3.5999999999999996)
+    166) (-0.42, 1.83, -0.47) (-4.8, -12.0, -14.399999999999999)
+    476) (-2.83, 1.53, -0.3) (22.8, 4.8, 19.2)
 
 
 ## Analyse the performance of each method
@@ -150,25 +153,10 @@ print(countNative(brmsds))
 
 
 ```python
-def eval_natives(natives,n):
-    positives=0
-    good=[]
-    bad=[]
-    for c in natives: 
-    #     print(natives[c])
-        if natives[c][n]>0:
-            positives+=1
-            good.append(c)
-        if natives[c][200]==0 and natives[c]["out"]==0:
-            bad.append(c)
-    return good, bad
-print(eval_natives({"4CPB":countNative(rmsds)}, 10))
+Natives={}
+Natives["mycomplex"]=countNative(rmsds)
+print(eval_natives(Natives, 10))
 ```
 
-    (['4CPB'], [])
+    (['mycomplex'], [])
 
-
-
-```python
-
-```
