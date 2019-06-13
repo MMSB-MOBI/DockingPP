@@ -1,4 +1,3 @@
-
 # Import modules 
 
 
@@ -8,12 +7,7 @@ sys.path.append("/Users/jprieto/DockingPP")
 from dockingPP import parse, zParse
 from core_visuals import Scores, countNative
 from core_clustering import rankCluster as rC, sortCluster, birchCluster
-%load_ext autoreload
 ```
-
-    The autoreload extension is already loaded. To reload it, use:
-      %reload_ext autoreload
-
 
 ## Create DockData object
 
@@ -45,20 +39,16 @@ DD.ccmap(start=0,stop=500,pSize=50)
 
 
 ```python
-%autoreload 2
-DD.write_all_scores(filename="/Users/jprieto/docking/Resultats/mytest")
+DD.write_all_scores(filename="/Users/jprieto/docking/Resultats/mycomplex")
 ```
 
     Warning : only 500 poses could be analysed
-    Warning : File /Users/jprieto/docking/Resultats/mytest_resstats.tab already exists, do you wish to continue anyway and replace it ? (yes/no)yes
-    Warning : File /Users/jprieto/docking/Resultats/mytest_constats.tab already exists, do you wish to continue anyway and replace it ? (yes/no)yes
-    Warning : File /Users/jprieto/docking/Resultats/mytest.tsv already exists, do you wish to continue anyway and replace it ? (yes/no)yes
 
 
 
 
 
-    '/Users/jprieto/docking/Resultats/mytest'
+    '/Users/jprieto/docking/Resultats/mycomplex.tsv'
 
 
 
@@ -66,7 +56,7 @@ DD.write_all_scores(filename="/Users/jprieto/docking/Resultats/mytest")
 
 
 ```python
-SC=Scores("/Users/jprieto/docking/Resultats/mytest.tsv")
+SC=Scores("/Users/jprieto/docking/Resultats/mycomplex.tsv")
 ```
 
 ## Make clusters with the BSAS algorithm 
@@ -80,7 +70,7 @@ SC.setPoses(DD.pList)
 res_fr_rank=SC.rankPoses(element="res_fr_sum")
 con_fr_rank=SC.rankPoses(element="con_fr_sum")
 
-c_clusters=rC(DD,con_fr_rank,8, out='dict', stop=500)
+c_clusters=rC(DD,con_fr_rank,5, out='dict', stop=500)
 
 ```
 
@@ -88,19 +78,16 @@ c_clusters=rC(DD,con_fr_rank,8, out='dict', stop=500)
 
 
 ```python
-b_clusters=birchCluster(DD, 8)
+b_clusters=birchCluster(DD, 5)
 # print(b_clusters)
 b_dict={}
+# turn list into dictionnary
 for u,c in enumerate(b_clusters): 
     if u == 500: 
         break
     if c not in b_dict: 
         b_dict[int(c)]=[] 
     b_dict[int(c)].append(DD.pList[int(u)])
-# print(b_dict)
-# print(sum([len(b_dict[c]) for c in b_dict]))
-# print(len(SC.rankPoses(element="res_log_sum")))
-# print(max([p.id-1 for c in b_dict for p in b_dict[c]]))
 ```
 
 ## Sort clusters using Ranks and get representatives
@@ -131,8 +118,11 @@ for p in a :
         print(p)
 ```
 
-    [166, 81, 394, 29, 148, 295, 203, 109, 426, 94, 28, 75, 283, 99, 180, 95, 464, 49, 259, 372, 458, 344, 254, 483, 227, 356, 257, 333, 150, 359]
-    [387, 143, 352, 451, 80, 390, 38, 156, 209, 21, 469, 42, 33, 5, 56, 48, 46, 78, 1, 12, 3, 365, 220, 349, 476]
+    [175, 315, 166, 81, 360, 450, 394, 29, 295, 455, 28, 420, 240, 11, 113, 426, 203, 148, 94, 109, 283, 324, 75, 194, 22, 40, 99, 180, 247, 382, 105, 453, 397, 95, 70, 464, 425, 372, 344, 476, 254, 427, 216, 257, 458, 227, 380, 356, 87, 150, 359, 333, 483]
+    [387, 293, 143, 367, 326, 352, 457, 278, 451, 222, 173, 337, 166, 378, 13, 91, 80, 38, 484, 23, 74, 21, 209, 100, 469, 155, 92, 33, 8, 5, 156, 130, 4, 17, 129, 1, 42, 104, 3, 12, 2, 317, 71, 45, 365, 220, 70, 443, 48, 79, 211, 107, 171, 373, 349, 448, 476]
+    476) (-2.83, 1.53, -0.3) (22.8, 4.8, 19.2)
+    166) (-0.42, 1.83, -0.47) (-4.8, -12.0, -14.399999999999999)
+    70) (0.42, 2.66, -2.19) (2.4, -21.599999999999998, -3.5999999999999996)
 
 
 ## Analyse the performance of each method
@@ -150,11 +140,11 @@ print(countNative(brmsds))
 
 ```
 
-    {5: 0, 10: 1, 20: 1, 100: 1, 200: 1, 'out': 0}
-    {5: 0, 10: 1, 20: 1, 100: 1, 200: 1, 'out': 0}
+    {5: 0, 10: 1, 20: 1, 100: 2, 200: 2, 'out': 0}
+    {5: 0, 10: 0, 20: 2, 100: 4, 200: 4, 'out': 0}
 
 
-## Now use it on set of complexes and count how many you got right 
+## Now use it on a set of complexes and count how many you got right 
 
 
 ```python
@@ -175,4 +165,8 @@ print(eval_natives({"4CPB":countNative(rmsds)}, 10))
 
     (['4CPB'], [])
 
- 
+
+
+```python
+
+```

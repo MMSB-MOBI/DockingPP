@@ -459,7 +459,7 @@ class DockData(object):
             for pose in range(len(scores)):
                 f.write(str(pose)+"\t"+ "\t".join([str(i) for i in scores[pose]]) + "\n")
 
-        return filename
+        return score_file
 
     def all_scores(self) :
         scores= []
