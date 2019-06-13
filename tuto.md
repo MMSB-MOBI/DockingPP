@@ -1,3 +1,4 @@
+
 # Import modules 
 
 
@@ -5,8 +6,9 @@
 import sys
 sys.path.append("/Users/jprieto/DockingPP")
 from dockingPP import parse, zParse
-from core_visuals import Scores, countNative
+from core_scores import Scores, countNative
 from core_clustering import rankCluster as rC, sortCluster, birchCluster
+%load_ext autoreload
 ```
 
 ## Create DockData object
