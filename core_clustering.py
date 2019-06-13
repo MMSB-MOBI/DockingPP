@@ -50,42 +50,47 @@ class Cluster(object):
             Y=testInsert(Y,y)
             Z=testInsert(Z,z)
         return (X,Y,Z)
+    @property
+    def repr(self):
+        return self.poses[0]
 
-def reverseRankCluster(pList, ranked, maxd=5, out="list") :
+# def reverseRankCluster(pList, ranked, maxd=5, out="list") :
+#     """Returns list of pose's belonging if out is "list" or a dictionnary of clusters
+#     and the poses they contain if out is "dict"  """
+#     def calcul_dist(pose1,pose2):
+#         dist= sqrt(sum([(pose1.translate[i]-pose2.translate[i])**2 for i in range(3)]))
+#         return dist
+#     assert len(ranked)==len(pList)
+#     r_list=[pList[i] for i in ranked]
+#     groups=[]
+#     clusters_found=0
+#     clusters={} #cluster_id : [poses]
+#     for i in range(len(r_list)):
+#     #     print(str(pose.id) + str(pose.translate))
+#         in_cluster = False
+#         for cluster_id in groups:
+#             # For each cluster representative
+#             representative = clusters[cluster_id][0]
+#             if calcul_dist(r_list[i],representative) < maxd:
+#                 clusters[cluster_id].append(r_list[i])
+#                 in_cluster = True
+#                 groups.insert(0,cluster_id)
+#                 break
+#         if not in_cluster:
+#             clusters_found += 1
+#             clusters[clusters_found] = [r_list[i]]
+#             groups.insert(0,clusters_found)
+#     if out=="list":
+#         groups.reverse()
+#         return groups
+#     if out=="dict":
+#         return clusters
+
+def rankCluster(zD, ranked, maxd, out="list", stop=None) :
     """Can return list of pose's belonging if out is "list" or a dictionnary of clusters
     and the poses they contain if out is "dict"  """
-    def calcul_dist(pose1,pose2):
-        dist= sqrt(sum([(pose1.translate[i]-pose2.translate[i])**2 for i in range(3)]))
-        return dist
-    assert len(ranked)==len(pList)
-    r_list=[pList[i] for i in ranked]
-    groups=[]
-    clusters_found=0
-    clusters={} #cluster_id : [poses]
-    for i in range(len(r_list)):
-    #     print(str(pose.id) + str(pose.translate))
-        in_cluster = False
-        for cluster_id in groups:
-            # For each cluster representative
-            representative = clusters[cluster_id][0]
-            if calcul_dist(r_list[i],representative) < maxd:
-                clusters[cluster_id].append(r_list[i])
-                in_cluster = True
-                groups.insert(0,cluster_id)
-                break
-        if not in_cluster:
-            clusters_found += 1
-            clusters[clusters_found] = [r_list[i]]
-            groups.insert(0,clusters_found)
-    if out=="list":
-        groups.reverse()
-        return groups
-    if out=="dict":
-        return clusters
-
-def rankCluster(pList, ranked, maxd, out="list") :
-    """Can return list of pose's belonging if out is "list" or a dictionnary of clusters
-    and the poses they contain if out is "dict"  """
+    pList=zD.pList
+    max=len(pList) if not stop else stop
     def calcul_dist(pose1,pose2):
         dist= sqrt(sum([(pose1.translate[i]-pose2.translate[i])**2 for i in range(3)]))
         return dist
@@ -94,9 +99,11 @@ def rankCluster(pList, ranked, maxd, out="list") :
     clusters_found=0
     clusters={} #cluster_id : [poses]
     for i in range(len(r_list)) :
-        if i % 10000 ==0:
-            print("Progress : " + str(i))
-    #     print(str(pose.id) + str(pose.translate))
+        if i > max:
+            break
+    #     if i % 10000 ==0:
+    #         print("Progress : " + str(i))
+    # #     print(str(pose.id) + str(pose.translate))
         in_cluster = False
         for cluster_id in groups:
             # For each cluster representative
@@ -115,6 +122,19 @@ def rankCluster(pList, ranked, maxd, out="list") :
         return groups
     if out=="dict":
         return clusters
+
+def cons_score(cluster,sc):
+    rank=sc.rankPoses(element="res_log_sum")
+    #     print([(rank[p.id-1]) for p in cluster])
+    return sum([(rank[p.id-1]) for p in cluster])/len(cluster)
+
+def original_score(cluster,sc):
+    return sum([(p.id) for p in cluster])/len(cluster)
+
+def sortCluster(cluster,sc,fn="original_score"):
+    _f={"original_score":original_score,"cons_score":cons_score}
+    # sort clusters from bigger to smaller
+    return sorted([cluster[c] for c in cluster], key=lambda o:_f[fn](o,sc))
 
 def birchCluster(zD, maxd):
     data=zD.dictPos

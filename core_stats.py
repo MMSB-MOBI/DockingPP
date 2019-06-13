@@ -116,7 +116,7 @@ class ResStats(object):
         if self.expName :
             data+=f"({self.expName})"
 
-        writeScore(self.expSize, dataset, filename=filename, title=data )
+        writeScore(dataset, size=self.expSize, filename=filename, title=data )
 
 class ContactStats(core.mdTree):
     """ This class allows to store contacts counts from ccmap """
@@ -197,10 +197,10 @@ class ContactStats(core.mdTree):
         for x in self.data :
             for y in self.data[x] :
                 scores[x+"_"+y]=freq.get(x,y)
-        writeScore(self.expSize, scores, filename=filename, title=title )
+        writeScore(scores, size=self.expSize, filename=filename, title=title )
 
 
-def writeScore(size, scores , filename="scores.tsv", title='Exp1'):
+def writeScore(scores , size=1, filename="scores.tsv", title='Exp1'):
     e=True
     while e==True :
         if os.path.isfile(filename):
@@ -225,10 +225,10 @@ def writeScore(size, scores , filename="scores.tsv", title='Exp1'):
 
     return filename
 
-def writeScores(size, scores , filename="scores.tsv", title='Exp1', header=None):
+def writeScores(scores , size=1, filename="scores.tsv", title='Exp1', header=None):
     e=True
     if header==None :
-        header=["score" + str(i) for i in range(len(scores))]
+        header=["score" + str(i) for i in range(len(scores[0]))]
     else:
         assert len(header)==len(scores[0])
     assert len(list(set([len(i) for i in scores])))==1

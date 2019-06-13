@@ -174,10 +174,10 @@ class Scores(object):
         [1.0, 'rgb(0, 0, 400)'] ]
         rmsds=self.rmsds
         pos=self.coordDict(start=0, stop=len(rank)-1)
-        C=[(i /max(rank) ) for i in rank]
+        C=rank
         # print(C)
-
-        S=[sqrt((rmsd/max(rmsds)))*20 for rmsd in rmsds]
+        # S=[ 15 if rmsd > 5 else 30 for rmsd in rmsds ]
+        S=[ 15]
         # print(S)
         # Configure Plotly to be rendered inline in the notebook.
         plotly.offline.init_notebook_mode()
@@ -190,8 +190,7 @@ class Scores(object):
                 'opacity': 1,
                 'color' : C,
                 'colorscale' : colorscale,
-                'colorbar': {'title' : 'Consensus ranking'}
-
+                'colorbar': {'title' : 'Ranks'}
             },
             text=rank)
         layout = go.Layout(title='Docking decoys', hovermode= 'closest',)
@@ -265,6 +264,21 @@ def countNative(rmsds):
                 counts["out"]+=1
         x+=1
     return counts
+
+def eval_natives(natives,n):
+    """Takes a dictionnary {complexe : countNative(rmsd)} and a top limit for good complexes (prediction in top n)
+    and returns a list of succeded complexes and failed ones """
+    positives=0
+    good=[]
+    bad=[]
+    for c in natives:
+    #     print(natives[c])
+        if natives[c][n]>0:
+            positives+=1
+            good.append(c)
+        if natives[c][200]==0 and natives[c]["out"]==0:
+            bad.append(c)
+    return (good, bad)
 
 def countValid(pList):
     for cluster in clusters:

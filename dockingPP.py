@@ -17,7 +17,7 @@ parserPDB = PDB.Parser()
 class Pose(object):
     """Object containing a pose of a Docking prediction output and calculating its coordinates to
     fit to the reference receptor's docking position"""
-    def __init__(self, belongsTo, id, euler, tr, RMSD):
+    def __init__(self, belongsTo, id, euler, tr):
         self.id = id
         self.euler = euler
         self.translate = tuple([ (-1) * t * belongsTo.step for t in tr ])
@@ -27,12 +27,15 @@ class Pose(object):
         self.recOffset = tuple( [ (-1) * o for o in belongsTo.baryREC] )
         self.dictorizedReceptor = None
         self.dictorizedLigand = None
-        self.rmsd= RMSD
+        self.rmsd=None
 
     def __str__(self):
         return str(self.id) + ') ' + str(self.euler) + ' ' + str(self.translate)
     def __repr__(self):
         return str(self.id) + ') ' + str(self.euler) + ' ' + str(self.translate)
+
+    def set_RMSD(self,RMSD):
+        self.rmsd=RMSD
 
     def ccmap(self, dist=4.5):
         #print self._ccmap
@@ -103,10 +106,10 @@ class Pose(object):
             return sum([counts[res] if res in counts else 1 for res in self.resMapList])
         elif method == 'freq' :
             freqs=resStats.resFreq
-            return sum([freqs[res] if res in freqs else 1/(len(self.belongsTo.pList)-7) for res in self.resMapList])
+            return sum([freqs[res] if res in freqs else 1/(len(self.belongsTo.pList)) for res in self.resMapList])
         elif method == 'log' :
             freqs=resStats.resFreq
-            return sum([math.log(freqs[res]) if res in freqs else math.log(1/(len(self.belongsTo.pList)-7)) for res in self.resMapList])
+            return sum([math.log(freqs[res]) if res in freqs else math.log(1/(len(self.belongsTo.pList))) for res in self.resMapList])
         else :
             raise Exception("Unknown '" + method + "' method value")
 
@@ -119,7 +122,7 @@ class Pose(object):
             return sum([counts[res] if res in counts else 1 for res in self.resMapList])/self.resSize
         elif method == 'freq' :
             freqs=resStats.resFreq
-            return sum([freqs[res] if res in freqs else 1/(len(self.belongsTo.pList)-7) for res in self.resMapList])/self.resSize
+            return sum([freqs[res] if res in freqs else 1/(len(self.belongsTo.pList)) for res in self.resMapList])/self.resSize
         else :
             raise Exception("Unknown '" + method + "' method value")
 
@@ -133,10 +136,10 @@ class Pose(object):
             return sum([counts[res] if res in counts else 1 for res in self.resMapList])
         elif method == 'freq' :
             freqs=resStats.resFreq
-            return sum([freqs[res] if res in freqs else (1/(len(self.belongsTo.pList)-7))**2 for res in self.resMapList])
+            return sum([freqs[res] if res in freqs else (1/(len(self.belongsTo.pList)))**2 for res in self.resMapList])
         elif method == 'log' :
             freqs=resStats.resFreq
-            return sum([math.log(freqs[res]) if res in freqs else (math.log(1/(len(self.belongsTo.pList)-7)))**2 for res in self.resMapList])
+            return sum([math.log(freqs[res]) if res in freqs else (math.log(1/(len(self.belongsTo.pList))))**2 for res in self.resMapList])
         else :
             raise Exception("Unknown '" + method + "' method value")
 
@@ -231,6 +234,7 @@ class DockData(object):
         self.pList = []
         self.pdbObjLigand = None
         self.pdbObjReceptor = None
+        self.truePos=[]
 
 
     def setComplexName(self, name):
@@ -282,7 +286,9 @@ class DockData(object):
                 i += 1
 
     def push(self, *args):
-        self.pList.append( Pose(self, *args) )
+        pose=Pose(self, *args)
+        self.pList.append( pose )
+        return pose
 
     def setReceptor(self, pdbFile): # Optional chain arguments ?
         # Get receptor's structure
@@ -308,12 +314,12 @@ class DockData(object):
     @property
     def getStats(self):
         """Return both ResStats and ContactStats objects for the experiment """
-        n=len(self.pList[7:])
+        n=len(self.pList)
         con_stats=ContactStats(n,append=False, name=self.complexName)
         res_stats=ResStats(n, name=self.complexName)
 
 
-        for i in range(7,n+7):
+        for i in range(n):
             residues=[]
             try:
                 for cclist in self[i]._ccmap['data']:
@@ -333,9 +339,9 @@ class DockData(object):
                     res_stats[i].increase_count(count='plain')
 
             except TypeError:
-                print(f'Warning : only {i-7} poses could be analysed' )
-                con_stats.setSize(int(i-7))
-                res_stats.setSize(int(i-7))
+                print(f'Warning : only {i} poses could be analysed' )
+                con_stats.setSize(int(i))
+                res_stats.setSize(int(i))
                 break
 
         return (res_stats,con_stats)
@@ -343,10 +349,10 @@ class DockData(object):
     @property
     def contactStats(self):
         """Return ContactStats object for the experiment """
-        n=len(self.pList[7:])
+        n=len(self.pList)
         con_stats=ContactStats(n, append=False, name=self.complexName)
 
-        for i in range(7,n+7):
+        for i in range(n):
             try:
                 for cclist in self[i]._ccmap['data']:
                     rootRes = CmapRes(cclist['root'], role='Rec')
@@ -355,18 +361,18 @@ class DockData(object):
                         con_stats.incrMdTree(rootRes.index, partnerRes.index)
 
             except TypeError:
-                print(f'Warning : only {i-7} poses could be analysed ' )
-                con_stats.setSize(int(i-7))
+                print(f'Warning : only {i} poses could be analysed ' )
+                con_stats.setSize(int(i))
                 break
         return con_stats
 
     @property
     def resStats(self):
         """Return ResStats object for the experiment """
-        n=len(self.pList[7:])
+        n=len(self.pList)
         res_stats=ResStats(n, name=self.complexName)
 
-        for i in range(7, n+7):
+        for i in range(n):
             residues=[]
             try:
                 for cclist in self[i]._ccmap['data']:
@@ -385,8 +391,8 @@ class DockData(object):
                     res_stats[i].increase_count(count='plain')
 
             except TypeError:
-                print(f'Warning : only {i-7} poses could be analysed ' )
-                res_stats.setSize(int(i-7))
+                print(f'Warning : only {i} poses could be analysed ' )
+                res_stats.setSize(int(i))
                 break
 
         return res_stats
@@ -415,10 +421,78 @@ class DockData(object):
             _functions={'sum' : Pose.cmapSumScore, 'square' : Pose.cmapSquareSumScore, 'mean':Pose.cmapMeanScore }
             if stats==None : stats=self.contactStats
         size=stats.expSize
-        poses= { i:_functions[function](p,stats , method=method) for i,p in enumerate(self.pList[:size+7])}
+        poses= { i:_functions[function](p,stats , method=method) for i,p in enumerate(self.pList[:size])}
         # sposes={i:poses[i] for i in sorted(poses.keys(), key=lambda o:poses[o], reverse=True)}
         # return sorted((self.pList[:size],_functions[function](self.pList[:size],stats , method=method)) , key=lambda o:_functions[function](o,stats , method=method))
         return poses
+
+    def write_all_scores(self, size=1 , filename="scores", title='Exp1', header=None) :
+        header = ["Surface size", "Residue freq sum", "Residue mean freq", "Residue log sum", "Residue square sum", "Number of contacts", "Contact freq sum", "Contact mean freq", "Contact log sum", "Contact square sum"]
+
+        resS , conS, scores=self.all_scores()
+        resS.write(filename+"_resstats.tab")
+        conS.write(filename+"_constats.tab")
+        assert len(list(set([len(i) for i in scores])))==1
+        e=True
+
+        score_file=filename + '.tsv'
+        while e==True :
+            if os.path.isfile(score_file):
+                re= input(f"Warning : File {score_file} already exists, do you wish to continue anyway and replace it ? (yes/no)")
+                if re=='yes':
+                    os.system("rm " + score_file)
+                    e=False
+                    break
+                elif re=='no':
+                    filename=input("new file name (or 'x' to exit):  ")
+                    if filename=="x" :
+                        return
+                else :
+                    print("Please answer 'yes' or 'no' ")
+            else :
+                e=False
+        with open(score_file,'a+') as f:
+            f.write("# Title : " + title + "\n")
+            f.write("# Experiment_size : " + str(size) + "\n")
+            f.write("Pose" + "\t" + "\t".join(header)+ "\n")
+
+            for pose in range(len(scores)):
+                f.write(str(pose)+"\t"+ "\t".join([str(i) for i in scores[pose]]) + "\n")
+
+        return filename
+
+    def all_scores(self) :
+        scores= []
+        resS , conS = self.getStats
+        # resS.write(filename+"_resstats.tab")
+        # conS.write(filename+"_constats.tab")
+        size=resS.expSize
+        rfreqs=resS.resFreq
+        cfreqs=conS.contactFreq
+        for i,p in enumerate(self.pList[:size]) :
+            p.has_ccmap()
+            complex=[0,0,0,0,0,0,0,0,0,0]
+            for res in p.resMapList :
+                complex[1] += rfreqs[res] if res in rfreqs else 1/size
+                complex[3] += math.log(rfreqs[res]) if res in rfreqs else math.log(1/size)
+                complex[4] += rfreqs[res]**2 if res in rfreqs else 1/size**2
+            complex[0] = p.resSize
+            try :
+                complex[2] = complex[1]/p.resSize  # mean freq
+            except ZeroDivisionError:
+                if complex[1]==0:
+                    complex[2]==0
+                else :
+                    raise Exception("weird pose : " + str(p.id) + " with size 0 resSize and "+ str(p.ccmap))
+            for contact in p.contactMapList:
+                # print(contact)
+                complex[6] += cfreqs.get(contact[0],contact[1])
+                complex[8] += math.log(cfreqs.get(contact[0],contact[1]))
+                complex[9] += (cfreqs.get(contact[0],contact[1]))**2
+            complex[5] = p.conSize
+            complex[7] = complex[6]/p.conSize if p.conSize !=0 else 0# mean contact freq
+            scores.append(complex)
+        return resS,conS,scores
 
     def __str__(self):
         return str({ 'step' : self.step, 'nCells' : self.nCells , 'EulerREC' : self.eulerREC,
@@ -443,8 +517,9 @@ def parse(fileName, maxPose = 0):
 
     reZPOSE = r'^[\s]*([\d-]+):[\s]+\([\s]*([\.\d-]+),[\s]*([\.\d-]+),[\s]*([\.\d-]+)\)[\s]+\([\s]*([\d-]+),[\s]*([\d-]+),[\s]*([\d-]+)\)'
 
-    dockdataObj = DockData()#ncpu and pSize arguments can be provided
+    dockdataObj = DockData()
     dockBool = False
+    R=False
     with open(fileName, 'r') as f:
         for line in f:
             if '*** docking results ***' in line:
@@ -470,16 +545,68 @@ def parse(fileName, maxPose = 0):
                 continue
             m = re.match(reZPOSE, line)
             if m:
-                try:
-                    RMSD=float("".join(line.split(" ")[-8:-5]).strip())
-                except ValueError:
-                    print("RMSD=" + "".join(line.split(" ")[-9:-4]).strip())
-                    raise
-                # print(RMSD)
-                euler = (float(m.groups()[1]), float(m.groups()[2]), float(m.groups()[3]))
-                tr = [int(m.groups()[4]), int(m.groups()[5]), int(m.groups()[6])]
+                if dockBool == False:
+                    euler = (float(m.groups()[1]), float(m.groups()[2]), float(m.groups()[3]))
+                    tr = [int(m.groups()[4]), int(m.groups()[5]), int(m.groups()[6])]
+                    tr=tuple([ t - dockdataObj.nCells if t > dockdataObj.nCells / 2 else t for t in tr ])
+                    dockdataObj.truePos.append(Pose(dockdataObj, int(m.groups()[0]), euler, tr))
+                if dockBool == True:
+                    try:
+                        RMSD=float("".join(line.split(" ")[-8:-5]).strip())
+                        R=True
+                    except ValueError:
+                        print("RMSD=" + "".join(line.split(" ")[-9:-4]).strip())
+                        raise
+                    # print(RMSD)
+                    euler = (float(m.groups()[1]), float(m.groups()[2]), float(m.groups()[3]))
+                    tr = [int(m.groups()[4]), int(m.groups()[5]), int(m.groups()[6])]
+                    tr=tuple([ t - dockdataObj.nCells if t > dockdataObj.nCells / 2 else t for t in tr ])
+                    pose=dockdataObj.push( int(m.groups()[0]), euler, tr)
+                    if R :
+                        pose.set_RMSD(RMSD)
+                        R=False
+                    if len(dockdataObj.pList) == maxPose:
+                        return dockdataObj
+        return dockdataObj
+
+def zParse(fileName, maxPose = 0):
+    """zDock pose-line format : 2.932153\t2.830209\t2.734943\t11\t5\t10\t1046.365"""
+    reL1 = r'^([\d]+)[\s]+([\d\.]+)[\s]*$'
+    reL2 = r'^[\s]*([\.\d-]+)[\s]+([\d\.-]+)[\s]+([\.\d-]+)[\s]*$'
+    reL3 = r'^[\s]*([\S]+)[\s]+([\.\d-]+)[\s]+([\d\.-]+)[\s]+([\.\d-]+)[\s]*$'
+
+    reZPOSE =  r'^([\d\.-]+)[\s]+([\d\.-]+)[\s]+([\d\.-]+)[\s]+([\d]+)[\s]+([\d]+)[\s]+([\d]+)[\s]+.*'
+
+    dockdataObj = DockData()
+    dockBool = False
+    with open(fileName, 'r') as f:
+        x=1
+        for line in f:
+            m = re.match(reL1, line)
+            if m :
+                dockdataObj.nCells = int(m.groups()[0])
+                dockdataObj.step = float(m.groups()[1])
+                continue
+            m = re.match(reL2, line)
+            if m :
+                dockdataObj.eulerREC = ( float(m.groups()[0]), float(m.groups()[1]),float(m.groups()[2]) )
+                continue
+            m = re.match(reL3, line)
+            if m :
+                if not dockdataObj.fileREC:
+                    dockdataObj.fileREC = m.groups()[0]
+                    dockdataObj.baryREC = (float(m.groups()[1]), float(m.groups()[2]), float(m.groups()[3]))
+                    continue
+                dockdataObj.fileLIG = m.groups()[0]
+                dockdataObj.baryLIG = (float(m.groups()[1]), float(m.groups()[2]), float(m.groups()[3]))
+                continue
+            m = re.match(reZPOSE, line)
+            if m:
+                euler = (float(m.groups()[0]), float(m.groups()[1]), float(m.groups()[2]))
+                tr = [int(m.groups()[3]), int(m.groups()[4]), int(m.groups()[5])]
                 tr=tuple([ t - dockdataObj.nCells if t > dockdataObj.nCells / 2 else t for t in tr ])
-                dockdataObj.push( int(m.groups()[0]), euler, tr,RMSD)
+                dockdataObj.push(x, euler, tr)
+                x+=1
                 if len(dockdataObj.pList) == maxPose:
                     return dockdataObj
         return dockdataObj
@@ -489,37 +616,3 @@ def mpCcmap(datum):
     for z in zPack:
             z.ccmap(dist=dist)
     return zPack
-
-def all_scores(zD,filename) :
-    scores= []
-    resS , conS = zD.getStats
-    resS.write(filename+"_resstats.tab")
-    conS.write(filename+"_constats.tab")
-    size=resS.expSize
-    rfreqs=resS.resFreq
-    cfreqs=conS.contactFreq
-    for i,p in enumerate(zD.pList[:size+7]) :
-        p.has_ccmap()
-        complex=[0,0,0,0,0,0,0,0,0,0]
-        for res in p.resMapList :
-            complex[1] += rfreqs[res] if res in rfreqs else 1/size
-            complex[3] += math.log(rfreqs[res]) if res in rfreqs else math.log(1/size)
-            complex[4] += rfreqs[res]**2 if res in rfreqs else 1/size**2
-        complex[0] = p.resSize
-        try :
-            complex[2] = complex[1]/p.resSize  # mean freq
-        except ZeroDivisionError:
-            if complex[1]==0:
-                complex[2]==0
-            else :
-                raise Exception("weird pose : " + str(p.id) + " with size 0 resSize and "+ str(p.ccmap))
-        for contact in p.contactMapList:
-            # print(contact)
-            complex[6] += cfreqs.get(contact[0],contact[1])
-            complex[8] += math.log(cfreqs.get(contact[0],contact[1]))
-            complex[9] += (cfreqs.get(contact[0],contact[1]))**2
-        complex[5] = p.conSize
-        complex[7] = complex[6]/p.conSize # mean contact freq
-        scores.append(complex)
-
-    return scores
