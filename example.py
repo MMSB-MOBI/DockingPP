@@ -1,8 +1,6 @@
 #! /usr/bin/env python3
 
-from dockingPP import parse,all_scores
-from core_stats import writeScores
-
+from dockingPP import parse
 # set your data here :
 pSize="size of packs for multiprocessing"
 n="number of poses"
@@ -15,21 +13,20 @@ c= "number of processes "
 
 ## Calculate scores and write Scores files
 print(f"Parsing {zF} file")
-zD= parse(zF, maxPose=n)
+DD= parse(zF, maxPose=n)
 # print(n)
-zD.setReceptor(recPDB)
-zD.setLigand(ligPDB)
-zD.setComplexName(name)
-zD.ccmap(start=0,stop=int(n),dist=5, pSize=pSize, ncpu=c)
+DD.setReceptor(recPDB)
+DD.setLigand(ligPDB)
+DD.setComplexName(name)
+DD.ccmap(start=0,stop=int(n),dist=5, pSize=pSize, ncpu=c)
 
 print("Calculating scores")
-header = ["Surface size", "Residue freq sum", "Residue mean freq", "Residue log sum", "Residue square sum", "Number of contacts", "Contact freq sum", "Contact mean freq", "Contact log sum", "Contact square sum"]
-fname=f"{resdir}/{zD.complexName}_{str(n)}.tsv"
+fname=f"{resdir}/{DD.complexName}_{str(n)}"
 print(fname)
-writeScores(n-7, all_scores(zD, f"{resdir}/{zD.complexName}_{str(n)}" ), filename=fname, title=f"Scores for {zD.complexName}", header= header)
+DD.write_all_scores(filename=fname, title=f"Scores for My experiment")
 
 ## VISUALISATION
-from core_visuals import Scores
+from core_scores import Scores
 
 scores=Scores(fname)
 scores.setPoses(zD.pList)
@@ -67,12 +64,13 @@ for i in range(len(complexes)):
     plt.title(complexes[i]+"_RMSDS")
 
 ## GENERATING CLUSTERS
-from core_clustering import rankCluster, birchCluster, wardCluster,herarCluster
+from core_clustering import rankCluster as rC, birchCluster, wardCluster,herarCluster
 # Rank Clusters
 # rankclusters can either be recovered in a list [clust1, cluster2, cluster1, cluster3, cluster4 ... ] or in a dictionnary {cluster1:[pose1, pose2], cluster2:[pose1,pose2] , ... }
 # rankCluster can be performed over a chosen rank
-ranked=scores.rankedPoses(element="con_mean_fr", start=7,stop=2293) # get ranked poses
-clusters=rankCluster(zD.pList, ranked, 5, out="list")
+ranked=scores.rankedPoses(element="con_mean_fr", start=0,stop=2200) # get ranked poses
+clusters=rC(zD.pList, ranked, 5, out="list")
+sortClusters(clusters,scores,fn='cons_score')
 # clusters=rankCluster(zD.pList, ranked, 5, out="dict")
 
 # all other clusters methods return lists and take in DockingData objects:

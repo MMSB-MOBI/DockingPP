@@ -124,7 +124,7 @@ def rankCluster(zD, ranked, maxd, out="list", stop=None) :
         return clusters
 
 def cons_score(cluster,sc):
-    rank=sc.rankPoses(element="res_log_sum")
+    rank=sc.rankPoses(element="con_fr_sum")
     #     print([(rank[p.id-1]) for p in cluster])
     return sum([(rank[p.id-1]) for p in cluster])/len(cluster)
 

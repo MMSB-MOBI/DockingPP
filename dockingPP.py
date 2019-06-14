@@ -407,6 +407,8 @@ class DockData(object):
         elif criteria=='contact':
             _functions={'sum' : Pose.cmapSumScore, 'square' : Pose.cmapSquareSumScore }
             if stats==None : stats=self.contactStats
+        else:
+            raise Exception("Criteria must be 'residue' or 'contact'")
         size=stats.expSize
         return sorted(self.pList[:size], key=lambda o:_functions[function](o,stats , method=method))[:n]
 
@@ -420,6 +422,8 @@ class DockData(object):
         elif criteria=='contact':
             _functions={'sum' : Pose.cmapSumScore, 'square' : Pose.cmapSquareSumScore, 'mean':Pose.cmapMeanScore }
             if stats==None : stats=self.contactStats
+        else:
+            raise Exception("Criteria must be 'residue' or 'contact'")
         size=stats.expSize
         poses= { i:_functions[function](p,stats , method=method) for i,p in enumerate(self.pList[:size])}
         # sposes={i:poses[i] for i in sorted(poses.keys(), key=lambda o:poses[o], reverse=True)}

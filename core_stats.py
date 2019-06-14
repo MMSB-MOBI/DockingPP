@@ -105,14 +105,10 @@ class ResStats(object):
             count[res]=self.rDict[res].cCount
         return count
 
-    def write(self,filename, type='freq'):
+    def write(self,filename):
         """Export the Residues frequencies out to a tab delimited file """
-        if type=='freq' :
-            data="Residue Frequencies"
-            dataset = self.resFreq
-        elif type=='pond':
-            data="Residue Contact Counts"
-            dataset = self.pondResDict
+        data="Residue Frequencies"
+        dataset = self.resFreq
         if self.expName :
             data+=f"({self.expName})"
 
@@ -127,6 +123,7 @@ class ContactStats(core.mdTree):
         except ValueError :
             raise Exception("The experiment size must be an integer ")
         self.expName=name
+
     def incrMdTree(self, x, y):
         _v = self.get(x, y) if self.get(x, y) else 0
         _v += 1
@@ -200,7 +197,9 @@ class ContactStats(core.mdTree):
         writeScore(scores, size=self.expSize, filename=filename, title=title )
 
 
-def writeScore(scores , size=1, filename="scores.tsv", title='Exp1'):
+def writeScore(scores , size=1, filename="scores.tsv", title='Experiment'):
+    """This function allows to write a list of scores to a file :
+    each pose is a new line"""
     e=True
     while e==True :
         if os.path.isfile(filename):
@@ -226,6 +225,8 @@ def writeScore(scores , size=1, filename="scores.tsv", title='Exp1'):
     return filename
 
 def writeScores(scores , size=1, filename="scores.tsv", title='Exp1', header=None):
+    """This function allows to write a list of scores to a file :
+    each pose is a new line, each score is a new column"""
     e=True
     if header==None :
         header=["score" + str(i) for i in range(len(scores[0]))]

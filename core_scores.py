@@ -32,10 +32,12 @@ import plotly.graph_objs as go
 # D=[(100-rmsd)/20 for rmsd in rmsds]
 
 class Scores(object):
+    """This class allows to read a rescoring file"""
     def __init__(self, file):
         self.data=None
         with open(file,'r') as f:
             self.data=[line.split("\t") for line in f.readlines()[3:]]
+        # self.columns=line.split("\t") for line in f.readlines()[2]
         self.columns={"pose":0,"s_size":1,"res_fr_sum":2,"res_mean_fr": 3, "res_log_sum": 4, "res_sq_sum": 5, "c_size": 6, "con_fr_sum": 7,"con_mean_fr" : 8,"con_log_sum" : 9,"con_sq_sum" : 10, "rmsd": 11}
         self.poses=None
 
@@ -279,15 +281,6 @@ def eval_natives(natives,n):
         if natives[c][200]==0 and natives[c]["out"]==0:
             bad.append(c)
     return (good, bad)
-
-def countValid(pList):
-    for cluster in clusters:
-        valid=False
-        for pose in cluster:
-            if pose.rmsd<5:
-                valid=True
-        if valid==True:
-            print(cluster + " is valid")
 
 
 
