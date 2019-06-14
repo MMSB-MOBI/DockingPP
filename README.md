@@ -128,7 +128,7 @@ DD.write_all_scores(fname="1BJ1_new_scores", title="Rescoring 1BJ1")
 ```python
 scoresDD=Scores("1BJ1_new_scores") 
 ```
-*See more in the tuto file : <https://github.com/juliaprieto/DockingPP/tuto.md>*
+*See more in the tuto file : <https://github.com/juliaprieto/DockingPP/blob/master/tuto.md>*
 </br>
 
 <a id="chapter-5"></a>
