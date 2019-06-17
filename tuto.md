@@ -1,5 +1,5 @@
 
-# Import modules 
+# Import modules
 
 
 ```python
@@ -64,7 +64,7 @@ DD.write_all_scores(filename="/Users/jprieto/docking/Resultats/mycomplex")
 SC=Scores("/Users/jprieto/docking/Resultats/mycomplex.tsv")
 ```
 
-## Make clusters with the BSAS algorithm 
+## Make clusters with the BSAS algorithm
 *different ranks can be used*
 
 
@@ -72,14 +72,14 @@ SC=Scores("/Users/jprieto/docking/Resultats/mycomplex.tsv")
 natural_rank= [i for i in range(50)]
 
 SC.setPoses(DD.pList)
-res_fr_rank=SC.rankPoses(element="res_fr_sum")
-con_fr_rank=SC.rankPoses(element="con_fr_sum")
+res_fr_rank=SC.rank(element="res_fr_sum")
+con_fr_rank=SC.rank(element="con_fr_sum")
 
 c_clusters=rC(DD,con_fr_rank,5, out='dict', stop=500)
 
 ```
 
-## You can also use birch Algorithm for instance 
+## You can also use birch Algorithm for instance
 
 
 ```python
@@ -87,11 +87,11 @@ b_clusters=birchCluster(DD, 5)
 # print(b_clusters)
 b_dict={}
 # turn list into dictionnary
-for u,c in enumerate(b_clusters): 
-    if u == 500: 
+for u,c in enumerate(b_clusters):
+    if u == 500:
         break
-    if c not in b_dict: 
-        b_dict[int(c)]=[] 
+    if c not in b_dict:
+        b_dict[int(c)]=[]
     b_dict[int(c)].append(DD.pList[int(u)])
 ```
 
@@ -103,7 +103,7 @@ for u,c in enumerate(b_clusters):
 sor_clus=sortCluster(c_clusters,SC, fn="cons_score")
 sor_bclus=sortCluster(b_dict,SC, fn="cons_score")
 
-# These are the final candidate poses for prediction. 
+# These are the final candidate poses for prediction.
 rep=[c[0] for c in sor_clus]
 
 brep=[c[0] for c in sor_bclus]
@@ -118,7 +118,7 @@ print([p.id for p in brep])
 a=brep[:]
 a.extend(rep)
 a=list(set(a))
-for p in a : 
+for p in a :
     if p in rep and p in brep:
         print(p)
 ```
@@ -134,9 +134,9 @@ for p in a :
 
 
 ```python
-# The MEGADOCK PARSER already picks up the RMSD of each decoy in the results file 
-# For zDock, you will have to set it manually for each decoy using 'p.set_RMSD(rmsd)' 
-# You 
+# The MEGADOCK PARSER already picks up the RMSD of each decoy in the results file
+# For zDock, you will have to set it manually for each decoy using 'p.set_RMSD(rmsd)'
+# You
 rmsds=[p.rmsd for p in rep]
 brmsds=[p.rmsd for p in brep]
 print(countNative(rmsds))
@@ -149,7 +149,7 @@ print(countNative(brmsds))
     {5: 0, 10: 0, 20: 2, 100: 4, 200: 4, 'out': 0}
 
 
-## Now use it on a set of complexes and count how many you got right 
+## Now use it on a set of complexes and count how many you got right
 
 
 ```python
@@ -159,4 +159,3 @@ print(eval_natives(Natives, 10))
 ```
 
     (['mycomplex'], [])
-

@@ -120,21 +120,31 @@ def rankCluster(zD, ranked, maxd, out="list", stop=None) :
 
     if out=="list":
         return groups
-    if out=="dict":
+    elif out=="dict":
         return clusters
 
+    else :
+        raise Exception('out value can only be "list" or "dict"')
+
 def cons_score(cluster,sc):
-    rank=sc.rankPoses(element="con_fr_sum")
+    rank=sc.ranks(element="res_fr_sum")
     #     print([(rank[p.id-1]) for p in cluster])
     return sum([(rank[p.id-1]) for p in cluster])/len(cluster)
 
-def original_score(cluster,sc):
-    return sum([(p.id) for p in cluster])/len(cluster)
+def clus_score(cluster,sc,rank='original_score'):
+    if rank=='original_score':
+        return sum([(p.id) for p in cluster])/len(cluster)
+    else :
+        try :
+            rank=sc.ranks(element=rank)
+            return sum([(rank[p.id-1]**2) for p in cluster])/len(cluster)
+        except :
+            raise Exception("Unknown rank type")
+
 
 def sortCluster(cluster,sc,fn="original_score"):
-    _f={"original_score":original_score,"cons_score":cons_score}
-    # sort clusters from bigger to smaller
-    return sorted([cluster[c] for c in cluster], key=lambda o:_f[fn](o,sc))
+    #Sort clusters using clus_score function. The lowest the score, the better the cluster.
+    return sorted([cluster[c] for c in cluster], key=lambda o:clus_score(o,sc,fn))
 
 def birchCluster(zD, maxd):
     data=zD.dictPos

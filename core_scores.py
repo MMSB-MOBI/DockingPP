@@ -105,7 +105,7 @@ class Scores(object):
 
 
 
-    def rankPoses(self, element="res_mean_fr", start=0, stop=None):
+    def ranks(self, element="res_mean_fr", start=0, stop=None):
         """Returns ranks for poses in the original order
         At position 0 we have pose 0 with rank 37 : rank[0] = 37
         Means the pose in original rank 0 is in 37th position according to rescoring
@@ -118,8 +118,13 @@ class Scores(object):
         return rank
 
     def rankedPoses(self, element="res_mean_fr", start=0, stop=None):
+        """Returns poses' ids,  sorted according to rescoring element : ]
+        "s_size","res_fr_sum","res_mean_fr","res_log_sum","res_sq_sum",
+        "c_size","con_fr_sum","con_mean_fr","con_log_sum","con_sq_sum"
+        Means the pose classified 1st is 1st position of the list.   """
+
         try :
-            r=self.rmsds
+            r=self.poses
         except :
             raise Exception("Please define poses using setPoses() function")
         if not stop:
@@ -134,55 +139,15 @@ class Scores(object):
         s=stop if stop else len(self.data)
         pl.hist(sorted([i[1] for i in self.data[:stop]]))
 
-    def plotly3D(self, rank, size="rmsd", colors="rank"):
-        """ Warning : rank must be in the original order, since positions and rmsds are in the original order """
-        colorscale= [
-        # Let first 10% (0.1) of the values have color rgb(0, 0, 0)
-        # [0, 'rgb(400, 180, 180)'],
-        # [0.1, 'rgb(400, 180, 180)'],
-        [0, 'rgb(400, 0, 0)'],
-        [0.05, 'rgb(400, 0, 0)'],
-        [0.05, 'rgb(400, 100, 40)'],
-        [0.1, 'rgb(400, 100, 40)'],
-        # Let values between 10-20% of the min and max of z
-        # have color rgb(20, 20, 20)
-        [0.1, 'rgb(400, 120, 60)'],
-        [0.2, 'rgb(400, 120, 60)'],
+    def trace(self, rank, name):
+        colorscale=make_colorScale()
 
-        # Values between 20-30% of the min and max of z
-        # have color rgb(40, 40, 40)
-        [0.2, 'rgb(400, 100, 80)'],
-        [0.3, 'rgb(400, 100, 80)'],
-
-        [0.3, 'rgb(400, 80, 100)'],
-        [0.4, 'rgb(400, 80, 100)'],
-
-        [0.4, 'rgb(300, 80, 120)'],
-        [0.5, 'rgb(300, 80, 120)'],
-
-        [0.5, 'rgb(250, 80, 200)'],
-        [0.6, 'rgb(250, 80, 200)'],
-
-        [0.6, 'rgb(200, 50, 250)'],
-        [0.7, 'rgb(200, 50, 250)'],
-
-        [0.7, 'rgb(150, 50, 300)'],
-        [0.8, 'rgb(150, 50, 300)'],
-
-        [0.8, 'rgb(100, 0, 350)'],
-        [0.9, 'rgb(100, 0, 350)'],
-
-        [0.9, 'rgb(0, 0, 400)'],
-        [1.0, 'rgb(0, 0, 400)'] ]
         rmsds=self.rmsds
         pos=self.coordDict(start=0, stop=len(rank)-1)
         C=rank
         # print(C)
-        # S=[ 15 if rmsd > 5 else 30 for rmsd in rmsds ]
-        S=[ 15]
-        # print(S)
-        # Configure Plotly to be rendered inline in the notebook.
-        plotly.offline.init_notebook_mode()
+        S=[ 15 if rmsd > 5 else 30 for rmsd in rmsds ]
+        # S=[ 15]
         # Configure the trace.
         trace = go.Scatter3d(
             x=pos['x'], y=pos['y'], z=pos['z'],
@@ -192,15 +157,84 @@ class Scores(object):
                 'opacity': 1,
                 'color' : C,
                 'colorscale' : colorscale,
-                'colorbar': {'title' : 'Ranks'}
+                'colorbar': dict(title = 'Ranks',
+            titleside = 'top',
+            tickmode = 'array',
+            x=0)
             },
-            text=rank)
-        layout = go.Layout(title='Docking decoys', hovermode= 'closest',)
+            name=name,
+            text=['rank=' + str(rank[i]) + ', rmsd='+ str(self.rmsds[i]) for i in range(len(rank))])
+
+        return trace
+
+    def plotly3D(self, rank, name=' ', title='Docking decoys'):
+        """ Warning : rank must be in the original order, since positions and rmsds are in the original order """
+        # Configure Plotly to be rendered inline in the notebook.
+        plotly.offline.init_notebook_mode()
+        trace=self.trace(rank, name)
+        layout = go.Layout(title=title, hovermode= 'closest',)
         margin={'l': 0, 'r': 0, 'b': 0, 't': 10}
         data = [trace]
         plot_figure = go.Figure(data=data, layout=layout)
         # Render the plot.
         plotly.offline.iplot(plot_figure,filename='Docking Decoys')
+
+    # NB : This function should take different sets of points and not sc object. --> put to core_visuals ?
+    def multiPlot3D(self, ranks, names, title='Docking decoys'):
+        """ Warning : rank must be in the original order, since positions and rmsds are in the original order
+        ranks is a list of lists of ranks"""
+        # Configure Plotly to be rendered inline in the notebook.
+        plotly.offline.init_notebook_mode()
+        traces=[self.trace(ranks[i],names[i]) for i in range(len(ranks))]
+        layout = go.Layout(title=title, hovermode= 'closest',)
+        margin={'l': 0, 'r': 15, 'b': 0, 't': 10}
+        data = traces
+        plot_figure = go.Figure(data=data, layout=layout)
+        # Render the plot.
+        plotly.offline.iplot(plot_figure,filename='Docking Decoys')
+
+
+
+def make_colorScale():
+    colorscale= [
+    # Let first 10% (0.1) of the values have color rgb(0, 0, 0)
+    # [0, 'rgb(400, 180, 180)'],
+    # [0.1, 'rgb(400, 180, 180)'],
+    [0, 'rgb(400, 0, 0)'],
+    [0.05, 'rgb(400, 0, 0)'],
+    [0.05, 'rgb(400, 100, 40)'],
+    [0.1, 'rgb(400, 100, 40)'],
+    # Let values between 10-20% of the min and max of z
+    # have color rgb(20, 20, 20)
+    [0.1, 'rgb(400, 120, 60)'],
+    [0.2, 'rgb(400, 120, 60)'],
+
+    # Values between 20-30% of the min and max of z
+    # have color rgb(40, 40, 40)
+    [0.2, 'rgb(400, 100, 80)'],
+    [0.3, 'rgb(400, 100, 80)'],
+
+    [0.3, 'rgb(400, 80, 100)'],
+    [0.4, 'rgb(400, 80, 100)'],
+
+    [0.4, 'rgb(300, 80, 120)'],
+    [0.5, 'rgb(300, 80, 120)'],
+
+    [0.5, 'rgb(250, 80, 200)'],
+    [0.6, 'rgb(250, 80, 200)'],
+
+    [0.6, 'rgb(200, 50, 250)'],
+    [0.7, 'rgb(200, 50, 250)'],
+
+    [0.7, 'rgb(150, 50, 300)'],
+    [0.8, 'rgb(150, 50, 300)'],
+
+    [0.8, 'rgb(100, 0, 350)'],
+    [0.9, 'rgb(100, 0, 350)'],
+
+    [0.9, 'rgb(0, 0, 400)'],
+    [1.0, 'rgb(0, 0, 400)'] ]
+    return colorscale
 
 def true3D(pos, complex):
     """Make sure the first 7 positions of your dictionnary pos are Native Like Solutions"""

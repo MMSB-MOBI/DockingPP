@@ -31,7 +31,7 @@ from core_scores import Scores
 scores=Scores(fname)
 scores.setPoses(zD.pList)
 # generate a list of ranks for each pose : in position 0 we get pose[0]'s rank in rescoring
-ranks=scores.rankPoses(element="con_log_sum", start=7)
+ranks=scores.ranks(element="con_log_sum", start=7)
 # generate a ranked list of poses : in position 0 we get pose with best score
 ranked=scores.rankedPoses(element="res_fr_sum", start=7, stop=8000)
 
