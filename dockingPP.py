@@ -339,10 +339,11 @@ class DockData(object):
                     res_stats[i].increase_count(count='plain')
 
             except TypeError:
-                print(f'Warning : only {i} poses could be analysed' )
-                con_stats.setSize(int(i))
-                res_stats.setSize(int(i))
-                break
+                pass
+            #     print(f'Warning : only {i} poses could be analysed' )
+            #     con_stats.setSize(int(i))
+            #     res_stats.setSize(int(i))
+            #     break
 
         return (res_stats,con_stats)
 
@@ -361,9 +362,10 @@ class DockData(object):
                         con_stats.incrMdTree(rootRes.index, partnerRes.index)
 
             except TypeError:
-                print(f'Warning : only {i} poses could be analysed ' )
-                con_stats.setSize(int(i))
-                break
+                pass
+            #     print(f'Warning : only {i} poses could be analysed ' )
+            #     con_stats.setSize(int(i))
+            #     break
         return con_stats
 
     @property
@@ -391,9 +393,10 @@ class DockData(object):
                     res_stats[i].increase_count(count='plain')
 
             except TypeError:
-                print(f'Warning : only {i} poses could be analysed ' )
-                res_stats.setSize(int(i))
-                break
+                pass
+            #     print(f'Warning : only {i} poses could be analysed ' )
+            #     res_stats.setSize(int(i))
+            #     break
 
         return res_stats
 

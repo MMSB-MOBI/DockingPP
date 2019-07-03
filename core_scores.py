@@ -144,7 +144,7 @@ class Scores(object):
 
         rmsds=self.rmsds
         pos=self.coordDict(start=0, stop=len(rank)-1)
-        C=rank
+        C=[r+1 for r in rank]
         # print(C)
         S=[ 15 if rmsd > 5 else 30 for rmsd in rmsds ]
         # S=[ 15]
@@ -160,39 +160,57 @@ class Scores(object):
                 'colorbar': dict(title = 'Ranks',
             titleside = 'top',
             tickmode = 'array',
-            x=0)
+            x=-0.25)
             },
             name=name,
-            text=['rank=' + str(rank[i]) + ', rmsd='+ str(self.rmsds[i]) for i in range(len(rank))])
+            text=['rank=' + str(rank[i]+1 ) + ', rmsd='+ str(self.rmsds[i]) for i in range(len(rank))])
 
         return trace
 
-    def plotly3D(self, rank, name=' ', title='Docking decoys'):
+    def plot3D(self, rank, name=' ', title='Docking decoys'):
         """ Warning : rank must be in the original order, since positions and rmsds are in the original order """
         # Configure Plotly to be rendered inline in the notebook.
         plotly.offline.init_notebook_mode()
         trace=self.trace(rank, name)
-        layout = go.Layout(title=title, hovermode= 'closest',)
-        margin={'l': 0, 'r': 0, 'b': 0, 't': 10}
+        layout = go.Layout(autosize=False,
+        width=650,
+        height=400,
+        title=title,
+        hovermode= 'x',
+        hoverlabel=dict(bgcolor='white', bordercolor='black'),
+        margin={'l': 0, 'r': 0, 'b': 0, 't': 10})
         data = [trace]
         plot_figure = go.Figure(data=data, layout=layout)
         # Render the plot.
         plotly.offline.iplot(plot_figure,filename='Docking Decoys')
+        return plot_figure
 
     # NB : This function should take different sets of points and not sc object. --> put to core_visuals ?
-    def multiPlot3D(self, ranks, names, title='Docking decoys'):
-        """ Warning : rank must be in the original order, since positions and rmsds are in the original order
-        ranks is a list of lists of ranks"""
-        # Configure Plotly to be rendered inline in the notebook.
-        plotly.offline.init_notebook_mode()
-        traces=[self.trace(ranks[i],names[i]) for i in range(len(ranks))]
-        layout = go.Layout(title=title, hovermode= 'closest',)
-        margin={'l': 0, 'r': 15, 'b': 0, 't': 10}
-        data = traces
-        plot_figure = go.Figure(data=data, layout=layout)
-        # Render the plot.
-        plotly.offline.iplot(plot_figure,filename='Docking Decoys')
 
+def multiPlot3D(sc, ranks, names, title='Docking decoys'):
+    """ Warning : rank must be in the original order, since positions and rmsds are in the original order
+    ranks is a list of lists of ranks"""
+    # Configure Plotly to be rendered inline in the notebook.
+    plotly.offline.init_notebook_mode()
+    traces=[sc[i].trace(ranks[i],names[i]) for i in range(len(ranks))]
+    layout = go.Layout(
+    # margin=go.layout.Margin(
+    #     l=50,
+    #     r=50,
+    #     b=100,
+    #     t=100,
+    #     pad=4 ),
+    autosize=False,
+    width=600,
+    height=400,
+    title=title, hovermode= 'closest',)
+    margin={'l': 0, 'r': 15, 'b': 0, 't': 10}
+    data = traces
+    plot_figure = go.Figure(data=data, layout=layout)
+    # Render the plot.
+    plotly.offline.iplot(plot_figure,filename='Docking Decoys')
+
+    return plot_figure
 
 
 def make_colorScale():
@@ -284,8 +302,7 @@ def countNative(rmsds):
     counts={5:0, 10:0, 20:0, 100:0, 200:0, "out":0}
     x=0
     for i in rmsds:
-
-        if i<5:
+        if i<2.5:
             if x<200:
                 counts[200]+=1
                 if x<100:

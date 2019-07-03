@@ -160,7 +160,7 @@ class ContactStats(core.mdTree):
                 logCounts.set(x, y, math.log(_v/self.expSize))
         return logCounts
 
-    def render_table(self, n=None):
+    def renderTable(self, n=None):
         """Returns a table of size n**2 with counts in the intersection of columns and lines"""
         L,R=[],[]
         for x in self.data:

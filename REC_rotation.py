@@ -84,10 +84,6 @@ for atom in DD.pdbObjReceptor.model[0]:
     atom.z=coords[2,0]
 
 
-# DD.pdbObjReceptor.atomdictorize['x']=new_coords['x']
-# DD.pdbObjReceptor.atomdictorize['y']=new_coords['y']
-# DD.pdbObjReceptor.atomdictorize['z']=new_coords['z']
-# print(str(DD.pdbObjReceptor.model[0]))
 DD.pList[0].ccmap(dist=5)
 C=DD.pList[0].resMapList
 # print(C)
