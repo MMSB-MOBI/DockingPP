@@ -613,20 +613,13 @@ def zParse(fileName, maxPose = 0):
             m = re.match(reZPOSE, line)
             if m:
                 euler = (float(m.groups()[0]), float(m.groups()[1]), float(m.groups()[2]))
-                print(x)
-                print(euler)
                 # Make rotation matrices
                 rand_rot=trans_matrix(*dockdataObj.eulerREC)
                 pose_rot=trans_matrix(*euler)
                 # Combine into one matrix
                 double=pose_rot.dot(rand_rot)
-                print(double)
                 # Recover combined angles
                 euler=euleurFromMatrix(double)
-                # if not np.array_equal(trans_matrix(*euler),double) :
-                #     print('OH :' + str(x))
-                #     print(trans_matrix(*euler))
-                #     print(double)
 
                 tr = [int(m.groups()[3]), int(m.groups()[4]), int(m.groups()[5])]
                 tr=tuple([ t - dockdataObj.nCells if t > dockdataObj.nCells / 2 else t for t in tr ])
