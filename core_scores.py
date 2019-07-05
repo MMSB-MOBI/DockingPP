@@ -302,7 +302,7 @@ def countNative(rmsds):
     counts={5:0, 10:0, 20:0, 100:0, 200:0, "out":0}
     x=0
     for i in rmsds:
-        if i<2.5:
+        if i<5:
             if x<200:
                 counts[200]+=1
                 if x<100:
