@@ -1,6 +1,6 @@
 #! /usr/bin/env python3
 
-import sys, os, re, pickle, json,math
+import sys, os, re, pickle, json,math, numpy as np
 path=["/Users/jprieto/Docking/modules/pyproteinsExt/src", "/Users/jprieto/Docking/scripts/dockingPP"]
 for way in path :
     if path not in sys.path :
@@ -8,6 +8,7 @@ for way in path :
 import pyproteinsExt.structure.coordinates as PDB
 import pyproteinsExt.structure.operations as PDBop
 from core_stats import ResStats, ContactStats , CmapRes, writeScores
+from rotation_utils import trans_matrix, euleurFromMatrix
 import ccmap
 
 from multiprocessing import Pool
@@ -37,7 +38,7 @@ class Pose(object):
     def set_RMSD(self,RMSD):
         self.rmsd=RMSD
 
-    def ccmap(self, dist=4.5):
+    def ccmap(self, dist=5):
         #print self._ccmap
         if not self._ccmap:
             pdbObjRec = self.belongsTo.pdbObjReceptor
@@ -251,7 +252,7 @@ class DockData(object):
     def ccmap(self, **kwargs):
         start = kwargs['start'] if 'start' in kwargs else 0
         stop  = kwargs['stop']  if 'stop' in kwargs else len(self.pList)
-        dist  = kwargs['dist']  if 'dist' in kwargs else 4.5
+        dist  = kwargs['dist']  if 'dist' in kwargs else 5
 
         #default distance value
 
@@ -566,6 +567,8 @@ def parse(fileName, maxPose = 0):
                         raise
                     # print(RMSD)
                     euler = (float(m.groups()[1]), float(m.groups()[2]), float(m.groups()[3]))
+
+
                     tr = [int(m.groups()[4]), int(m.groups()[5]), int(m.groups()[6])]
                     tr=tuple([ t - dockdataObj.nCells if t > dockdataObj.nCells / 2 else t for t in tr ])
                     pose=dockdataObj.push( int(m.groups()[0]), euler, tr)
@@ -610,6 +613,21 @@ def zParse(fileName, maxPose = 0):
             m = re.match(reZPOSE, line)
             if m:
                 euler = (float(m.groups()[0]), float(m.groups()[1]), float(m.groups()[2]))
+                print(x)
+                print(euler)
+                # Make rotation matrices
+                rand_rot=trans_matrix(*dockdataObj.eulerREC)
+                pose_rot=trans_matrix(*euler)
+                # Combine into one matrix
+                double=pose_rot.dot(rand_rot)
+                print(double)
+                # Recover combined angles
+                euler=euleurFromMatrix(double)
+                # if not np.array_equal(trans_matrix(*euler),double) :
+                #     print('OH :' + str(x))
+                #     print(trans_matrix(*euler))
+                #     print(double)
+
                 tr = [int(m.groups()[3]), int(m.groups()[4]), int(m.groups()[5])]
                 tr=tuple([ t - dockdataObj.nCells if t > dockdataObj.nCells / 2 else t for t in tr ])
                 dockdataObj.push(x, euler, tr)
