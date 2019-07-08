@@ -8,7 +8,7 @@ for way in path :
 import pyproteinsExt.structure.coordinates as PDB
 import pyproteinsExt.structure.operations as PDBop
 from core_stats import ResStats, ContactStats , CmapRes, writeScores
-from rotation_utils import trans_matrix, euleurFromMatrix
+from rotation_utils import trans_matrix, eulerFromMatrix
 import ccmap
 
 from multiprocessing import Pool
@@ -434,15 +434,17 @@ class DockData(object):
         # return sorted((self.pList[:size],_functions[function](self.pList[:size],stats , method=method)) , key=lambda o:_functions[function](o,stats , method=method))
         return poses
 
-    def write_all_scores(self, size=1 , filename="scores", title='Exp1', header=None) :
+    def write_all_scores(self, size=1 , filename="scores", title='Exp1', header=None, F=False) :
         header = ["Surface size", "Residue freq sum", "Residue mean freq", "Residue log sum", "Residue square sum", "Number of contacts", "Contact freq sum", "Contact mean freq", "Contact log sum", "Contact square sum"]
 
         resS , conS, scores=self.all_scores()
         resS.write(filename+"_resstats.tab")
         conS.write(filename+"_constats.tab")
         assert len(list(set([len(i) for i in scores])))==1
-        e=True
-
+        if F :
+            e=False
+        else :
+            e=True
         score_file=filename + '.tsv'
         while e==True :
             if os.path.isfile(score_file):
@@ -619,7 +621,7 @@ def zParse(fileName, maxPose = 0):
                 # Combine into one matrix
                 double=pose_rot.dot(rand_rot)
                 # Recover combined angles
-                euler=euleurFromMatrix(double)
+                euler=eulerFromMatrix(double)
 
                 tr = [int(m.groups()[3]), int(m.groups()[4]), int(m.groups()[5])]
                 tr=tuple([ t - dockdataObj.nCells if t > dockdataObj.nCells / 2 else t for t in tr ])

@@ -14,22 +14,6 @@ import plotly.plotly as py
 import plotly
 import plotly.graph_objs as go
 
-# #labels = range(1, 11)
-# plt.figure(figsize=(10, 7))
-# plt.subplots_adjust(bottom=0.1)
-# plt.scatter('x','y', data=madata, label='True Position')
-# plt.plot(madata['x'][:6],madata['y'][:6],'rs')
-
-#3D viewing
-# Make the plot
-
-# zD = pickle.load(open('/Users/jprieto/Docking/scripts/1BJ1_4000_full.pickle','rb'))
-# zD=parse('/Users/jprieto/Docking/data/subsamples/1BJ1_r-1BJ1_l.detail')
-# madata=zD.dictPos
-# groups=rankCluster(zD.pList,5)
-# Données a definir
-# S=[(sqrt(10000-i)/10) for i in rank]
-# D=[(100-rmsd)/20 for rmsd in rmsds]
 
 class Scores(object):
     """This class allows to read a rescoring file"""
@@ -298,11 +282,11 @@ def colorsFromRmsd(rmsds):
             colors.extend(['blue'])
     return colors
 
-def countNative(rmsds):
+def countNative(rmsds, cutoff=5):
     counts={5:0, 10:0, 20:0, 100:0, 200:0, "out":0}
     x=0
     for i in rmsds:
-        if i<5:
+        if i<cutoff:
             if x<200:
                 counts[200]+=1
                 if x<100:

@@ -1,16 +1,23 @@
 #! /usr/bin/env python3
 import sys, os, numpy as np
-from math import cos, sin, acos, asin, atan2, sqrt
+from math import cos, sin, acos, asin, atan2, sqrt , pi
 
 
 
-# print(pdbObj.atomDictorize['x'])
 def where(O,astr):
     count=0
     for i in O:
         if astr in i:
             count+=1
     return count
+
+def is_zero(num):
+    return ( num <= 1e-14 and num >= -1e-14)
+
+def equals(num1, num2):
+
+    return ( num1 >= num2-(1e-14) and num1 <= num2+(1e-14) )
+
 
 def rotate(x,y,z,psi,theta,phi) :
     r11 = cos(psi)*cos(phi)  -  sin(psi)*cos(theta)*sin(phi)
@@ -50,16 +57,28 @@ def trans_matrix(psi,theta,phi):
 
     return tr_matrix
 
-def euleurFromMatrix(matrix):
-    t1=acos(matrix[2,2])
-    t2= -1 * t1
-    if matrix[2,0] != 0 and matrix[2,1] != 0 and matrix[0,2] != 0 and matrix[1,2] != 0 :
-        f=atan2(matrix[2,0], matrix[2,1])
-        t=atan2(acos(matrix[2,2]),sqrt(matrix[2,0]**2+matrix[2,1]**2) )
-        p=atan2(matrix[0,2]/sin(t1), matrix[1,2] / sin(t2))
-
-
-    return (p,t1,f)
+def eulerFromMatrix(matrix):
+    t=acos(matrix[2,2])
+    t2=-1*t
+    if not is_zero(sin(acos(matrix[2,2]))) :
+        f=atan2(matrix[2,0]/t, matrix[2,1]/t)
+        f2=atan2(matrix[2,0]/t2, matrix[2,1]/t2)
+        # t=atan2(sqrt(matrix[2,0]**2+matrix[2,1]**2),matrix[2,2] )
+        p=atan2(matrix[0,2]/t, matrix[1,2]/t2)
+        p2=atan2(matrix[0,2]/t2, matrix[1,2]/t)
+    else :
+        if equals(matrix[2,2], -1) :
+            p= 1-atan2(matrix[1,0], matrix[0,0])
+            t=pi
+            f=1
+        if equals(matrix[2,2], 1) :
+            f=atan2(matrix[1,0], matrix[0,0]) /2
+            t=0
+            p=atan2(matrix[1,0], matrix[0,0]) /2
+        else :
+            # print(matrix[2,2])
+            return 4
+    return (p,t,f)
 
 def vertical_matrix(P):
     ver_coordinates=np.matrix([[i] for i in P])

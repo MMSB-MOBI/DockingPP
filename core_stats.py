@@ -105,14 +105,14 @@ class ResStats(object):
             count[res]=self.rDict[res].cCount
         return count
 
-    def write(self,filename):
+    def write(self,filename, F=False):
         """Export the Residues frequencies out to a tab delimited file """
         data="Residue Frequencies"
         dataset = self.resFreq
         if self.expName :
             data+=f"({self.expName})"
 
-        writeScore(dataset, size=self.expSize, filename=filename, title=data )
+        writeScore(dataset, size=self.expSize, filename=filename, title=data, F=F )
 
 class ContactStats(core.mdTree):
     """ This class allows to store contacts counts from ccmap """
@@ -184,7 +184,7 @@ class ContactStats(core.mdTree):
                 all_val.append(self.get(x, y))
         return all_val
 
-    def write(self,filename):
+    def write(self,filename,F=False):
         """Export the Contact frequencies out to a tab delimited file """
         scores={}
         freq= self.contactFreq
@@ -194,13 +194,16 @@ class ContactStats(core.mdTree):
         for x in self.data :
             for y in self.data[x] :
                 scores[x+"_"+y]=freq.get(x,y)
-        writeScore(scores, size=self.expSize, filename=filename, title=title )
+        writeScore(scores, size=self.expSize, filename=filename, title=title,F=F)
 
 
-def writeScore(scores , size=1, filename="scores.tsv", title='Experiment'):
+def writeScore(scores , size=1, filename="scores.tsv", title='Experiment', F=False):
     """This function allows to write a list of scores to a file :
     each pose is a new line"""
-    e=True
+    if F :
+        e=False
+    else :
+        e=True
     while e==True :
         if os.path.isfile(filename):
             re= input(f"Warning : File {filename} already exists, do you wish to continue anyway and replace it ? (yes/no)")
@@ -216,18 +219,22 @@ def writeScore(scores , size=1, filename="scores.tsv", title='Experiment'):
                 print("Please answer 'yes' or 'no' ")
         else :
             e=False
-    with open(filename,'a+') as f:
-        f.write("# Title : " + title + "\n")
-        f.write("# Experiment_size : " + str(size) + "\n")
-        for i in scores :
-            f.write(str(i)+ "\t" + str(scores[i]) + "\n")
+    C="# Title : " + title + "\n"
+    C+="# Experiment_size : " + str(size) + "\n"
+    for i in scores :
+        C+=str(i)+ "\t" + str(scores[i]) + "\n"
+    with open(filename,'w+') as f:
+        f.write(C)
 
     return filename
 
-def writeScores(scores , size=1, filename="scores.tsv", title='Exp1', header=None):
+def writeScores(scores , size=1, filename="scores.tsv", title='Exp1', header=None, F=False):
     """This function allows to write a list of scores to a file :
     each pose is a new line, each score is a new column"""
-    e=True
+    if F :
+        e=False
+    else :
+        e=True
     if header==None :
         header=["score" + str(i) for i in range(len(scores[0]))]
     else:
@@ -248,12 +255,12 @@ def writeScores(scores , size=1, filename="scores.tsv", title='Exp1', header=Non
                 print("Please answer 'yes' or 'no' ")
         else :
             e=False
-    with open(filename,'a+') as f:
-        f.write("# Title : " + title + "\n")
-        f.write("# Experiment_size : " + str(size) + "\n")
-        f.write("Pose" + "\t" + "\t".join(header)+ "\n")
-
-        for pose in range(len(scores)):
-            f.write(str(pose)+"\t"+ "\t".join([str(i) for i in scores[pose]]) + "\n")
+    C="# Title : " + title + "\n"
+    C+="# Experiment_size : " + str(size) + "\n"
+    C+="Pose\t" + "\t".join(header)+ "\n"
+    for pose in range(len(scores)):
+        C+=str(pose)+"\t"+ "\t".join([str(i) for i in scores[pose]]) + "\n"
+    with open(filename,'w+') as f:
+        f.write(C)
 
     return filename
