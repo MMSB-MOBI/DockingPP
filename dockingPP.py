@@ -7,8 +7,8 @@ for way in path :
         sys.path.append(way)
 import pyproteinsExt.structure.coordinates as PDB
 import pyproteinsExt.structure.operations as PDBop
-from core_stats import ResStats, ContactStats , CmapRes, writeScores
-from rotation_utils import trans_matrix, eulerFromMatrix
+from src.core_stats import ResStats, ContactStats , CmapRes, writeScores
+from src.rotation_utils import trans_matrix, eulerFromMatrix
 import ccmap
 
 from multiprocessing import Pool
@@ -438,8 +438,8 @@ class DockData(object):
         header = ["Surface size", "Residue freq sum", "Residue mean freq", "Residue log sum", "Residue square sum", "Number of contacts", "Contact freq sum", "Contact mean freq", "Contact log sum", "Contact square sum"]
 
         resS , conS, scores=self.all_scores()
-        resS.write(filename+"_resstats.tab")
-        conS.write(filename+"_constats.tab")
+        resS.write(filename+"_resstats.tab", F=F)
+        conS.write(filename+"_constats.tab",F=F)
         assert len(list(set([len(i) for i in scores])))==1
         if F :
             e=False

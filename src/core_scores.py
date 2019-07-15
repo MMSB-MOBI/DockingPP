@@ -5,7 +5,7 @@ import math
 import seaborn as sns
 import pandas as pd
 from mpl_toolkits.mplot3d import Axes3D
-from core_clustering import rankCluster
+from src.core_clustering import rankCluster
 import pickle
 from dockingPP import parse
 from math import sqrt
@@ -21,7 +21,6 @@ class Scores(object):
         self.data=None
         with open(file,'r') as f:
             self.data=[line.split("\t") for line in f.readlines()[3:]]
-        # self.columns=line.split("\t") for line in f.readlines()[2]
         self.columns={"pose":0,"s_size":1,"res_fr_sum":2,"res_mean_fr": 3, "res_log_sum": 4, "res_sq_sum": 5, "c_size": 6, "con_fr_sum": 7,"con_mean_fr" : 8,"con_log_sum" : 9,"con_sq_sum" : 10, "rmsd": 11}
         self.poses=None
 
@@ -108,7 +107,7 @@ class Scores(object):
         Means the pose classified 1st is 1st position of the list.   """
 
         try :
-            r=self.poses
+            p=self.poses
         except :
             raise Exception("Please define poses using setPoses() function")
         if not stop:
@@ -286,7 +285,7 @@ def countNative(rmsds, cutoff=5):
     counts={5:0, 10:0, 20:0, 100:0, 200:0, "out":0}
     x=0
     for i in rmsds:
-        if i<cutoff:
+        if i<=cutoff:
             if x<200:
                 counts[200]+=1
                 if x<100:

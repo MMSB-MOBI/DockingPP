@@ -86,7 +86,7 @@ class Cluster(object):
 #     if out=="dict":
 #         return clusters
 
-def rankCluster(zD, ranked, maxd, out="list", stop=None) :
+def rankCluster(zD, ranks, maxd, out="list", start=0,stop=None) :
     """Can return list of pose's belonging if out is "list" or a dictionnary of clusters
     and the poses they contain if out is "dict"  """
     pList=zD.pList
@@ -94,7 +94,7 @@ def rankCluster(zD, ranked, maxd, out="list", stop=None) :
     def calcul_dist(pose1,pose2):
         dist= sqrt(sum([(pose1.translate[i]-pose2.translate[i])**2 for i in range(3)]))
         return dist
-    r_list=[pList[i] for i in ranked]
+    r_list=[pList[i] for i in ranks]
     groups=[]
     clusters_found=0
     clusters={} #cluster_id : [poses]
@@ -133,11 +133,11 @@ def cons_score(cluster,sc):
 
 def clus_score(cluster,sc,rank='original_score'):
     if rank=='original_score':
-        return sum([(p.id) for p in cluster])/len(cluster)
+        return sum([(p.id-1) for p in cluster])/len(cluster)
     else :
         try :
             rank=sc.ranks(element=rank)
-            return sum([(rank[p.id-1]**2) for p in cluster])/len(cluster)
+            return sum([(rank[p.id-1]) for p in cluster])/len(cluster)
         except :
             raise Exception("Unknown rank type")
 
