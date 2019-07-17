@@ -7,6 +7,7 @@ for way in path :
         sys.path.append(way)
 import pyproteinsExt.structure.coordinates as PDB
 import pyproteinsExt.structure.operations as PDBop
+from src.core_scores import Scores
 from src.core_stats import ResStats, ContactStats , CmapRes, writeScores
 from src.rotation_utils import trans_matrix, eulerFromMatrix
 import ccmap
@@ -236,7 +237,17 @@ class DockData(object):
         self.pdbObjLigand = None
         self.pdbObjReceptor = None
         self.truePos=[]
+        self.scores=None
 
+    def setScores(self, scores=None, filename=None):
+        if filename:
+            self.scores=Scores(filename=filename, data=None)
+        elif scores:
+            self.scores=Scores(data=scores, filename=None)
+        else :
+            self.scores=Scores(data=self.all_scores())
+        self.scores.setPoses(self.pList)
+        return self.scores
 
     def setComplexName(self, name):
         self._name=name
@@ -437,7 +448,8 @@ class DockData(object):
     def write_all_scores(self, size=1 , filename="scores", title='Exp1', header=None, F=False) :
         header = ["Surface size", "Residue freq sum", "Residue mean freq", "Residue log sum", "Residue square sum", "Number of contacts", "Contact freq sum", "Contact mean freq", "Contact log sum", "Contact square sum"]
 
-        resS , conS, scores=self.all_scores()
+        resS , conS=self.getStats
+        scores=self.all_scores(resStats=resS, conStats=conS)
         resS.write(filename+"_resstats.tab", F=F)
         conS.write(filename+"_constats.tab",F=F)
         assert len(list(set([len(i) for i in scores])))==1
@@ -467,42 +479,46 @@ class DockData(object):
             f.write("Pose" + "\t" + "\t".join(header)+ "\n")
 
             for pose in range(len(scores)):
-                f.write(str(pose)+"\t"+ "\t".join([str(i) for i in scores[pose]]) + "\n")
+                f.write("\t".join([str(i) for i in scores[pose]]) + "\n")
 
         return score_file
 
-    def all_scores(self) :
+    def all_scores(self, resStats=None, conStats=None) :
+        header = ["Surface size", "Residue freq sum", "Residue mean freq", "Residue log sum", "Residue square sum", "Number of contacts", "Contact freq sum", "Contact mean freq", "Contact log sum", "Contact square sum"]
         scores= []
-        resS , conS = self.getStats
-        # resS.write(filename+"_resstats.tab")
-        # conS.write(filename+"_constats.tab")
+        if resStats and conStats :
+            resS , conS = resStats, conStats
+        else :
+            resS , conS = self.getStats
+
         size=resS.expSize
         rfreqs=resS.resFreq
         cfreqs=conS.contactFreq
         for i,p in enumerate(self.pList[:size]) :
             p.has_ccmap()
-            complex=[0,0,0,0,0,0,0,0,0,0]
+            complex=[None,0,0,0,0,0,0,0,0,0,0]
+            complex[0]=p.id
             for res in p.resMapList :
-                complex[1] += rfreqs[res] if res in rfreqs else 1/size
-                complex[3] += math.log(rfreqs[res]) if res in rfreqs else math.log(1/size)
-                complex[4] += rfreqs[res]**2 if res in rfreqs else 1/size**2
-            complex[0] = p.resSize
+                complex[2] += rfreqs[res] if res in rfreqs else 1/size
+                complex[4] += math.log(rfreqs[res]) if res in rfreqs else math.log(1/size)
+                complex[5] += rfreqs[res]**2 if res in rfreqs else 1/size**2
+            complex[1] = p.resSize
             try :
-                complex[2] = complex[1]/p.resSize  # mean freq
+                complex[3] = complex[2]/complex[1]  # mean freq
             except ZeroDivisionError:
-                if complex[1]==0:
-                    complex[2]==0
+                if complex[2]==0:
+                    complex[3]==0
                 else :
                     raise Exception("weird pose : " + str(p.id) + " with size 0 resSize and "+ str(p.ccmap))
             for contact in p.contactMapList:
                 # print(contact)
-                complex[6] += cfreqs.get(contact[0],contact[1])
-                complex[8] += math.log(cfreqs.get(contact[0],contact[1]))
-                complex[9] += (cfreqs.get(contact[0],contact[1]))**2
-            complex[5] = p.conSize
-            complex[7] = complex[6]/p.conSize if p.conSize !=0 else 0# mean contact freq
+                complex[7] += cfreqs.get(contact[0],contact[1])
+                complex[9] += math.log(cfreqs.get(contact[0],contact[1]))
+                complex[10] += (cfreqs.get(contact[0],contact[1]))**2
+            complex[6] = p.conSize
+            complex[8] = complex[7]/p.conSize if p.conSize !=0 else 0# mean contact freq
             scores.append(complex)
-        return resS,conS,scores
+        return scores
 
     def __str__(self):
         return str({ 'step' : self.step, 'nCells' : self.nCells , 'EulerREC' : self.eulerREC,

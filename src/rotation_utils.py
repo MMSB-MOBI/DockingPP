@@ -10,6 +10,12 @@ def where(O,astr):
         if astr in i:
             count+=1
     return count
+def whereInt(O,int):
+    count=0
+    for i in O:
+        if i== int:
+            count+=1
+    return count
 
 def is_zero(num):
     return ( num <= 1e-14 and num >= -1e-14)

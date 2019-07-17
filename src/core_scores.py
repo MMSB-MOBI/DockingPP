@@ -7,7 +7,6 @@ import pandas as pd
 from mpl_toolkits.mplot3d import Axes3D
 from src.core_clustering import rankCluster
 import pickle
-from dockingPP import parse
 from math import sqrt
 import plotly.plotly as py
 # Import dependencies
@@ -17,12 +16,28 @@ import plotly.graph_objs as go
 
 class Scores(object):
     """This class allows to read a rescoring file"""
-    def __init__(self, file):
+    def __init__(self, filename=None, data=None):
         self.data=None
-        with open(file,'r') as f:
-            self.data=[line.split("\t") for line in f.readlines()[3:]]
+        if filename :
+            self.loadFile(filename)
+        elif data:
+            self.loadScores(data)
         self.columns={"pose":0,"s_size":1,"res_fr_sum":2,"res_mean_fr": 3, "res_log_sum": 4, "res_sq_sum": 5, "c_size": 6, "con_fr_sum": 7,"con_mean_fr" : 8,"con_log_sum" : 9,"con_sq_sum" : 10, "rmsd": 11}
         self.poses=None
+
+    @property
+    def originalRank(self):
+        if not self.poses:
+            raise Exception("Please define poses using setPoses")
+        return [i for i in range(len(self.poses))]
+
+    def loadFile(self,file):
+        with open(file,'r') as f:
+            self.data=[line.strip("\n").split("\t") for line in f.readlines()[3:]]
+        return True
+
+    def loadScores(self,scores):
+        self.data=scores
 
     def setPoses(self, pList):
         self.poses=pList
@@ -53,9 +68,9 @@ class Scores(object):
         return self.scoresDict[int(poseid)-1][self.columns[score]]
 
 
-    def rankedRmsds(self, ranked):
+    def rankedRmsds(self, rankedPoses):
         rmsds=[]
-        for i in ranked:
+        for i in rankedPoses:
             rmsds.append(self.rmsds[i])
         return rmsds
 
@@ -73,12 +88,14 @@ class Scores(object):
             coord['a3'] .append(pose.euler[2])
         return coord
 
-    def rmsdGraphGenerator(self, ranks, start=0, stop=None, plot=None ):
+    def rmsdGraphGenerator(self, rankedPoses, start=0, stop=None, plot=None, title=None ):
         pl=plot if plot else plt
+        if title:
+            pl.set_title(title)
         x=0
         if not stop:
-            stop=len(ranks)-1
-        rmsds=self.rankedRmsds(ranks)
+            stop=len(rankedPoses)-1
+        rmsds=self.rankedRmsds(rankedPoses)
         colors=colorsFromRmsd(rmsds)[int(start):int(stop)]
         x=[i if i!=0 else 0 for i in range(len(colors))]
         y=rmsds[int(start):int(stop)]
@@ -150,11 +167,11 @@ class Scores(object):
 
         return trace
 
-    def plot3D(self, rank, name=' ', title='Docking decoys'):
-        """ Warning : rank must be in the original order, since positions and rmsds are in the original order """
+    def plot3D(self, ranks, name=' ', title='Docking decoys'):
+        """ Warning : ranks must be in the original order, since positions and rmsds are in the original order """
         # Configure Plotly to be rendered inline in the notebook.
         plotly.offline.init_notebook_mode()
-        trace=self.trace(rank, name)
+        trace=self.trace(ranks, name)
         layout = go.Layout(autosize=False,
         width=650,
         height=400,
@@ -318,11 +335,13 @@ def eval_natives(natives,n):
 
 
 
-def multiplePlots(num, size=(20,10)):
+def multiplePlots(num, size=(20,10), ylim=None):
     fig=plt.figure(figsize=size)
     axlist=[]
     for i in range(1,num+1):
         ax=plt.subplot(1, num, i)
+        if ylim:
+            ax.set_ylim(*ylim)
         axlist.append(ax)
     return axlist
 

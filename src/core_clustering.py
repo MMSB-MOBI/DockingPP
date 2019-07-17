@@ -86,15 +86,14 @@ class Cluster(object):
 #     if out=="dict":
 #         return clusters
 
-def rankCluster(zD, ranks, maxd, out="list", start=0,stop=None) :
+def rankCluster(pList, rankedPoses, maxd, out="list", start=0,stop=None) :
     """Can return list of pose's belonging if out is "list" or a dictionnary of clusters
     and the poses they contain if out is "dict"  """
-    pList=zD.pList
     max=len(pList) if not stop else stop
     def calcul_dist(pose1,pose2):
         dist= sqrt(sum([(pose1.translate[i]-pose2.translate[i])**2 for i in range(3)]))
         return dist
-    r_list=[pList[i] for i in ranks]
+    r_list=[pList[i] for i in rankedPoses]
     groups=[]
     clusters_found=0
     clusters={} #cluster_id : [poses]
@@ -156,16 +155,26 @@ def birchCluster(zD, maxd):
     # brc.set_params(n_clusters = 2500 )
     brc.partial_fit(np.matrix(X))
     groups=brc.predict(X)
-    return groups
+    clusters=list2dict(zD,groups)
+    return clusters
 
+def list2dict(zD,cluster):
+    dictclus={}
+    for u,v in enumerate(cluster):
+        if v not in dictclus:
+            dictclus[v]=[]
+        dictclus[v].append(zD.pList[u])
+
+    return dictclus
 def wardCluster(zD, maxd):
     data=zD.dictPos
     Z = ward(pdist([[data['x'][i],data['y'][i],data['z'][i],data['a1'][i],data['a2'][i],data['a3'][i]] for i in range(7,len(zD.pList))]))
     groups = fcluster(Z,maxd, criterion = 'distance')
-    return groups
+    clusters=list2dict(zD,groups)
+    return clusters
 
-def herarCluster(zD, maxc):
-    cluster = AgglomerativeClustering(n_clusters=maxc, affinity='euclidean', linkage='complete')
+def herarCluster(zD, maxc, linkage='complete'):
+    cluster = AgglomerativeClustering(n_clusters=maxc, affinity='euclidean', linkage=linkage)
     data=zD.dictPos
     cluster.fit_predict([[data['x'][i],data['y'][i],data['z'][i]] for i in range(7,len(zD.pList))])
-    return cluster.labels_
+    return list2dict(zD, cluster.labels_)
