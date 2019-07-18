@@ -77,7 +77,7 @@ SC.setPoses(DD.pList)
 res_fr_rank=SC.rankedPoses(element="res_fr_sum")
 con_fr_rank=SC.rankedPoses(element="con_fr_sum")
 
-c_clusters=rC(DD,con_fr_rank,5, out='dict', stop=500)
+c_clusters=rC(DD.pList,con_fr_rank,5, out='dict', stop=500)
 
 ```
 
