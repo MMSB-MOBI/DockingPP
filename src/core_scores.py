@@ -2,13 +2,10 @@
 
 import matplotlib.pyplot as plt
 import math
-import seaborn as sns
-import pandas as pd
-from mpl_toolkits.mplot3d import Axes3D
+
 from src.core_clustering import rankCluster
 import pickle
 from math import sqrt
-import plotly.plotly as py
 # Import dependencies
 import plotly
 import plotly.graph_objs as go
