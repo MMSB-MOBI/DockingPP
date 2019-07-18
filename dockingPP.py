@@ -246,7 +246,7 @@ class DockData(object):
         RMSDS=[]
         with open(filename,'r') as f:
             for line in f.readlines():
-            RMSDS.append(line.split('\t')[1].strip('\n'))
+                RMSDS.append(line.split('\t')[1].strip('\n'))
         for i in range(max(len(self.pList), len(RMSDS))):
             self.pList[i].set_RMSD(RMSD[i])
         return True
