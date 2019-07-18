@@ -239,6 +239,19 @@ class DockData(object):
         self.truePos=[]
         self.scores=None
 
+    def loadRMSDS(self,filename=None):
+        # Can be used for ZD or to use different RMSDS
+        if not filename:
+            raise Exception("You must set an rmsd file to use")
+        RMSDS=[]
+        with open(filename,'r') as f:
+            for line in f.readlines():
+            RMSDS.append(line.split('\t')[1].strip('\n'))
+        for i in range(max(len(self.pList), len(RMSDS))):
+            self.pList[i].set_RMSD(RMSD[i])
+        return True
+
+
     def setScores(self, scores=None, filename=None):
         if filename:
             self.scores=Scores(filename=filename, data=None)
