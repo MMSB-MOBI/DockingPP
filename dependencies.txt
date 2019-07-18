@@ -1,0 +1,11 @@
+pickle
+json
+numpy
+sklearn
+scipy
+matplotlib
+plotly
+ccmap
+pyproteinsExt
+pyproteins
+mpl_toolkits

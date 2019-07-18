@@ -61,7 +61,9 @@ DD.write_all_scores(filename="/Users/jprieto/docking/Resultats/mycomplex")
 
 
 ```python
-SC=Scores("/Users/jprieto/docking/Resultats/mycomplex.tsv")
+SC=Scores(filename="/Users/jprieto/docking/Resultats/mycomplex.tsv")
+# or 
+DD.setScores(filename="/Users/jprieto/docking/Resultats/mycomplex.tsv")
 ```
 
 ## Make clusters with the BSAS algorithm
@@ -72,8 +74,8 @@ SC=Scores("/Users/jprieto/docking/Resultats/mycomplex.tsv")
 natural_rank= [i for i in range(50)]
 
 SC.setPoses(DD.pList)
-res_fr_rank=SC.rank(element="res_fr_sum")
-con_fr_rank=SC.rank(element="con_fr_sum")
+res_fr_rank=SC.rankedPoses(element="res_fr_sum")
+con_fr_rank=SC.rankedPoses(element="con_fr_sum")
 
 c_clusters=rC(DD,con_fr_rank,5, out='dict', stop=500)
 
@@ -85,14 +87,6 @@ c_clusters=rC(DD,con_fr_rank,5, out='dict', stop=500)
 ```python
 b_clusters=birchCluster(DD, 5)
 # print(b_clusters)
-b_dict={}
-# turn list into dictionnary
-for u,c in enumerate(b_clusters):
-    if u == 500:
-        break
-    if c not in b_dict:
-        b_dict[int(c)]=[]
-    b_dict[int(c)].append(DD.pList[int(u)])
 ```
 
 ## Sort clusters using Ranks and get representatives
@@ -101,7 +95,7 @@ for u,c in enumerate(b_clusters):
 ```python
 
 sor_clus=sortCluster(c_clusters,SC, fn="cons_score")
-sor_bclus=sortCluster(b_dict,SC, fn="cons_score")
+sor_bclus=sortCluster(b_clusters,SC, fn="cons_score")
 
 # These are the final candidate poses for prediction.
 rep=[c[0] for c in sor_clus]

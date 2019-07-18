@@ -104,7 +104,7 @@ def rankCluster(pList, rankedPoses, maxd, out="list", start=0,stop=None) :
     #         print("Progress : " + str(i))
     # #     print(str(pose.id) + str(pose.translate))
         in_cluster = False
-        for cluster_id in groups:
+        for cluster_id in clusters:
             # For each cluster representative
             representative = clusters[cluster_id][0]
             if calcul_dist(r_list[i],representative) < maxd:
@@ -142,6 +142,7 @@ def clus_score(cluster,sc,rank='original_score'):
 
 
 def sortCluster(cluster,sc,fn="original_score"):
+    """Takes a clusters dictionary: {cluster1 : [ p1, p2, p3 ... ], cluster2 : [ p1, p2, p3 ... ]} """
     #Sort clusters using clus_score function. The lowest the score, the better the cluster.
     return sorted([cluster[c] for c in cluster], key=lambda o:clus_score(o,sc,fn))
 

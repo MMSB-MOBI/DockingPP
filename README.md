@@ -18,6 +18,11 @@ dockingPP has the following dependencies:
 * pyProteins (<https://github.com/glaunay/pyproteins>) 
 * ccmap (<https://github.com/glaunay/ccmap>) 
 * NumPy (<http://www.numpy.org/>)
+* sklearn (<https://scikit-learn.org/stable/>) 
+* scipy (<https://www.scipy.org/>)
+* matplotlib (<https://matplotlib.org/>) 
+* plotly (<https://plot.ly/python/>) 
+* mpl_toolkits (<https://matplotlib.org/1.4.3/mpl\_toolkits/index.html>)
 
 </br>
 
@@ -126,23 +131,34 @@ DD.write_all_scores(fname="1BJ1_new_scores", title="Rescoring 1BJ1")
 #### Now use the core_scores source to parse results
 
 ```python
-scoresDD=Scores("1BJ1_new_scores") 
+DD.setScores(filename="1BJ1_new_scores.tsv" )
+# or use the all_scores function 
+DD.setScores(data=DD.all_scores()) 
 ```
+
+#### The scores object has many functionnalities 
+
+```python
+pose15_score=DD.scores.getScore(15, "res_fr_sum")
+sorted_poses=DD.rankedPoses(element="con_mean_fr") 
+```
+
+
 *See more in the tuto file : <https://github.com/juliaprieto/DockingPP/blob/master/tuto.md>*
 </br>
 
 <a id="chapter-5"></a>
 ## Available objects and functions
 
-* <a href=#docking style="text-decoration: none;"> dockingPP.docking </a>
-* <a href=#stats style="text-decoration: none;">dockingPP.core_stats</a>
-* <a href=#cluster style="text-decoration: none;">dockingPP.core_clustering</a>
-* <a href=#visuals style="text-decoration: none;">dockingPP.core_scores</a>
+* <a href=#docking style="text-decoration: none;"> dockingPP </a>
+* <a href=#stats style="text-decoration: none;"> src.core_stats</a>
+* <a href=#cluster style="text-decoration: none;"> src.core_clustering</a>
+* <a href=#visuals style="text-decoration: none;"> src.core_scores</a>
 
 </br>
 
 <a id="docking"></a>
-### dockingPP.docking
+### dockingPP
 
 <span style="color:Crimson ;font-weight=500"> *class DockData* </span> _ *Docking results container*
 we will consider as pose_index its original rank 
@@ -170,8 +186,7 @@ we will consider as pose_index its original rank
 	- **push(pose\_id, pose\_euler, pose\_tr)** : add pose to pList 
 	- **setReceptor(RecFile)** : add PDB reference
 	- **setLigand(LigFile)** : add PDB reference
-	- **dictPos()** : returns a dictionary useful for visualisation { 'x' : , 'y' : } 
-	- **bestPoses(stats=None, n=10, criteria = 'residue' , function='sum', method = 'freq')** : returns a list of the n best poses according to 1 rescoring method, criteria can be 'residue' or 'contact', function can take 'sum','mean' or 'square' and method can be 'plain','freq' or 'log' (log of the frequency)  
+	- **dictPos()** : returns a dictionary useful for visualisation { 'x' : [ ] , 'y' : [ ] , 'z' : [ ] } 
 	- **poseScores(stats=None, criteria = 'residue' , function='sum', method = 'freq')** : returns a dictionary : { pose_index : score }. Parameters behave like they do for *bestPoses()*
 	- **all_scores()**
 	- **write_all_scores()**
@@ -212,7 +227,7 @@ format : {'type': 'contactList', 'data': [{'root': {'resID': '  50 ', 'chainID':
 </br>
 
 <a id="stats"></a>
-### dockingPP.core_stats
+### src.core_stats
 <span style="color:Crimson ;font-weight=500"> *class CmapRes* </span> _ *store residues from ccmap and their counts* 
 
 * Attributes 
@@ -262,7 +277,7 @@ format : {'type': 'contactList', 'data': [{'root': {'resID': '  50 ', 'chainID':
 </br>
 
 <a id="visuals"></a>
-### dockingPP.core_scores 
+### src.core_scores 
 <span style="color:Crimson ;font-weight=500"> *class Scores* </span> _ *read and store scores from a rescoring file* 
 
 * Attributes 
@@ -279,7 +294,7 @@ format : {'type': 'contactList', 'data': [{'root': {'resID': '  50 ', 'chainID':
 </br>
 
 <a id="cluster"></a>
-### dockingPP.core_clustering 
+### src.core_clustering 
 <span style="color:Crimson ;font-weight=500"> *class CmapRes* </span> _ *store residues from ccmap and their counts* 
 
 * Attributes 
