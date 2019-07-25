@@ -3,7 +3,6 @@
 import matplotlib.pyplot as plt
 import math
 
-from src.core_clustering import rankCluster
 import pickle
 from math import sqrt
 # Import dependencies
@@ -19,18 +18,20 @@ class Scores(object):
             self.loadFile(filename)
         elif data:
             self.loadScores(data)
-        self.columns={"pose":0,"s_size":1,"res_fr_sum":2,"res_mean_fr": 3, "res_log_sum": 4, "res_sq_sum": 5, "c_size": 6, "con_fr_sum": 7,"con_mean_fr" : 8,"con_log_sum" : 9,"con_sq_sum" : 10, "rmsd": 11}
+        self.columns={"original_rank":0,"r_size":1,"res_fr_sum":2,"res_mean_fr": 3, "res_log_sum": 4, "res_sq_sum": 5, "c_size": 6, "con_fr_sum": 7,"con_mean_fr" : 8,"con_log_sum" : 9,"con_sq_sum" : 10}
+        self.belongsTo=None
         self.poses=None
 
-    @property
-    def originalRank(self):
-        if not self.poses:
-            raise Exception("Please define poses using setPoses")
-        return [i for i in range(len(self.poses))]
 
     def loadFile(self,file):
+        data=[]
         with open(file,'r') as f:
-            self.data=[line.strip("\n").split("\t") for line in f.readlines()[3:]]
+            for line in f.readlines()[3:]:
+                pose=[]
+                for info in line.strip("\n").split("\t"):
+                    pose.append(float(info))
+                data.append(pose)
+        self.data=data
         return True
 
     def loadScores(self,scores):
@@ -38,6 +39,28 @@ class Scores(object):
 
     def setPoses(self, pList):
         self.poses=pList
+
+    def __getitem__(self,poseID):
+        dict_for_pose={}
+        for key in self.columns:
+            try :
+                dict_for_pose[key] = self.data[poseID-1][self.columns[key]]
+            except IndexError :
+                break
+        return dict_for_pose
+
+    @property
+    def getPoses(self):
+        # Poses defined with setPoses will be preferentially used
+        if self.poses:
+            return self.poses
+        if self.belongsTo :
+            return self.belongsTo.pList
+        else :
+            raise Exception("Please define poses using setPoses()")
+
+    def getScore(self,poseid, score):
+        return self.scoresDict[int(poseid)-1][self.columns[score]]
 
     @property
     def scoresDict(self):
@@ -52,31 +75,19 @@ class Scores(object):
 
     @property
     def rmsds(self):
-        if self.poses :
-            return [pose.rmsd for pose in self.poses]
+        """ return Rmsds in the original order """
+        if self.getPoses :
+            return [pose.rmsd for pose in self.getPoses]
         else :
-            try:
-                return [float(info[self.columns["rmsd"]].strip('\n')) for info in self.data]
-            except IndexError:
-                raise Exception("Please define poses using setPoses")
+            raise Exception("Please define poses using setPoses")
 
-
-    def getScore(self,poseid, score):
-        return self.scoresDict[int(poseid)-1][self.columns[score]]
-
-
-    def rankedRmsds(self, rankedPoses):
-        rmsds=[]
-        for i in rankedPoses:
-            rmsds.append(self.rmsds[i])
-        return rmsds
 
     def coordDict(self, start=0, stop=None):
         """dockingPP poses position dictorizer """
         coord={'x':[],'y':[],'z':[],'a1':[],'a2':[],'a3':[]}
         if not stop:
-            stop=len(self.poses)-1
-        for pose in self.poses[int(start):int(stop)]:
+            stop=len(self.getPoses)
+        for pose in self.getPoses[int(start):int(stop)]:
             coord['x'].append(pose.translate[0])
             coord['y'] .append(pose.translate[1])
             coord['z'] .append(pose.translate[2])
@@ -85,20 +96,39 @@ class Scores(object):
             coord['a3'] .append(pose.euler[2])
         return coord
 
-    def rmsdGraphGenerator(self, rankedPoses, start=0, stop=None, plot=None, title=None ):
-        pl=plot if plot else plt
-        if title:
-            pl.set_title(title)
-        x=0
+
+
+    ###############################################
+    ##                                           ##
+    ##            Rescoring Functions            ##
+    ##                                           ##
+    ###############################################
+
+
+    def rankedPoses(self, element="res_mean_fr", start=0, stop=None):
+        """Returns poses' ids,  sorted according to rescoring element : ]
+        "original_rank","s_size","res_fr_sum","res_mean_fr","res_log_sum","res_sq_sum",
+        "c_size","con_fr_sum","con_mean_fr","con_log_sum","con_sq_sum"
+        Means the pose classified 1st is 1st position of the list.   """
+
+        try :
+            p=self.getPoses
+        except :
+            raise Exception("Please define poses using setPoses() function")
         if not stop:
-            stop=len(rankedPoses)-1
-        rmsds=self.rankedRmsds(rankedPoses)
-        colors=colorsFromRmsd(rmsds)[int(start):int(stop)]
-        x=[i if i!=0 else 0 for i in range(len(colors))]
-        y=rmsds[int(start):int(stop)]
-        # print(len(x))
-        # print(len(y))
-        pl.scatter(x, rmsds[int(start):int(stop)], c=colors)
+            stop=len(self.data)
+        col=self.columns[element]
+        r=sorted(self.data[int(start):int(stop)],key=lambda o:float(o[col]),reverse=True)
+        sorted_i=[self.getPoses[int(pose[0])-1] for pose in r]
+        return sorted_i
+
+
+
+    def rankedRmsds(self, rankedPoses):
+        rmsds=[]
+        for i in rankedPoses:
+            rmsds.append(i.rmsd)
+        return rmsds
 
 
 
@@ -107,29 +137,36 @@ class Scores(object):
         At position 0 we have pose 0 with rank 37 : rank[0] = 37
         Means the pose in original rank 0 is in 37th position according to rescoring
         element:
-        "s_size","res_fr_sum","res_mean_fr","res_log_sum","res_sq_sum",
+        "original_rank","s_size","res_fr_sum","res_mean_fr","res_log_sum","res_sq_sum",
         "c_size","con_fr_sum","con_mean_fr","con_log_sum","con_sq_sum"  """
 
-        sorted_i=self.rankedPoses(element=element, start=start, stop=stop)
-        rank=[u[0] for u in sorted([(u,v) for u,v in enumerate(sorted_i)], key=lambda o:o[1])]
+        return self.ranksFromRankedPoses(self.rankedPoses(element=element, start=start, stop=stop))
+
+    def ranksFromRankedPoses(self,rankedPoses):
+        rank=[u[0] for u in sorted([(u,v.id) for u,v in enumerate(rankedPoses)], key=lambda o:o[1])]
         return rank
 
-    def rankedPoses(self, element="res_mean_fr", start=0, stop=None):
-        """Returns poses' ids,  sorted according to rescoring element : ]
-        "s_size","res_fr_sum","res_mean_fr","res_log_sum","res_sq_sum",
-        "c_size","con_fr_sum","con_mean_fr","con_log_sum","con_sq_sum"
-        Means the pose classified 1st is 1st position of the list.   """
 
-        try :
-            p=self.poses
-        except :
-            raise Exception("Please define poses using setPoses() function")
+    ###############################################
+    ##                                           ##
+    ##         Visualization Functions          ##
+    ##                                           ##
+    ###############################################
+
+    def rmsdGraphGenerator(self, rankedPoses, start=0, stop=None, plot=None, title=None ):
+        pl=plot if plot else plt
+        if title:
+            pl.set_title(title)
+        x=0
         if not stop:
-            stop=len(self.data)
-        col=self.columns[element]
-        r=sorted(self.data[int(start):int(stop)],key=lambda o:float(o[col]),reverse=True)
-        sorted_i=[int(pose[0]) for pose in r]
-        return sorted_i
+            stop=len(rankedPoses)
+        rmsds=self.rankedRmsds(rankedPoses)
+        colors=colorsFromRmsd(rmsds)[int(start):int(stop)]
+        x=[i if i!=0 else 0 for i in range(len(colors))]
+        y=rmsds[int(start):int(stop)]
+        # print(len(x))
+        # print(len(y))
+        pl.scatter(x, rmsds[int(start):int(stop)], c=colors)
 
     def histRmsd(self,plot=None, stop=None):
         pl= plot if plot else plt
@@ -160,11 +197,13 @@ class Scores(object):
             x=-0.25)
             },
             name=name,
-            text=['rank=' + str(rank[i]+1 ) + ', rmsd='+ str(self.rmsds[i]) for i in range(len(rank))])
+            text=['id=' + str(i+1) + ', rank=' + str(rank[i]+1 ) + ', rmsd='+ str(self.rmsds[i]) for i in range(len(rank))])
 
         return trace
 
-    def plot3D(self, ranks, name=' ', title='Docking decoys'):
+    def plot3D(self, rankedPoses, name=' ', title='Docking decoys'):
+        ranks=self.ranksFromRankedPoses(rankedPoses)
+        """ Suited for notebook display """
         """ Warning : ranks must be in the original order, since positions and rmsds are in the original order """
         # Configure Plotly to be rendered inline in the notebook.
         plotly.offline.init_notebook_mode()
@@ -184,10 +223,11 @@ class Scores(object):
 
     # NB : This function should take different sets of points and not sc object. --> put to core_visuals ?
 
-def multiPlot3D(sc, ranks, names, title='Docking decoys'):
-    """ Warning : rank must be in the original order, since positions and rmsds are in the original order
+def multiPlot3D(sc, ranks, names, title='Docking decoys', size = (600,400)):
+    """ Warning : ranks must be in the original order, since positions and rmsds are in the original order
     ranks is a list of lists of ranks"""
     # Configure Plotly to be rendered inline in the notebook.
+    width,height=size
     plotly.offline.init_notebook_mode()
     traces=[sc[i].trace(ranks[i],names[i]) for i in range(len(ranks))]
     layout = go.Layout(
@@ -198,8 +238,8 @@ def multiPlot3D(sc, ranks, names, title='Docking decoys'):
     #     t=100,
     #     pad=4 ),
     autosize=False,
-    width=600,
-    height=400,
+    width=width,
+    height=height,
     title=title, hovermode= 'closest',)
     margin={'l': 0, 'r': 15, 'b': 0, 't': 10}
     data = traces
@@ -332,13 +372,17 @@ def eval_natives(natives,n):
 
 
 
-def multiplePlots(num, size=(20,10), ylim=None):
+def multiplePlots(num, size=(20,10), ylim=None, xlim=None, title=None):
     fig=plt.figure(figsize=size)
+    if title:
+        fig.suptitle(title)
     axlist=[]
     for i in range(1,num+1):
         ax=plt.subplot(1, num, i)
         if ylim:
             ax.set_ylim(*ylim)
+        if xlim:
+            ax.set_xlim(*xlim)
         axlist.append(ax)
     return axlist
 

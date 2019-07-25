@@ -11,7 +11,7 @@
 ---------------------------------
 <a id="chapter-1"></a>
 ## Dependencies 
-dockingPP has the following dependencies:
+dockingPP has the following dependencies : 
 
 * **Python 3**
 * pyProteinsExt (<https://github.com/glaunay/pyproteinsExt>)
@@ -25,7 +25,11 @@ dockingPP has the following dependencies:
 * mpl_toolkits (<https://matplotlib.org/1.4.3/mpl\_toolkits/index.html>)
 
 </br>
+Install dependencies using 
 
+```sh
+pip install -r LOCAL_PATH_TO_REPO/requirements.txt
+``` 
 
 <a id="chapter-2"></a>
 ## Quick Start 
@@ -34,7 +38,7 @@ dockingPP has the following dependencies:
 ```sh
 git clone https://github.com/juliaprieto/dockingPP.git  LOCAL_PATH_TO_REPO
 ``` 
-Check for dependencies in LOCAL\_PATH\_TO\_REPO/setup.py
+Check for dependencies in LOCAL\_PATH\_TO\_REPO/requirments.txt
 
 ```python
 sys.path.append(LOCAL_PATH_TO_REPO/src)
@@ -132,7 +136,7 @@ DD.write_all_scores(fname="1BJ1_new_scores", title="Rescoring 1BJ1")
 
 ```python
 DD.setScores(filename="1BJ1_new_scores.tsv" )
-# or use the all_scores function 
+# or use the all_scores function for smaller data sets
 DD.setScores(data=DD.all_scores()) 
 ```
 

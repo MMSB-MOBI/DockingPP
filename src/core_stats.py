@@ -5,9 +5,16 @@ import pyproteins.container.Core as core
 class CmapRes(object):
     """ This class allows to store residues from ccmap and their counts ( in contacts and plain )"""
     def __init__(self, datum, role=None):
-        """ Takes datum : {'chainID' : , 'resID' :  }"""
-        self.chainID = datum['chainID'].strip()
-        self.resID = datum['resID'].strip()
+        """ Takes datum : "AminoAcid:resID:chainID" """
+        values=datum.split(":")
+        if len(values) < 3 :
+            values.append("")
+        if len(values) > 3 :
+            raise Exception("Wrong argument")
+        try :
+            self.AA, self.resID, self.chainID = values
+        except ValueError:
+            raise Exception("Wrong argument")
         self.role = role
         self.count=0
         self.cCount=0

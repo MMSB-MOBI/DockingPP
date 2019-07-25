@@ -7,14 +7,17 @@ for way in path :
         sys.path.append(way)
 import pyproteinsExt.structure.coordinates as PDB
 import pyproteinsExt.structure.operations as PDBop
-from src.core_scores import Scores
+from src.core_scores import Scores, multiPlot3D
 from src.core_stats import ResStats, ContactStats , CmapRes, writeScores
+from src.core_clustering import BSAS, birchCluster, wardCluster, herarCluster, ClusterColl
 from src.rotation_utils import trans_matrix, eulerFromMatrix
 import ccmap
 
 from multiprocessing import Pool
 
 parserPDB = PDB.Parser()
+
+# self.columns={"original_score":0,"r_size":1,"res_fr_sum":2,"res_mean_fr": 3, "res_log_sum": 4, "res_sq_sum": 5, "c_size": 6, "con_fr_sum": 7,"con_mean_fr" : 8,"con_log_sum" : 9,"con_sq_sum" : 10, "rmsd": 11}
 
 class Pose(object):
     """Object containing a pose of a Docking prediction output and calculating its coordinates to
@@ -40,17 +43,21 @@ class Pose(object):
         self.rmsd=RMSD
 
     def ccmap(self, dist=5):
-        #print self._ccmap
+        self.has_rec()
+        self.has_lig()
+
         if not self._ccmap:
             pdbObjRec = self.belongsTo.pdbObjReceptor
             pdbObjLig = self.belongsTo.pdbObjLigand
             #tmp_ccmap = ccmap.zmap(dist, self.euler)
+            ligResCount=len(pdbObjLig.getResID)
             self.dictorizedReceptor = pdbObjRec.atomDictorize
             self.dictorizedLigand = pdbObjLig.atomDictorize
             #print dist
-            ccmapAsString = ccmap.zmap( (self.dictorizedReceptor, self.dictorizedLigand), dist,
+            pccmap = ccmap.zmap( (self.dictorizedReceptor, self.dictorizedLigand), dist,
                                    self.euler, self.translate, self.recOffset,  self.ligOffset)
-            self._ccmap = json.loads(ccmapAsString)
+            indexes=[(int(i/ligResCount), i% ligResCount)   for i in pccmap]
+            self._ccmap = indexes
         return self._ccmap
 
     def dump(self):
@@ -65,22 +72,34 @@ class Pose(object):
         return str(pdbObjRec) + str(pdbObjLig)
 
     @property
+    def translatedCcmap(self) :
+        self.has_ccmap()
+        def index(ResID):
+            items=ResID.replace(":","").split()
+            return ":".join(items)
+
+        rec_residues=self.belongsTo.pdbObjReceptor.getResID
+        lig_residues=self.belongsTo.pdbObjLigand.getResID
+        tr_ccmap= [(index(rec_residues[i[0]]), index(lig_residues[i[1]])) for i in self._ccmap]
+        return tr_ccmap
+
+
+    @property
     def resMapList(self):
         """Returns a list of all residues implied in the contact between this Pose and the receptor"""
         self.has_ccmap()
         residues=[]
-        for contact in self._ccmap['data']:
-            residues.append(CmapRes(contact['root'], role='Rec').index)
-            for partner in contact['partners']:
-                residues.append(CmapRes(partner,role='Lig').index)
+        for contact in self.translatedCcmap:
+            residues.append(CmapRes(contact[0], role='Rec').index)
+            residues.append(CmapRes(contact[1],role='Lig').index)
         return list(set(residues))
 
     @property
     def contactMapList(self):
+        self.has_ccmap ()
         contacts=[]
-        for contact in self._ccmap['data']:
-            for partner in contact['partners']:
-                contacts.append((CmapRes(contact['root'], role='Rec').index,CmapRes(partner,role='Lig').index))
+        for contact in self.translatedCcmap:
+            contacts.append((CmapRes(contact[0], role='Rec').index,CmapRes(contact[1],role='Lig').index))
         return contacts
 
     @property
@@ -94,9 +113,8 @@ class Pose(object):
         """Returns the number of contacts between this pose and the receptor """
         self.has_ccmap()
         consize=0
-        for contact in self._ccmap['data']:
-            for partner in contact['partners']:
-                consize+=1
+        for contact in self.translatedCcmap:
+            consize+=1
         return consize
 
     def SumScore(self, resStats, method='plain'):
@@ -151,21 +169,18 @@ class Pose(object):
         self.has_ccmap()
         score=0
         if method == 'plain' :
-            for contact in self._ccmap['data']:
-                for partner in contact['partners']:
-                    score+=conStats.get(CmapRes(contact['root'], role='Rec').index,CmapRes(partner,role='Lig').index)
+            for contact in self.translatedCcmap:
+                    score+=conStats.get(CmapRes(contact[0], role='Rec').index,CmapRes(contact[1],role='Lig').index)
             return score
         elif method == 'freq' :
             freqs=conStats.contactFreq
-            for contact in self._ccmap['data']:
-                for partner in contact['partners']:
-                    score+=freqs.get(CmapRes(contact['root'], role='Rec').index,CmapRes(partner,role='Lig').index)
+            for contact in self.translatedCcmap:
+                score+=freqs.get(CmapRes(contact[0], role='Rec').index,CmapRes(contact[1],role='Lig').index)
             return score
         elif method == 'log' :
             freqs=conStats.contactFreq
-            for contact in self._ccmap['data']:
-                for partner in contact['partners']:
-                    score+=math.log(freqs.get(CmapRes(contact['root'], role='Rec').index,CmapRes(partner,role='Lig').index))
+            for contact in self.translatedCcmap:
+                score+=math.log(freqs.get(CmapRes(contact[0], role='Rec').index,CmapRes(contact[1],role='Lig').index))
             return score
         else :
             raise Exception("Unknown '" + method + "' method value")
@@ -176,14 +191,12 @@ class Pose(object):
         self.has_ccmap()
         score=0
         if method == 'plain' :
-            for contact in self._ccmap['data']:
-                for partner in contact['partners']:
-                    score+=conStats.get(CmapRes(contact['root'], role='Rec').index,CmapRes(partner,role='Lig').index)
+            for contact in self.translatedCcmap:
+                score+=conStats.get(CmapRes(contact[0], role='Rec').index,CmapRes(contact[1],role='Lig').index)
             return score/self.conSize
         elif method == 'freq' :
-            for contact in self._ccmap['data']:
-                for partner in contact['partners']:
-                    score+=conStats.contactFreq.get(CmapRes(contact['root'], role='Rec').index,CmapRes(partner,role='Lig').index)
+            for contact in self.translatedCcmap :
+                score+=conStats.contactFreq.get(CmapRes(contact[0], role='Rec').index,CmapRes(contact[1],role='Lig').index)
             return score/self.conSize
         else :
             raise Exception("Unknown '" + method + "' method value")
@@ -194,29 +207,49 @@ class Pose(object):
         self.has_ccmap()
         score=0
         if method == 'plain' :
-            for contact in self._ccmap['data']:
-                for partner in contact['partners']:
-                    score+=conStats.get(CmapRes(contact['root'], role='Rec').index,CmapRes(partner,role='Lig').index)**2
+            for contact in self.translatedCcmap:
+                score+=conStats.get(CmapRes(contact[0], role='Rec').index,CmapRes(contact[1],role='Lig').index)**2
             return score
         elif method == 'freq' :
-            for contact in self._ccmap['data']:
-                for partner in contact['partners']:
-                    score+=conStats.contactFreq.get(CmapRes(contact['root'], role='Rec').index,CmapRes(partner,role='Lig').index)**2
+            for contact in self.translatedCcmap:
+                score+=conStats.contactFreq.get(CmapRes(contact[0], role='Rec').index,CmapRes(contact[1],role='Lig').index)**2
             return score
         elif method == 'log' :
-            for contact in self._ccmap['data']:
-                for partner in contact['partners']:
-                    score+=math.log(conStats.get(CmapRes(contact['root'], role='Rec').index,CmapRes(partner,role='Lig').index))**2
+            for contact in self.translatedCcmap:
+                score+=math.log(conStats.get(CmapRes(contact[0], role='Rec').index,CmapRes(contact[1],role='Lig').index))**2
             return score
         else :
             raise Exception("Unknown '" + method + "' method value")
 
-    def has_ccmap(self):
+    def has_ccmap(self, error=True):
         """ Check ccmap has been calculated for this pose """
         if self._ccmap != None :
             return True
         else :
-            raise Exception("You must calculate ccmap before calculating scores, use : DockData.ccmap(start=...,stop=...,dist=...)")
+            if error:
+                raise Exception("You must calculate ccmap before using this function, use : DockData.ccmap(start=...,stop=...,dist=...)")
+            else:
+                return False
+
+    def has_rec(self):
+        """ Check Receptor has been set for this pose """
+        if self.belongsTo.fileREC != None :
+            return True
+        else :
+            raise Exception("You must set Receptor PDB before using this function, use : DockData.setReceptor(PDB_FILE)")
+
+    def has_lig(self):
+        """ Check Receptor has been set for this pose """
+        if self.belongsTo.fileLIG != None :
+            return True
+        else :
+            raise Exception("You must set Ligand PDB before using this function, use : DockData.setLigand(PDB_FILE)")
+
+    @property
+    def scores(self):
+        if self.belongsTo:
+            if self.belongsTo.scores:
+                return self.belongsTo.scores[self.id]
 
 class DockData(object):
 
@@ -239,7 +272,7 @@ class DockData(object):
         self.truePos=[]
         self.scores=None
 
-    def loadRMSDS(self,filename=None):
+    def loadRMSD(self,filename=None):
         # Can be used for ZD or to use different RMSDS
         if not filename:
             raise Exception("You must set an rmsd file to use")
@@ -247,8 +280,8 @@ class DockData(object):
         with open(filename,'r') as f:
             for line in f.readlines():
                 RMSDS.append(line.split('\t')[1].strip('\n'))
-        for i in range(max(len(self.pList), len(RMSDS))):
-            self.pList[i].set_RMSD(RMSD[i])
+        for i in range(min(len(self.pList), len(RMSDS))):
+            self.pList[i].set_RMSD(float(RMSDS[i]))
         return True
 
 
@@ -258,9 +291,13 @@ class DockData(object):
         elif scores:
             self.scores=Scores(data=scores, filename=None)
         else :
-            self.scores=Scores(data=self.all_scores())
+            try :
+                self.scores=Scores(data=self.all_scores())
+            except :
+                return False
         self.scores.setPoses(self.pList)
-        return self.scores
+        self.scores.belongsTo=self
+        return True
 
     def setComplexName(self, name):
         self._name=name
@@ -345,21 +382,24 @@ class DockData(object):
 
 
         for i in range(n):
+            if not self[i].has_ccmap(error=False):
+                print(f"{i} poses analysed")
+                break
             residues=[]
             try:
-                for cclist in self[i]._ccmap['data']:
-                    rootRes = CmapRes(cclist['root'], role='Rec')
-                    res_stats.addRes(rootRes)
-                    residues.append(rootRes.index)
+                for contact in self[i].translatedCcmap:
+                    rootRes = CmapRes(contact[0], role='Rec')
+                    if rootRes.index not in residues:
+                        res_stats.addRes(rootRes)
+                        residues.append(rootRes.index)
+                    res_stats[rootRes.index].increase_count(count='pond')
 
-                    for partner in cclist['partners']:
-                        res_stats[rootRes.index].increase_count(count='pond')
-                        partnerRes = CmapRes(partner,role='Lig')
+                    partnerRes = CmapRes(contact[1],role='Lig')
+                    if partnerRes.index not in residues:
                         residues.append(partnerRes.index)
                         res_stats.addRes(partnerRes)
-
-                        res_stats[partnerRes.index].increase_count(count='pond')
-                        con_stats.incrMdTree(rootRes.index, partnerRes.index)
+                    res_stats[partnerRes.index].increase_count(count='pond')
+                    con_stats.incrMdTree(rootRes.index, partnerRes.index)
                 for i in list(set(residues)):
                     res_stats[i].increase_count(count='plain')
 
@@ -379,16 +419,18 @@ class DockData(object):
         con_stats=ContactStats(n, append=False, name=self.complexName)
 
         for i in range(n):
+            if not self[i].has_ccmap(error=False):
+                print(f'Warning : only {i} poses could be analysed ' )
+                con_stats.setSize(int(i))
+                break
             try:
-                for cclist in self[i]._ccmap['data']:
-                    rootRes = CmapRes(cclist['root'], role='Rec')
-                    for partner in cclist['partners']:
-                        partnerRes = CmapRes(partner,role='Lig')
-                        con_stats.incrMdTree(rootRes.index, partnerRes.index)
+                for contact in self[i].translatedCcmap:
+                    rootRes = CmapRes(contact[0], role='Rec')
+                    partnerRes = CmapRes(contact[1],role='Lig')
+                    con_stats.incrMdTree(rootRes.index, partnerRes.index)
 
             except TypeError:
                 pass
-            #     print(f'Warning : only {i} poses could be analysed ' )
             #     con_stats.setSize(int(i))
             #     break
         return con_stats
@@ -400,19 +442,24 @@ class DockData(object):
         res_stats=ResStats(n, name=self.complexName)
 
         for i in range(n):
+            if not self[i].has_ccmap(error=False):
+                print(f'Warning : only {i} poses could be analysed ' )
+                res_stats.setSize(int(i))
+                break
             residues=[]
             try:
-                for cclist in self[i]._ccmap['data']:
-                    rootRes = CmapRes(cclist['root'], role='Rec')
-                    res_stats.addRes(rootRes)
-                    residues.append(rootRes.index)
+                for contact in self[i].translatedCcmap:
+                    rootRes = CmapRes(contact[0], role='Rec')
+                    if rootRes.index not in residues:
+                        res_stats.addRes(rootRes)
+                        residues.append(rootRes.index)
+                    res_stats[rootRes.index].increase_count(count='pond')
 
-                    for partner in cclist['partners']:
-                        partnerRes = CmapRes(partner,role='Lig')
+                    partnerRes = CmapRes(contact[1],role='Lig')
+                    if partnerRes.index not in residues:
                         residues.append(partnerRes.index)
                         res_stats.addRes(partnerRes)
-                        res_stats[rootRes.index].increase_count(count='pond')
-                        res_stats[partnerRes.index].increase_count(count='pond')
+                    res_stats[partnerRes.index].increase_count(count='pond')
 
                 for i in list(set(residues)):
                     res_stats[i].increase_count(count='plain')
@@ -420,7 +467,6 @@ class DockData(object):
             except TypeError:
                 pass
             #     print(f'Warning : only {i} poses could be analysed ' )
-            #     res_stats.setSize(int(i))
             #     break
 
         return res_stats
@@ -508,7 +554,9 @@ class DockData(object):
         rfreqs=resS.resFreq
         cfreqs=conS.contactFreq
         for i,p in enumerate(self.pList[:size]) :
-            p.has_ccmap()
+            if not p.has_ccmap(error=False):
+                print(f"Warning : only {i} poses could be evaluated" )
+                break
             complex=[None,0,0,0,0,0,0,0,0,0,0]
             complex[0]=p.id
             for res in p.resMapList :
@@ -533,6 +581,12 @@ class DockData(object):
             scores.append(complex)
         return scores
 
+    def has_scores(self):
+        if self.scores :
+            return True
+        else :
+            return False
+
     def __str__(self):
         return str({ 'step' : self.step, 'nCells' : self.nCells , 'EulerREC' : self.eulerREC,
                        'fileREC' : self.fileREC, 'baryREC' : self.baryREC,
@@ -547,6 +601,71 @@ class DockData(object):
         for Pose in self.pList:
             yield Pose
 
+                ###############################################
+                ##                                           ##
+                ##  High level functions from scores object  ##
+                ##                                           ##
+                ###############################################
+
+    def rankedPoses(self, element="original_rank", start=0, stop=None):
+        if self.has_scores:
+            return self.scores.rankedPoses(element=element)
+        else :
+            raise Exception("You must set scores before using rescoring functions")
+
+    def ranks(self,element="original_rank"):
+        if self.has_scores:
+            return self.scores.ranks(element=element)
+        else :
+            raise Exception("You must set scores before using rescoring functions")
+
+    def rankedRmsds(self,element="original_rank", start=0, stop=None):
+        if self.has_scores:
+            rankedPoses=self.scores.rankedPoses(element=element, start=0, stop=None)
+            return self.scores.rankedRmsds(rankedPoses)
+        else :
+            raise Exception("You must set scores before using rescoring functions")
+
+
+    def plot3D(self, element="res_fr_sum", name='My complex', title='Docking decoys'):
+        """ Notebook version """
+        if self.has_scores:
+            rankedPoses=self.scores.rankedPoses(element=element)
+            self.scores.plot3D(rankedPoses, element=element,name=name,title=title)
+        else :
+            raise Exception("You must set scores before using rescoring functions")
+
+    def rmsdPlot(self, element="original_rank", start=0, stop=None, plot=None, title=None ):
+        if self.has_scores:
+            rankedPoses= self.scores.rankedPoses(element=element)
+            self.scores.rmsdGraphGenerator(rankedPoses, start=start, stop=stop, plot=plot, title=title )
+        else :
+            raise Exception("You must set scores before using rescoring functions")
+
+    def multiPlot3D(self, wanted_scores,  title='Docking decoys', size=(600,400)):
+        ranks=[self.scores.ranks(element=score) for score in wanted_scores]
+        multiPlot3D([self.scores for i in wanted_scores], ranks, wanted_scores, title=title,size=size)
+
+                ###############################################
+                ##                                           ##
+                ## High level functions from core_clustering ##
+                ##                                           ##
+                ###############################################
+
+    def BSAS(self, maxd , element="original_rank", out="dict", start=0,stop=None):
+
+        clusters=ClusterColl(BSAS(self.rankedPoses(element), maxd, out=out, start=start,stop=stop ))
+        return clusters
+    def birchCluster(self, maxd, out='dict', N=None):
+        return birchCluster(self, maxd, out=out, N=N)
+
+        ###############################################################
+        ##                                                           ##
+        ##                                                           ##
+        ##                      Parsing Functions                    ##
+        ##                                                           ##
+        ##                                                           ##
+        ###############################################################
 
 def parse(fileName, maxPose = 0):
     reL1 = r'^([\d]+)[\s]+([\d\.]+)[\s]*$'
