@@ -1,155 +1,218 @@
 
-# Import modules
-
 
 ```python
 import sys
-sys.path.append("/Users/jprieto/DockingPP")
-from dockingPP import parse, zParse
-from core_scores import Scores, countNative, eval_natives
-from core_clustering import rankCluster as rC, sortCluster, birchCluster
+import os
+PATH_TO_LOCAL_REPO="/Users/jprieto/DockingPP"
+sys.path.append(PATH_TO_LOCAL_REPO)
+from dockingPP import zParse
+from src.core_scores import multiplePlots
 %load_ext autoreload
+from copy import copy
 ```
 
-## Create DockData object
+### Generate Dock Data object From ZDOCK files
 
 
 ```python
-# Megadock version
-DD=parse("/Users/jprieto/Docking/data/unbound-outputs/4CPA_r-4CPA_l.detail")
-DD.setReceptor("/Users/jprieto/Docking/data/benchmark5/structures/4CPA_r_u.pdb")
-DD.setLigand("/Users/jprieto/Docking/data/benchmark5/structures/4CPA_l_u.pdb")
-
-# zDock version with pre-treated pdbs using 'cut -c1-54'
-zD=zParse("/Users/jprieto/Docking/data/decoys_bm4_zd3.0.2_6deg_fixed/results/4CPA.zd3.0.2.fg.fixed.out")
-zD.setReceptor("/Users/jprieto/Docking/ZD_new_pdbs/4CPA_r_u.pdb.ms_2")
-zD.setLigand("/Users/jprieto/Docking/ZD_new_pdbs/4CPA_l_u.pdb.ms_2")
+%autoreload 2
+zD=zParse(PATH_TO_LOCAL_REPO+"/example_data/ZDOCK_examples/1BJ1.out", maxPose=500)
+zD.setReceptor(PATH_TO_LOCAL_REPO+"/example_data/ZDOCK_examples/1BJ1_r_u.pdb")
+zD.setLigand(PATH_TO_LOCAL_REPO+"/example_data/ZDOCK_examples/1BJ1_l_u.pdb")
+zD.setComplexName("1BJ1")
 ```
 
-## Calculate Contact maps
+### Import rmsds from external file in ZDOCK-like format
 
 
 ```python
-DD.ccmap(start=0,stop=500,pSize=50)
+zD.loadRMSD(filename=PATH_TO_LOCAL_REPO+"/example_data/ZDOCK_examples/1BJ1.rmsds")
 ```
 
-    Created 10 data packets (50 zObjects each) for process pool
+
+    True
+
+
+
+### Compute Contactmap for each pose
+
+
+```python
+zD.ccmap(start=0, stop=500, pSize=10)
+```
+
+    Created 50 data packets (10 zObjects each) for process pool
     unpacking
 
 
-## Calculate all scores and write frequences and scores to files
+### Analyse poses and obtain scores
 
 
 ```python
-DD.write_all_scores(filename="/Users/jprieto/docking/Resultats/mycomplex")
+zD.setScores()
+# scores are available at 
+scores=zD.scores
 ```
 
-    Warning : only 500 poses could be analysed
-    Warning : File /Users/jprieto/docking/Resultats/mycomplex_resstats.tab already exists, do you wish to continue anyway and replace it ? (yes/no)yes
-    Warning : File /Users/jprieto/docking/Resultats/mycomplex_constats.tab already exists, do you wish to continue anyway and replace it ? (yes/no)yes
-    Warning : File /Users/jprieto/docking/Resultats/mycomplex.tsv already exists, do you wish to continue anyway and replace it ? (yes/no)yes
-
-
-
-
-
-    '/Users/jprieto/docking/Resultats/mycomplex.tsv'
-
-
-
-## Parse scores with the Scores Class
+### Get scores for a given pose 
 
 
 ```python
-SC=Scores(filename="/Users/jprieto/docking/Resultats/mycomplex.tsv")
-# or 
-DD.setScores(filename="/Users/jprieto/docking/Resultats/mycomplex.tsv")
+print(zD.pList[0].scores)
 ```
 
-## Make clusters with the BSAS algorithm
-*different ranks can be used*
+    {'original_rank': 1, 'r_size': 57, 'res_fr_sum': 34.586, 'res_mean_fr': 0.6067719298245614, 'res_log_sum': -35.13188173524741, 'res_sq_sum': 24.845604000000005, 'c_size': 94, 'con_fr_sum': 16.688375999999995, 'con_mean_fr': 0.17753591489361698, 'con_log_sum': -173.4957554528565, 'con_sq_sum': 3.5713095055040007}
+
+
+### Use rescoring functions to rearrange poses' order
+Available rescoring functions are 
+ - "original_score" : initial order from scoring function
+ - "r_size" : number of residues in contact in interface
+ - "res_fr_sum" : residues' frequency sum
+ - "res_mean_fr" : residues' frequency mean value
+ - "res_log_sum" : residues' log(frequency) sum
+ - "res_sq_sum" : residues' frequency<sup>2</sup> sum
+ - "c_size" : number of contacts between residues in interface
+ - "con_fr_sum" : contacts' frequency sum
+ - "con_mean_fr" : contacts' frequency mean value
+ - "con_log_sum" : contacts' log(frequency) sum
+ - "con_sq_sum" : contacts' frequency<sup>2</sup> sum
 
 
 ```python
-natural_rank= [i for i in range(50)]
-
-SC.setPoses(DD.pList)
-res_fr_rank=SC.rankedPoses(element="res_fr_sum")
-con_fr_rank=SC.rankedPoses(element="con_fr_sum")
-
-c_clusters=rC(DD.pList,con_fr_rank,5, out='dict', stop=500)
-
+zD.rankedPoses(element="con_fr_sum", start=0, stop=10)
 ```
 
-## You can also use birch Algorithm for instance
+
+
+
+    [1) (-2.3387043048467024, 0.0877660312067456, 2.5892605659497265) (30.0, -14.399999999999999, -50.4),
+     9) (-2.0009782416802335, 0.19220052712899582, 2.1858633717121037) (31.2, -15.6, -49.199999999999996),
+     5) (-1.0908638889462818, 0.127485129156887, 1.1695390693224217) (28.799999999999997, -14.399999999999999, -51.6),
+     2) (0.16057090936250432, 0.03341704129736545, 0.0168032252968433) (27.599999999999998, -13.2, -52.8),
+     3) (0.055850909362502324, 0.03341704129736545, 0.0168032252968433) (26.4, -14.399999999999999, -52.8),
+     7) (-2.1056982416802335, 0.19220052712899582, 2.1858633717121037) (30.0, -18.0, -49.199999999999996),
+     10) (-3.082004870984042, 0.1696747547453455, -2.8753304406779834) (28.799999999999997, -15.6, -51.6),
+     8) (-1.3505746727262768, 0.2002869797238684, -1.5106441284114913) (13.2, 10.799999999999999, -54.0),
+     6) (2.8724760031747043, 2.4330632335825055, -2.827461246420031) (9.6, 8.4, -54.0),
+     4) (-0.07815321597227459, 2.2831535556249776, -1.5440776532022715) (21.599999999999998, -1.2, -46.8)]
+
+
 
 
 ```python
-b_clusters=birchCluster(DD, 5)
-# print(b_clusters)
+zD.rankedRmsds(element="con_fr_sum", start=0, stop=10)
 ```
 
-## Sort clusters using Ranks and get representatives
+
+
+
+    [1.38, 1.32, 0.98, 0.98, 0.85, 1.05, 1.72, 12.59, 12.41, 11.26]
+
+
+
+### Visualize this new ranking 
+In 3D : hover on each pose to see it's detail
 
 
 ```python
+zD.plot3D(element="con_fr_sum", name="1BJ1", title= "Contact frequency sum")
+```
 
-sor_clus=sortCluster(c_clusters,SC, fn="cons_score")
-sor_bclus=sortCluster(b_clusters,SC, fn="cons_score")
+![](3Dplot_500.png)
 
-# These are the final candidate poses for prediction.
-rep=[c[0] for c in sor_clus]
+```python
+print(zD[5].translate)
+```
 
-brep=[c[0] for c in sor_bclus]
+    (9.6, 8.4, -54.0)
 
+
+### Evaluate the success of your rescoring Method 
+
+
+```python
+# zD.rmsdPlot(element="con_fr_sum", title="Contact frequency sum")
+```
+![](rmsdplot.png)
+
+```python
+zD.countNatives(element="res_fr_sum", cutoff=2.5) 
+```
+
+
+
+
+    {5: 0, 10: 0, 20: 0, 100: 9, 200: 41, 'out': 105}
+
+
+
+*Oh, it didn't wortk : no good solution in first 10 !* 
+
+### Now let's try some clustering 
+
+
+```python
+%autoreload 2
+clusters=zD.BSAS(3) ## returns clusterCollection object
 ```
 
 
 ```python
-print([p.id for p in rep])
-print([p.id for p in brep])
-
-a=brep[:]
-a.extend(rep)
-a=list(set(a))
-for p in a :
-    if p in rep and p in brep:
-        print(p)
+print(clusters.size) ## Number of clusters
+print([ clus.size for clus in clusters]) # number of poses in each cluster 
+print(clusters[1].bounds) ## Minimum and maximum coordinates in cluster ([xmin,xmax],[ymin,ymax],[zmin,zmax])
 ```
 
-    [175, 315, 166, 81, 360, 450, 394, 29, 295, 455, 28, 420, 240, 11, 113, 426, 203, 148, 94, 109, 283, 324, 75, 194, 22, 40, 99, 180, 247, 382, 105, 453, 397, 95, 70, 464, 425, 372, 344, 476, 254, 427, 216, 257, 458, 227, 380, 356, 87, 150, 359, 333, 483]
-    [387, 293, 143, 367, 326, 352, 457, 278, 451, 222, 173, 337, 166, 378, 13, 91, 80, 38, 484, 23, 74, 21, 209, 100, 469, 155, 92, 33, 8, 5, 156, 130, 4, 17, 129, 1, 42, 104, 3, 12, 2, 317, 71, 45, 365, 220, 70, 443, 48, 79, 211, 107, 171, 373, 349, 448, 476]
-    70) (0.42, 2.66, -2.19) (2.4, -21.599999999999998, -3.5999999999999996)
-    166) (-0.42, 1.83, -0.47) (-4.8, -12.0, -14.399999999999999)
-    476) (-2.83, 1.53, -0.3) (22.8, 4.8, 19.2)
+    103
+    [37, 19, 39, 15, 16, 19, 16, 11, 15, 12, 10, 6, 9, 16, 9, 12, 4, 16, 4, 6, 8, 6, 8, 3, 3, 7, 5, 10, 5, 3, 6, 4, 2, 4, 3, 2, 3, 1, 3, 6, 7, 7, 3, 3, 1, 1, 4, 2, 1, 3, 1, 3, 2, 3, 3, 2, 1, 3, 1, 1, 5, 2, 2, 2, 1, 1, 2, 1, 1, 3, 3, 3, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 2, 1, 1, 2, 2, 1, 1, 1, 2, 1, 1, 2, 1, 1]
+    ([27.599999999999998, 32.4], [-16.8, -12.0], [-52.8, -48.0])
 
 
-## Analyse the performance of each method
+ *103 clusters have been created containing from 1 to 12 poses*
+
+### Sort and filter clusters based on size, scores
 
 
 ```python
-# The MEGADOCK PARSER already picks up the RMSD of each decoy in the results file
-# For zDock, you will have to set it manually for each decoy using 'p.set_RMSD(rmsd)'
-# You
-rmsds=[p.rmsd for p in rep]
-brmsds=[p.rmsd for p in brep]
-print(countNative(rmsds))
-print(countNative(brmsds))
-
-
+sor_clusters=clusters.sorted(min_size=10)
+print(len(sor_clusters))
 ```
 
-    {5: 0, 10: 1, 20: 1, 100: 2, 200: 2, 'out': 0}
-    {5: 0, 10: 0, 20: 2, 100: 4, 200: 4, 'out': 0}
+    15
 
 
-## Now use it on a set of complexes and count how many you got right
+*Only 15 clusters left after trimming*
 
 
 ```python
-Natives={}
-Natives["mycomplex"]=countNative(rmsds)
-print(eval_natives(Natives, 10))
+print([(p.id,p.rmsd) for p in clusters.representatives(element="res_fr_sum", min_size=10)])
+# print([p.id for p in clusters.representatives(min_size=2)]) 
 ```
 
-    (['mycomplex'], [])
+    [(14, 12.53), (25, 12.26), (8, 12.59), (55, 12.4), (20, 12.7), (6, 12.41), (50, 12.4), (4, 11.26), (1, 1.38), (17, 1.77), (119, 2.14), (2, 0.98), (30, 1.35), (7, 1.05), (18, 0.95)]
+
+
+
+```python
+clusters.countNatives(clusters.representatives(element="res_fr_sum", min_size=10), cutoff=2.5)
+```
+
+
+
+
+    {5: 0, 10: 2, 20: 7, 100: 7, 200: 7, 'out': 0}
+
+
+
+*Clustering helped !* 
+
+### Visualize your clusters or your chosen poses using plotFromPoses() 
+
+
+```python
+zD.plotFromPoses(clusters.representatives(element="res_fr_sum", min_size=10))
+
+```
+
+![](3Dplot_clus.png)

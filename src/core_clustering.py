@@ -3,7 +3,7 @@ import sys ,pickle, time
 from math import sqrt
 from statistics import mean
 import numpy as np
-
+from src.core_scores import countNative
 from sklearn.cluster import AgglomerativeClustering, Birch
 from scipy.cluster.hierarchy import linkage, dendrogram , fcluster , ward
 from scipy.spatial.distance import pdist
@@ -12,11 +12,19 @@ from scipy.spatial.distance import pdist
 barycenters in order to generate clusters with different algorithms. """
 
 class Cluster(object):
-    def __init__(self,poses):
+    def __init__(self,poses, key=None, clusterColl=None):
         self.poses=poses
+        self.belongsTo=clusterColl if clusterColl else None
+        self.key=key if key else None
+
 
     @property
     def size(self):
+        return len(self.poses)
+
+    @property
+    def bounds(self):
+        """ Returns maximal and minimal value of points in cluster for each axis"""
         def testInsert(pair, new_val):
             if not pair :
                 pair=[new_val,new_val]
@@ -38,6 +46,19 @@ class Cluster(object):
             Z=testInsert(Z,z)
         return (X,Y,Z)
 
+    def set_Rank(self,new_rank):
+        self.current_rank=new_rank
+
+    def get_Rank(self):
+        return self.current_rank
+
+    def meanRank(self, ranks):
+        return sum([ranks[p.id-1] for p in self])/self.size
+
+    @property
+    def representative(self):
+        return self.poses[0]
+
     def __str__(self):
         return str(self.poses) if self.poses else None
 
@@ -54,12 +75,21 @@ class Cluster(object):
 
 class ClusterColl(object):
     """ Must contain a dictionnary with integer keys """
-    def __init__(self, clusters= None):
+    def __init__(self, clusters= None, DDObj=None):
         if clusters:
             self.setClusters(clusters)
         else :
             self.clusters=None
+        self.FromDD=DDObj if DDObj else None
 
+
+    @property
+    def size(self):
+        return max([c for c in self.clusters])
+
+    def set_DDObj(self, DDObj):
+        if not self.FromDD:
+            self.FromDD = DDObj
     def addCluster(self, cluster):
         """ Takes a cluster object together in a cluster """
         self.clusters[max([key for key in self.clusters])+1]=cluster
@@ -67,8 +97,35 @@ class ClusterColl(object):
     def setClusters(self,clusters):
         """ Build ClusterColl from a cluster's python dictionnary containing Docking poses
         and errase the previous clusters in collection"""
-        self.clusters={ key : Cluster(clusters[key]) for key in clusters}
+        self.clusters={ key : Cluster(clusters[key], key=key, clusterColl=self ) for key in clusters}
 
+    def representatives(self, element =None, min_size=None):
+        #Choose representatives from ranked clusters
+        if element :
+            return [clus.representative for clus in self.sorted(element=element, min_size=min_size)]
+        else :
+            if min_size :
+                return [self[c].representative for c in self.clusters if self[c].size >= min_size]
+            else :
+                return [self[c].representative for c in self.clusters]
+
+    def sorted(self, element='original_rank' ,min_size=None):
+        if element and self.FromDD :
+            ranks=self.FromDD.ranks(element=element)
+            if min_size:
+                sorted_clus=sorted([clus for clus in self if clus.size >= min_size], key=lambda o:o.meanRank(ranks))
+            else :
+                sorted_clus=sorted([clus for clus in self], key=lambda o:o.meanRank(ranks))
+            return sorted_clus
+
+        else :
+            raise Exception("clusters cannot be sorted without DockingDataObject  \n \
+                            Use self.set_DDObj(DDObj) and pick a sorting element from :\n \
+                            'original_rank', 'r_size', 'res_fr_sum', 'res_mean_fr', 'res_log_sum', 'res_sq_sum', \
+                            'c_size', 'con_fr_sum', 'con_mean_fr', 'con_log_sum', 'con_sq_sum', 'rmsd'")
+
+    def countNatives(self, poseList, cutoff=5):
+        return countNative([p.rmsd for p in poseList], cutoff=cutoff)
     def __str__(self):
         return str(self.clusters) if self.clusters else None
 
@@ -79,8 +136,9 @@ class ClusterColl(object):
         return self.clusters[i]
 
     def __iter__(self):
-        for key in self.clusters :
-            yield key
+        for key in sorted([k for k in self.clusters]):
+            yield self.clusters[key]
+
     ###############################################
     ##                                           ##
     ##          Clustering Functions :           ##
@@ -94,6 +152,7 @@ class ClusterColl(object):
 def BSAS(rankedPoses, maxd, out="dict", start=0,stop=None) :
     """Can return list of pose's belonging if out is "list" or a dictionnary of clusters
     and the poses they contain if out is "dict"  """
+
     max=len(rankedPoses) if not stop else stop
     def calcul_dist(pose1,pose2):
         dist= sqrt(sum([(pose1.translate[i]-pose2.translate[i])**2 for i in range(3)]))
@@ -177,21 +236,15 @@ def herarCluster(zD, maxc=None, linkage='complete', start=0, stop=None ):
     ###############################################
 
 
-def clusScore(cluster,sc,rank='original_score'):
-    if rank=='original_score':
-        return sum([(p.id-1) for p in cluster])/len(cluster)
-    else :
-        try :
-            rank=sc.ranks(element=rank)
-            return sum([(rank[p.id-1]) for p in cluster])/len(cluster)
-        except :
-            raise Exception("Unknown rank type")
+def posesMeanRank(cluster,ranks):
+    "Takes a single list of poses"
+    return sum([(ranks[p.id-1]) for p in cluster])/len(cluster)
 
 
-def sortCluster(cluster,sc,fn="original_score"):
+def sortCluster(clusters,ranks):
     """Takes a clusters dictionary: {cluster1 : [ p1, p2, p3 ... ], cluster2 : [ p1, p2, p3 ... ]} """
     #Sort clusters using clusScore function. The lowest the score, the better the cluster.
-    return sorted([cluster[c] for c in cluster], key=lambda o:clusScore(o,sc,fn))
+    return sorted([cluster[c] for c in cluster], key=lambda o:posesMeanRank(o,ranks))
 
 
 def list2dict(zD,cluster):

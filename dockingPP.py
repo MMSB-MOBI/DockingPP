@@ -7,7 +7,7 @@ for way in path :
         sys.path.append(way)
 import pyproteinsExt.structure.coordinates as PDB
 import pyproteinsExt.structure.operations as PDBop
-from src.core_scores import Scores, multiPlot3D
+from src.core_scores import Scores, multiPlot3D, countNative
 from src.core_stats import ResStats, ContactStats , CmapRes, writeScores
 from src.core_clustering import BSAS, birchCluster, wardCluster, herarCluster, ClusterColl
 from src.rotation_utils import trans_matrix, eulerFromMatrix
@@ -17,7 +17,7 @@ from multiprocessing import Pool
 
 parserPDB = PDB.Parser()
 
-# self.columns={"original_score":0,"r_size":1,"res_fr_sum":2,"res_mean_fr": 3, "res_log_sum": 4, "res_sq_sum": 5, "c_size": 6, "con_fr_sum": 7,"con_mean_fr" : 8,"con_log_sum" : 9,"con_sq_sum" : 10, "rmsd": 11}
+# self.columns={"original_rank":0,"r_size":1,"res_fr_sum":2,"res_mean_fr": 3, "res_log_sum": 4, "res_sq_sum": 5, "c_size": 6, "con_fr_sum": 7,"con_mean_fr" : 8,"con_log_sum" : 9,"con_sq_sum" : 10, "rmsd": 11}
 
 class Pose(object):
     """Object containing a pose of a Docking prediction output and calculating its coordinates to
@@ -471,39 +471,6 @@ class DockData(object):
 
         return res_stats
 
-    def bestPoses(self, stats=None, n=10, criteria = 'residue' , function='sum', method = 'freq') :
-        """ criteria can be either 'residue'(default) or 'contact',
-        function can take values : 'sum'(default),'square',
-        method can take three values : 'plain' , 'freq'(default) or 'log' """
-        if criteria =='residue':
-            _functions={'sum' : Pose.SumScore , 'square' : Pose.SquareSumScore}
-            if stats==None : stats=self.resStats
-        elif criteria=='contact':
-            _functions={'sum' : Pose.cmapSumScore, 'square' : Pose.cmapSquareSumScore }
-            if stats==None : stats=self.contactStats
-        else:
-            raise Exception("Criteria must be 'residue' or 'contact'")
-        size=stats.expSize
-        return sorted(self.pList[:size], key=lambda o:_functions[function](o,stats , method=method))[:n]
-
-    def poseScores(self, stats=None, criteria = 'residue' , function='sum', method = 'freq') :
-        """ criteria can be either 'residue'(default) or 'contact',
-        function can take values : 'sum'(default),'square','mean'
-        method can take three values : 'plain' , 'freq'(default) or 'log' """
-        if criteria =='residue':
-            _functions={'sum' : Pose.SumScore , 'square' : Pose.SquareSumScore, 'mean': Pose.MeanScore}
-            if stats==None : stats=self.resStats
-        elif criteria=='contact':
-            _functions={'sum' : Pose.cmapSumScore, 'square' : Pose.cmapSquareSumScore, 'mean':Pose.cmapMeanScore }
-            if stats==None : stats=self.contactStats
-        else:
-            raise Exception("Criteria must be 'residue' or 'contact'")
-        size=stats.expSize
-        poses= { i:_functions[function](p,stats , method=method) for i,p in enumerate(self.pList[:size])}
-        # sposes={i:poses[i] for i in sorted(poses.keys(), key=lambda o:poses[o], reverse=True)}
-        # return sorted((self.pList[:size],_functions[function](self.pList[:size],stats , method=method)) , key=lambda o:_functions[function](o,stats , method=method))
-        return poses
-
     def write_all_scores(self, size=1 , filename="scores", title='Exp1', header=None, F=False) :
         header = ["Surface size", "Residue freq sum", "Residue mean freq", "Residue log sum", "Residue square sum", "Number of contacts", "Contact freq sum", "Contact mean freq", "Contact log sum", "Contact square sum"]
 
@@ -539,7 +506,7 @@ class DockData(object):
 
             for pose in range(len(scores)):
                 f.write("\t".join([str(i) for i in scores[pose]]) + "\n")
-
+        self.setScores(scores=scores)
         return score_file
 
     def all_scores(self, resStats=None, conStats=None) :
@@ -579,6 +546,7 @@ class DockData(object):
             complex[6] = p.conSize
             complex[8] = complex[7]/p.conSize if p.conSize !=0 else 0# mean contact freq
             scores.append(complex)
+        self.setScores(scores=scores)
         return scores
 
     def has_scores(self):
@@ -586,6 +554,13 @@ class DockData(object):
             return True
         else :
             return False
+
+    def has_rmsd(self):
+        rmsd=True
+        for p in self.pList :
+            if not p.rmsd:
+                rmsd=False
+        return rmsd
 
     def __str__(self):
         return str({ 'step' : self.step, 'nCells' : self.nCells , 'EulerREC' : self.eulerREC,
@@ -608,43 +583,103 @@ class DockData(object):
                 ###############################################
 
     def rankedPoses(self, element="original_rank", start=0, stop=None):
-        if self.has_scores:
-            return self.scores.rankedPoses(element=element)
+        if self.has_scores() or element=="original_rank":
+            try :
+                return self.scores.rankedPoses(element=element, start=start, stop=stop)
+            except KeyError :
+                raise Exception("pick a sorting element from \n \
+'original_rank', 'r_size', 'res_fr_sum', 'res_mean_fr', 'res_log_sum', 'res_sq_sum', \n \
+'c_size', 'con_fr_sum', 'con_mean_fr', 'con_log_sum', 'con_sq_sum', 'rmsd'")
         else :
-            raise Exception("You must set scores before using rescoring functions")
+            raise Exception("You must set scores using self.setScores() or compute them with self.all_scores() before using rescoring functions")
+
+    def rankedIDs(self, element="original_rank", start=0, stop=None):
+        try :
+            return [p.id for p in self.rankedPoses(element=element, start=start, stop=stop)]
+        except KeyError :
+            raise Exception("pick a sorting element from \n \
+            'original_rank', 'r_size', 'res_fr_sum', 'res_mean_fr', 'res_log_sum', 'res_sq_sum', \
+            'c_size', 'con_fr_sum', 'con_mean_fr', 'con_log_sum', 'con_sq_sum', 'rmsd'")
+        return [p.id for p in self.rankedPoses(element=element, start=start, stop=stop)]
 
     def ranks(self,element="original_rank"):
-        if self.has_scores:
-            return self.scores.ranks(element=element)
+        if self.has_scores() or element=="original_rank":
+            try :
+                return self.scores.ranks(element=element)
+            except KeyError :
+                raise Exception("pick a sorting element from \n \
+                'original_rank', 'r_size', 'res_fr_sum', 'res_mean_fr', 'res_log_sum', 'res_sq_sum', \
+                'c_size', 'con_fr_sum', 'con_mean_fr', 'con_log_sum', 'con_sq_sum', 'rmsd'")
         else :
             raise Exception("You must set scores before using rescoring functions")
 
+    def rmsds(self):
+        return self.rankedRmsds(element="original_rank", start=0, stop=None)
+
     def rankedRmsds(self,element="original_rank", start=0, stop=None):
-        if self.has_scores:
-            rankedPoses=self.scores.rankedPoses(element=element, start=0, stop=None)
-            return self.scores.rankedRmsds(rankedPoses)
+        if (self.has_scores() or element=="original_rank") and self.has_rmsd() :
+            try :
+                rankedPoses=self.scores.rankedPoses(element=element, start=start, stop=stop)
+                return self.scores.rankedRmsds(rankedPoses)
+            except KeyError :
+                raise Exception("pick a sorting element from \n \
+                'original_rank', 'r_size', 'res_fr_sum', 'res_mean_fr', 'res_log_sum', 'res_sq_sum', \
+                'c_size', 'con_fr_sum', 'con_mean_fr', 'con_log_sum', 'con_sq_sum', 'rmsd'")
         else :
-            raise Exception("You must set scores before using rescoring functions")
+            raise Exception("You must compute scores ( use self.all_scores()) and set RMSDs (use loadRMSD(filename=FILENAME)) before using this function")
+
+    def countNatives(self, element="original_rank", cutoff=5):
+        if (self.has_scores() or element=="original_rank") and self.has_rmsd() :
+            try :
+                rankedPoses=self.scores.rankedPoses(element=element)
+                rankedRmsds=self.scores.rankedRmsds(rankedPoses)
+                return countNative(rankedRmsds, cutoff=cutoff)
+            except KeyError :
+                raise Exception("pick a sorting element from \n \
+                'original_rank', 'r_size', 'res_fr_sum', 'res_mean_fr', 'res_log_sum', 'res_sq_sum', \
+                'c_size', 'con_fr_sum', 'con_mean_fr', 'con_log_sum', 'con_sq_sum', 'rmsd'")
+        else :
+            raise Exception("You must set scores and RMSDs before using this function")
+
+    def plotFromPoses(self, rankedPoses, name='My complex', title='Docking decoys'):
+        """ Notebook version """
+        self.scores.plot3D(rankedPoses,name=name,title=title)
 
 
     def plot3D(self, element="res_fr_sum", name='My complex', title='Docking decoys'):
         """ Notebook version """
-        if self.has_scores:
-            rankedPoses=self.scores.rankedPoses(element=element)
-            self.scores.plot3D(rankedPoses, element=element,name=name,title=title)
+        if self.has_scores() or element=="original_rank":
+            try :
+                rankedPoses=self.scores.rankedPoses(element=element)
+                self.scores.plot3D(rankedPoses,name=name,title=title)
+            except KeyError :
+                raise Exception("pick a sorting element from \n \
+                'original_rank', 'r_size', 'res_fr_sum', 'res_mean_fr', 'res_log_sum', 'res_sq_sum', \
+                'c_size', 'con_fr_sum', 'con_mean_fr', 'con_log_sum', 'con_sq_sum', 'rmsd'")
         else :
             raise Exception("You must set scores before using rescoring functions")
 
     def rmsdPlot(self, element="original_rank", start=0, stop=None, plot=None, title=None ):
-        if self.has_scores:
-            rankedPoses= self.scores.rankedPoses(element=element)
-            self.scores.rmsdGraphGenerator(rankedPoses, start=start, stop=stop, plot=plot, title=title )
+        if self.has_scores() or element=="original_rank":
+            try :
+                rankedPoses= self.scores.rankedPoses(element=element)
+                self.scores.rmsdGraphGenerator(rankedPoses, start=start, stop=stop, plot=plot, title=title )
+            except KeyError :
+                raise Exception("pick a sorting element from \n \
+                'original_rank', 'r_size', 'res_fr_sum', 'res_mean_fr', 'res_log_sum', 'res_sq_sum', \
+                'c_size', 'con_fr_sum', 'con_mean_fr', 'con_log_sum', 'con_sq_sum', 'rmsd'")
         else :
             raise Exception("You must set scores before using rescoring functions")
 
     def multiPlot3D(self, wanted_scores,  title='Docking decoys', size=(600,400)):
-        ranks=[self.scores.ranks(element=score) for score in wanted_scores]
-        multiPlot3D([self.scores for i in wanted_scores], ranks, wanted_scores, title=title,size=size)
+        try :
+            ranks=[self.scores.ranks(element=score) for score in wanted_scores]
+            multiPlot3D([self.scores for i in wanted_scores], ranks, wanted_scores, title=title,size=size)
+        except KeyError :
+            raise Exception("pick a sorting element from \n \
+            'original_rank', 'r_size', 'res_fr_sum', 'res_mean_fr', 'res_log_sum', 'res_sq_sum', \
+            'c_size', 'con_fr_sum', 'con_mean_fr', 'con_log_sum', 'con_sq_sum', 'rmsd'")
+
 
                 ###############################################
                 ##                                           ##
@@ -653,11 +688,28 @@ class DockData(object):
                 ###############################################
 
     def BSAS(self, maxd , element="original_rank", out="dict", start=0,stop=None):
+        try :
+            clusters=ClusterColl(BSAS(self.rankedPoses(element=element), maxd, out=out, start=start,stop=stop ), DDObj=self)
+        except KeyError :
+            raise Exception("pick a sorting element from \n \
+            'original_rank', 'r_size', 'res_fr_sum', 'res_mean_fr', 'res_log_sum', 'res_sq_sum', \
+            'c_size', 'con_fr_sum', 'con_mean_fr', 'con_log_sum', 'con_sq_sum', 'rmsd'")
 
-        clusters=ClusterColl(BSAS(self.rankedPoses(element), maxd, out=out, start=start,stop=stop ))
         return clusters
+
+    def wardCluster(self,maxd,  start=0, stop=None):
+        clusters=ClusterColl(wardCluster(self, maxd, start=start, stop=stop ), DDObj=self)
+        return clusters
+
     def birchCluster(self, maxd, out='dict', N=None):
-        return birchCluster(self, maxd, out=out, N=N)
+        clusters=ClusterColl(birchCluster(self, maxd, out=out, N=N), DDObj=self)
+        return clusters
+
+    def herarCluster(self, maxc=None, linkage='complete', start=0, stop=None ):
+        clusters=ClusterColl(herarCluster(self, maxc=maxc, linkage=linkage, start=start, stop=stop), DDObj=self)
+        return clusters
+
+
 
         ###############################################################
         ##                                                           ##

@@ -155,9 +155,11 @@ sorted_poses=DD.rankedPoses(element="con_mean_fr")
 ## Available objects and functions
 
 * <a href=#docking style="text-decoration: none;"> dockingPP </a>
+	* <a href=#general style="text-decoration: none;"> DockData Object's Basics</a>
+	* <a href=#rescoring style="text-decoration: none;"> Rescoring Utilities</a>
+	* <a href=#clustering style="text-decoration: none;"> Clustering Utilities</a>
 * <a href=#stats style="text-decoration: none;"> src.core_stats</a>
-* <a href=#cluster style="text-decoration: none;"> src.core_clustering</a>
-* <a href=#visuals style="text-decoration: none;"> src.core_scores</a>
+
 
 </br>
 
@@ -183,50 +185,72 @@ we will consider as pose_index its original rank
 			`resStats,conStats=DD.getStats`
 	- **contactStats** : returns contactStats object
 	- **resStats** : returns resStats object
-* Available Methods
+* Available Methods<a id="general"></a>
+
+	#### General Functions
+	
 	- **setComplexName**
 	- **ccmap(start=0, stop=1000, dist=5, pSize=100, ncpu=10)** : calculate and store ccmap for each pose using multiprocessing </br>
 *Use start and stop to choose the number of poses to be computed, dist to set the minimal distance to detect a contact in the interface of the two molecules, pSize (size of the paquets) and ncpu (number of workers) as multiprocessing parameters.* 
 	- **push(pose\_id, pose\_euler, pose\_tr)** : add pose to pList 
 	- **setReceptor(RecFile)** : add PDB reference
 	- **setLigand(LigFile)** : add PDB reference
+	- **loadRMSD(filename="")** : load RMSDs from zDock like rmsd file 
 	- **dictPos()** : returns a dictionary useful for visualisation { 'x' : [ ] , 'y' : [ ] , 'z' : [ ] } 
-	- **poseScores(stats=None, criteria = 'residue' , function='sum', method = 'freq')** : returns a dictionary : { pose_index : score }. Parameters behave like they do for *bestPoses()*
-	- **all_scores()**
-	- **write_all_scores()**
+	- **all\_scores()**
+	- **write\_all\_scores()**<a id="rescoring"></a>
+
+
+	#### Rescoring and visualization Methods
+		
+	- **.rankedPoses(element=**"original_rank", **start**=0, **stop**=None ): add PDB reference
+	- **.rankedIDs(element**="original_rank", **start**=0, **stop**=None ) : add PDB reference
+	- **.ranks(element**="original_rank") : add PDB reference
+	- **.rmsds()** : add PDB reference
+	- **.rankedRmsds(element**="original_rank", **start**=0, **stop**= None) : add PDB reference
+	- **.rankedPoses(element**="original_rank", **cutoff**=5 ) : add PDB reference
+	- **.countNatives(element**="original_rank", **cutoff**=5 ) : add PDB reference
+	- **.plot3D(element**="original_rank", **name**="",  title="") : add PDB reference
+	- **.mutliPlot3D( wanted_scores**,  **title**='Docking decoys', **size**=(600,400)) : add PDB reference
+	- **.rmsdPlot(element**="original_rank", **start**=0, **stop**=None, **plot**=None, **title**=None ) : add PDB reference<a id="clustering"></a>
+
+	#### Clustering Methods
+		
+	- **.rankedPoses(element=**"original_rank", **start**=0, **stop**=None ): add PDB reference
+	- **.rankedIDs(element**="original_rank", **start**=0, **stop**=None ) : add PDB reference
+	- **.ranks(element**="original_rank") : add PDB reference
+	- **.rmsds()** : add PDB reference
+	- **.rankedRmsds(element**="original_rank", **start**=0, **stop**= None) : add PDB reference
+	- **.rankedPoses(element**="original_rank", **cutoff**=5 ) : add PDB reference
+	- **.countNatives(element**="original_rank", **cutoff**=5 ) : add PDB reference
+	- **.plot3D(element**="original_rank", **name**="",  title="") : add PDB reference
+	- **.mutliPlot3D( wanted_scores**,  **title**='Docking decoys', **size**=(600,400)) : add PDB reference
+	- **.rmsdPlot(element**="original_rank", **start**=0, **stop**=None, **plot**=None, **title**=None ) : add PDB reference
 
 </br>
 <span style="color:Crimson ;font-weight=500"> *class Pose* </span> _ *Ligand Pose information*. 
   
 * Attributes
-	- **id** : integer, similar to its position in the original ranking
-	- **euler : (psi, theta, phi)** rotation angles from the original pdb ligand to the pose
-	- **translate : (x,y,z)** translation distances from the original pdb ligand to the pose
-	- **ccmap**: json formatted contact map, dictionary of contacts between residues   </br> 
+	- **.id** : integer, similar to its position in the original ranking
+	- **.euler : (psi, theta, phi)** rotation angles from the original pdb ligand to the pose
+	- **.translate : (x,y,z)** translation distances from the original pdb ligand to the pose
+	- **.ccmap**: json formatted contact map, dictionary of contacts between residues   </br> 
 format : {'type': 'contactList', 'data': [{'root': {'resID': '  50 ', 'chainID': 'A'}, 'partners': [{'resID': ' 650 ', 'chainID': 'B'}]}, ... ]} 
-	- **belongsTo** : DockData object containing pose
-	- ligOffset 
-	- recOffset
-	- **dictorizedReceptor** : positions for the receptors atoms
-	- **dictorizedLigand** : positions for the ligands atoms
-	- **rmsd** : if set, returns the rmsd between the pose and the native pose
-	- **resMapList** : returns the list of residues implied in the contact map for this pose in the form of the concatenation of the residue number, its chain and its original molecule </br> 
+	- **.belongsTo** : returns DockData object containing the pose
+	- **.dictorizedReceptor** : positions for the receptors atoms
+	- **.dictorizedLigand** : positions for the ligands atoms
+	- **.rmsd** : if set, returns the rmsd between the pose and the native pose
+	- **.resMapList** : returns the list of residues implied in the contact map for this pose in the form of the concatenation of the residue number, its chain and its original molecule </br> 
 *format* : ['171ALig', '175ALig' , ... ]
-	- **resSize** : number of residues in pose contactmap
-	- **conSize** : number of contacts in pose contactmap 
+	- **.resSize** : number of residues in pose contactmap
+	- **.conSize** : number of contacts in pose contactmap 
+	- **.scores** : returns a dictionnary of poses' scores in data set if scores have been calculated
 
 * Available Methods
-	- **set_RMSD(rmsd)** : give or replace the value of pose.rmsd
-	- **SumScore(resStats, method= 'plain')** :returns the sum of the residues statistics, method can take two values : 'plain' , 'freq'
-	- **MeanScore(resStats, method= 'plain')** : returns the mean of the residues statistics, method can take two values : 'plain' , 'freq'
-	- **SquareSumScore(resStats, method= 'plain')** : returns the square sum of the residues statistics, method can take three values : 'plain' , 'freq' or 'log'</br>
-*And so for contacts*
-	- **cmapSumScore(conStats, method= 'plain')** :returns the sum of the contacts statistics, method can take two values : 'plain' , 'freq'
-	- **cmapMeanScore(conStats, method= 'plain')** : returns the mean of the contacts statistics, method can take two values : 'plain' , 'freq'
-	- **cmapSquareSumScore(conStats, method= 'plain')** : returns the square sum of the contacts statistics, method can take two values : 'plain' , 'freq'
-	- **has_ccmap()** : checks wether pose's ccmap has been calculated
-	- **ccmap()** : calculate contact map
-	- **dump()** : returns a pdb-like content describing the pose, ligand and receptor
+	- **has_ccmap(error=False)** : Returns boolean, checks wether pose's ccmap has been calculated
+	- **has_rmsd()** : checks wether pose's ccmap has been calculated
+	- **ccmap(dist=5)** : calculate contact map
+	- **dump()** : returns a pdb-like content describing the pose, ligand and receptor , rotations have been applied if pose's ccmap has been calculated
 
 </br>
 
@@ -280,42 +304,11 @@ format : {'type': 'contactList', 'data': [{'root': {'resID': '  50 ', 'chainID':
 
 </br>
 
-<a id="visuals"></a>
-### src.core_scores 
-<span style="color:Crimson ;font-weight=500"> *class Scores* </span> _ *read and store scores from a rescoring file* 
-
-* Attributes 
-	- **resID** : residue id
-	- **chainID** : residue chain in the form of the original PDB name
-	- **role** : Residue origin : receptor or ligand ('Rec' and 'Lig') 
-	- **count** : number of occurences in residues counts
-	- **cCount** : number of occurences in contacts counts
-	- **index** : unique index for each residue ( concatenation of the residue number, its chain and its original molecule ) 
-* Available Methods
-	- **increase_count(count='plain')** : add 1 to the pose count number in residue counts if *count='plain'*, in contact counts if *count='pond'*
-	- **reset_all()** : resets all counts to 0
-
-</br>
-
-<a id="cluster"></a>
-### src.core_clustering 
-<span style="color:Crimson ;font-weight=500"> *class CmapRes* </span> _ *store residues from ccmap and their counts* 
-
-* Attributes 
-	- **resID** : residue id
-	- **chainID** : residue chain in the form of the original PDB name
-	- **role** : Residue origin : receptor or ligand ('Rec' and 'Lig') 
-	- **count** : number of occurences in residues counts
-	- **cCount** : number of occurences in contacts counts
-	- **index** : unique index for each residue ( concatenation of the residue number, its chain and its original molecule ) 
-* Available Methods
-	- **increase_count(count='plain')** : add 1 to the pose count number in residue counts if *count='plain'*, in contact counts if *count='pond'*
-	- **reset_all()** : resets all counts to 0
-
 </br>
 
 -------------------------------
 
 
 
-#### X
+#### 
+

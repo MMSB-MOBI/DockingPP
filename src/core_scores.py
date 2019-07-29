@@ -22,6 +22,11 @@ class Scores(object):
         self.belongsTo=None
         self.poses=None
 
+    def __repr__(self):
+        return str(self.data)
+
+    def __str__(self):
+        return str(self.data)
 
     def loadFile(self,file):
         data=[]
@@ -118,8 +123,11 @@ class Scores(object):
         if not stop:
             stop=len(self.data)
         col=self.columns[element]
-        r=sorted(self.data[int(start):int(stop)],key=lambda o:float(o[col]),reverse=True)
-        sorted_i=[self.getPoses[int(pose[0])-1] for pose in r]
+        if element == "original_rank" :
+            r=sorted(self.data[int(start):int(stop)],key=lambda o:float(o[col]))
+        else:
+            r=sorted(self.data[int(start):int(stop)],key=lambda o:float(o[col]),reverse=True)
+        sorted_i=[self.getPoses[int(pose[0])-1] for pose in r] # get pose from ID with getPoses function
         return sorted_i
 
 
@@ -143,7 +151,7 @@ class Scores(object):
         return self.ranksFromRankedPoses(self.rankedPoses(element=element, start=start, stop=stop))
 
     def ranksFromRankedPoses(self,rankedPoses):
-        rank=[u[0] for u in sorted([(u,v.id) for u,v in enumerate(rankedPoses)], key=lambda o:o[1])]
+        rank=[t[0]+1 for t in sorted([(u,v.id) for u,v in enumerate(rankedPoses)], key=lambda o:o[1])]
         return rank
 
 
@@ -156,7 +164,16 @@ class Scores(object):
     def rmsdGraphGenerator(self, rankedPoses, start=0, stop=None, plot=None, title=None ):
         pl=plot if plot else plt
         if title:
-            pl.set_title(title)
+            try :
+                pl.set_title(title)
+            except AttributeError :
+                pl.title(title)
+        try:
+            pl.xlabel("Rank")
+            pl.ylabel("RMSD")
+        except AttributeError :
+            pl.set_xlabel("Rank")
+            pl.set_ylabel("RMSD")
         x=0
         if not stop:
             stop=len(rankedPoses)
@@ -173,18 +190,20 @@ class Scores(object):
         s=stop if stop else len(self.data)
         pl.hist(sorted([i[1] for i in self.data[:stop]]))
 
-    def trace(self, rank, name):
+    def trace(self, rankedPoses, name):
         colorscale=make_colorScale()
 
-        rmsds=self.rmsds
-        pos=self.coordDict(start=0, stop=len(rank)-1)
-        C=[r+1 for r in rank]
+        x = [ p.translate[0] for p in rankedPoses]
+        y = [ p.translate[1] for p in rankedPoses]
+        z = [ p.translate[2] for p in rankedPoses]
+        # pos=self.coordDict(start=0, stop=len(rank)-1)
+        C=[i+1 for i in range(len(rankedPoses))]
         # print(C)
-        S=[ 15 if rmsd > 5 else 30 for rmsd in rmsds ]
+        S=[ 15 if p.rmsd > 5 else 30 for p in rankedPoses ]
         # S=[ 15]
         # Configure the trace.
         trace = go.Scatter3d(
-            x=pos['x'], y=pos['y'], z=pos['z'],
+            x=x, y=y, z=z,
             mode = 'markers',
             marker={
                 'size': S,
@@ -197,17 +216,17 @@ class Scores(object):
             x=-0.25)
             },
             name=name,
-            text=['id=' + str(i+1) + ', rank=' + str(rank[i]+1 ) + ', rmsd='+ str(self.rmsds[i]) for i in range(len(rank))])
+            text=['id=' + str(p.id) + ', rank=' + str(u+1) + ', rmsd='+ str(p.rmsd) for u,p in enumerate(rankedPoses)])
 
         return trace
 
     def plot3D(self, rankedPoses, name=' ', title='Docking decoys'):
-        ranks=self.ranksFromRankedPoses(rankedPoses)
+        # ranks=self.ranksFromRankedPoses(rankedPoses)
         """ Suited for notebook display """
         """ Warning : ranks must be in the original order, since positions and rmsds are in the original order """
         # Configure Plotly to be rendered inline in the notebook.
         plotly.offline.init_notebook_mode()
-        trace=self.trace(ranks, name)
+        trace=self.trace(rankedPoses, name)
         layout = go.Layout(autosize=False,
         width=650,
         height=400,
@@ -334,6 +353,7 @@ def colorsFromRmsd(rmsds):
         else :
             colors.extend(['blue'])
     return colors
+
 
 def countNative(rmsds, cutoff=5):
     counts={5:0, 10:0, 20:0, 100:0, 200:0, "out":0}
