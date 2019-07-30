@@ -5,11 +5,74 @@ import sys
 import os
 PATH_TO_LOCAL_REPO="/Users/jprieto/DockingPP"
 sys.path.append(PATH_TO_LOCAL_REPO)
-from dockingPP import zParse
+from dockingPP import zParse, parse
 from src.core_scores import multiplePlots
 %load_ext autoreload
 from copy import copy
 ```
+
+# Analyse Data from Megadock 
+
+
+```python
+mD= parse(PATH_TO_LOCAL_REPO+"/example_data/MEGADOCK_examples/1BJ1.out", maxPose=500)
+mD.setReceptor(PATH_TO_LOCAL_REPO+"/example_data/MEGADOCK_examples/1BJ1_r_u.pdb")
+mD.setLigand(PATH_TO_LOCAL_REPO+"/example_data/MEGADOCK_examples/1BJ1_l_u.pdb")
+mD.setComplexName("1BJ1")
+```
+
+
+```python
+mD.ccmap()
+```
+
+    Created 3 data packets (200 zObjects each) for process pool
+    unpacking
+
+
+
+```python
+scores=mD.all_scores()
+```
+
+## Try scoring and Clustering Combinations
+
+#### *Sort representatives from clusters depending on average rank in cluster with cluster.representatives(element=, min_size=) and set a minimal cluster size to put aside smaller clusters*
+
+
+```python
+clusters=mD.herarCluster(30, linkage="single") # Make 30 clusters 
+# clusters=mD.BSAS(5,element="c_size") # pos in cluster if closer than 5 grid cell units from cluster representative
+# clusters=mD.birchCluster(5)
+# clusters=mD.wardCluster(5)
+sortedClusters= clusters.sorted("original_rank", min_size=4)
+mD.plotFromPoses(clusters.representatives("original_rank", min_size=4)) 
+```
+![](example_results/megadock.png)
+
+## The right clustering and rescoring can bring good solutions up in the rank
+
+```python
+print(clusters.countNatives(clusters.representatives("original_rank", min_size=4)))
+print(clusters.countNatives(clusters.representatives("c_size",min_size=8))) 
+```
+
+    {5: 1, 10: 1, 20: 1, 100: 1, 200: 1, 'out': 0}
+    {5: 0, 10: 1, 20: 1, 100: 1, 200: 1, 'out': 0}
+
+
+## Interested in a particular pose? 
+
+
+```python
+print(mD[51-1].scores)
+
+print(mD[151-1].scores)
+```
+
+    {'original_rank': 51, 'r_size': 49, 'res_fr_sum': 8.372, 'res_mean_fr': 0.17085714285714285, 'res_log_sum': -97.16765337461774, 'res_sq_sum': 1.9294320000000005, 'c_size': 74, 'con_fr_sum': 1.0822960000000001, 'con_mean_fr': 0.014625621621621624, 'con_log_sum': -316.85286717421894, 'con_sq_sum': 0.017356657183999993}
+    {'original_rank': 151, 'r_size': 51, 'res_fr_sum': 11.514000000000001, 'res_mean_fr': 0.22576470588235295, 'res_log_sum': -81.53486010372774, 'res_sq_sum': 2.978339999999999, 'c_size': 70, 'con_fr_sum': 0.9182800000000007, 'con_mean_fr': 0.013118285714285723, 'con_log_sum': -311.99047542644047, 'con_sq_sum': 0.014987345119999999}
+
 
 ### Generate Dock Data object From ZDOCK files
 
@@ -28,6 +91,8 @@ zD.setComplexName("1BJ1")
 ```python
 zD.loadRMSD(filename=PATH_TO_LOCAL_REPO+"/example_data/ZDOCK_examples/1BJ1.rmsds")
 ```
+
+
 
 
     True
@@ -118,8 +183,7 @@ In 3D : hover on each pose to see it's detail
 ```python
 zD.plot3D(element="con_fr_sum", name="1BJ1", title= "Contact frequency sum")
 ```
-
-![](3Dplot_500.png)
+![](example_results/3Dplot_500.png)
 
 ```python
 print(zD[5].translate)
@@ -132,9 +196,9 @@ print(zD[5].translate)
 
 
 ```python
-# zD.rmsdPlot(element="con_fr_sum", title="Contact frequency sum")
+zD.rmsdPlot(element="con_fr_sum", title="Contact frequency sum")
 ```
-![](rmsdplot.png)
+![](example_results/rmsdplot.png)
 
 ```python
 zD.countNatives(element="res_fr_sum", cutoff=2.5) 
@@ -211,8 +275,8 @@ clusters.countNatives(clusters.representatives(element="res_fr_sum", min_size=10
 
 
 ```python
-zD.plotFromPoses(clusters.representatives(element="res_fr_sum", min_size=10))
+# zD.plotFromPoses(clusters.representatives(element="res_fr_sum", min_size=10))
 
 ```
+![](example_results/3Dplot_clus.png)
 
-![](3Dplot_clus.png)

@@ -46,12 +46,6 @@ class Cluster(object):
             Z=testInsert(Z,z)
         return (X,Y,Z)
 
-    def set_Rank(self,new_rank):
-        self.current_rank=new_rank
-
-    def get_Rank(self):
-        return self.current_rank
-
     def meanRank(self, ranks):
         return sum([ranks[p.id-1] for p in self])/self.size
 

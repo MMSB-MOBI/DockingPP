@@ -52,13 +52,14 @@ sys.path.append(LOCAL_PATH_TO_REPO/src)
 A typical megadock results file is derived from the [ZDOCK format](http://zdock.umassmed.edu/zdock_output_format.php). 
 
 - First line features the number of grid cells and the size of the cubic cell. 
+- Line 2 indicates the initial random rotation of the **ligand**. 
 - Line 3 indicates the initial position of the **receptor** barycenter within the original system of coordinates. 
 - Line 4 indicates similar information for the **ligand**.
 - From line 12 to 16, docking poses' information is provided.   
 
 <span style="color:Crimson ;font-weight=500">In order to reconstruct a docking pose both **receptor** and **ligand** molecule barycenters have to be set to the origin.</span>  
 
-- The first field is the **Euler angles** triplet to apply rotation to the **ligand** molecule to reconstruct its orientation in the pose.   
+- The first field is the **Euler angles (X,Z,X')** triplet to apply rotation to the **ligand** molecule to reconstruct its orientation in the pose.   
 - The second triplet is the **translation vector** in mesh units to move the **ligand** molecule to its position in  the pose.
 
 <pre style="font-family:Monaco;font-size:0.8em;padding:1em;border:gray 1px solid; background-color: Gainsboro;">
@@ -158,7 +159,8 @@ sorted_poses=DD.rankedPoses(element="con_mean_fr")
 	* <a href=#general style="text-decoration: none;"> DockData Object's Basics</a>
 	* <a href=#rescoring style="text-decoration: none;"> Rescoring Utilities</a>
 	* <a href=#clustering style="text-decoration: none;"> Clustering Utilities</a>
-* <a href=#stats style="text-decoration: none;"> src.core_stats</a>
+* <a href=#stats style="text-decoration: none;"> Statistics, src/core_stats.py</a>
+* <a href=#clustering style="text-decoration: none;"> Clustering Object, src/core_clustering.py </a>
 
 
 </br>
@@ -195,7 +197,7 @@ we will consider as pose_index its original rank
 	- **push(pose\_id, pose\_euler, pose\_tr)** : add pose to pList 
 	- **setReceptor(RecFile)** : add PDB reference
 	- **setLigand(LigFile)** : add PDB reference
-	- **loadRMSD(filename="")** : load RMSDs from zDock like rmsd file 
+	- **loadRMSD(filename="")** : load RMSDs from zDock like rmsd file (tsv :  [ pose id ; RMSDS ] ) 
 	- **dictPos()** : returns a dictionary useful for visualisation { 'x' : [ ] , 'y' : [ ] , 'z' : [ ] } 
 	- **all\_scores()**
 	- **write\_all\_scores()**<a id="rescoring"></a>
@@ -205,7 +207,7 @@ we will consider as pose_index its original rank
 		
 	- **.rankedPoses(element=**"original_rank", **start**=0, **stop**=None ): add PDB reference
 	- **.rankedIDs(element**="original_rank", **start**=0, **stop**=None ) : add PDB reference
-	- **.ranks(element**="original_rank") : add PDB reference
+	- **.ranks(element**="original_rank") : returns rank values from 1 to n 
 	- **.rmsds()** : add PDB reference
 	- **.rankedRmsds(element**="original_rank", **start**=0, **stop**= None) : add PDB reference
 	- **.rankedPoses(element**="original_rank", **cutoff**=5 ) : add PDB reference
@@ -216,17 +218,11 @@ we will consider as pose_index its original rank
 
 	#### Clustering Methods
 		
-	- **.rankedPoses(element=**"original_rank", **start**=0, **stop**=None ): add PDB reference
-	- **.rankedIDs(element**="original_rank", **start**=0, **stop**=None ) : add PDB reference
-	- **.ranks(element**="original_rank") : add PDB reference
-	- **.rmsds()** : add PDB reference
-	- **.rankedRmsds(element**="original_rank", **start**=0, **stop**= None) : add PDB reference
-	- **.rankedPoses(element**="original_rank", **cutoff**=5 ) : add PDB reference
-	- **.countNatives(element**="original_rank", **cutoff**=5 ) : add PDB reference
-	- **.plot3D(element**="original_rank", **name**="",  title="") : add PDB reference
-	- **.mutliPlot3D( wanted_scores**,  **title**='Docking decoys', **size**=(600,400)) : add PDB reference
-	- **.rmsdPlot(element**="original_rank", **start**=0, **stop**=None, **plot**=None, **title**=None ) : add PDB reference
-
+	- **.BSAS(maxd , element**="original_rank"**, out**="dict"**, start**=0**,stop**=None**): cluster experiment's poses with Basic sequential algorithm scheme lead by element order using maximal distance maxd between barycenters as inclusion condition. 
+	- **. birchCluster(maxd, out**='dict'**, N**=None): use birch clustering algorithm with maxd being maximal threshold for cluster's radius and N the number of clusters to build.
+	- **.wardCluster(maxd,  start**=0**, stop**=None) : use ward linkage clustering with maxd the maximum variance of the clusters.
+	- **.herarCluster(self, maxc**=None**, linkage**='complete'**, start**=0**, stop**=None ) : apply herarchichal clustering, linkage can be {“ward”, “complete”, “average”, “single”}. maxc is the number of clusters to be kept . 
+	
 </br>
 <span style="color:Crimson ;font-weight=500"> *class Pose* </span> _ *Ligand Pose information*. 
   
@@ -303,6 +299,24 @@ format : {'type': 'contactList', 'data': [{'root': {'resID': '  50 ', 'chainID':
 	- **write(filename)** : write the residue frequencies of the docking experiment to a file
 
 </br>
+<a id="clustering"></a>
+### src.core_clustering
+<span style="color:Crimson ;font-weight=500"> *class Cluster* </span> _ *store cluster :  group of poses* 
+
+* Attributes 
+	- **.size** : number of poses in cluster
+	- **.poses**: list of poses objects in cluster
+	- **.bounds** : Returns maximal and minimal value of points in cluster for each axis ([xmin,xmax],[ymin,ymax],[zmin,zmax])
+	- **.representative** : returns 1st pose in cluster
+* Available Methods
+	- **.meanRank(ranks)** : Takes ranks of poses in the original order (by id) and returns the average rank of the cluster.
+	- **setSize(n)** : set a size used for normalisation in frequencies
+	- **all()** : returns all contact counts in the dataset allowing to perform statistical analyses and overall view of the counts distribution
+	- **get(A,B)** : returns the number of contact ocurrences between A and B
+	- **render_table(n=None)** : returns a table of size n**2 with counts in the intersection of columns and lines, each contact has a starting count of 1/expSize
+	- **write(filename)** : write the residue frequencies of the docking experiment to a file
+
+
 
 </br>
 
