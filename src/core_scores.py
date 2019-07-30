@@ -211,10 +211,12 @@ class Scores(object):
                 'color' : C,
                 'colorscale' : colorscale,
                 'colorbar': dict(title = 'Ranks',
+            lenmode='fraction',
+            len=0.75,
+            thickness=20,
             titleside = 'top',
             tickmode = 'array',
-            x=-0.25)
-            },
+            x=0.75)},
             name=name,
             text=['id=' + str(p.id) + ', rank=' + str(u+1) + ', rmsd='+ str(p.rmsd) for u,p in enumerate(rankedPoses)])
 
@@ -225,13 +227,17 @@ class Scores(object):
         """ Suited for notebook display """
         """ Warning : ranks must be in the original order, since positions and rmsds are in the original order """
         # Configure Plotly to be rendered inline in the notebook.
+        title_text=title
         plotly.offline.init_notebook_mode()
         trace=self.trace(rankedPoses, name)
-        layout = go.Layout(autosize=False,
-        width=650,
-        height=400,
-        title=title,
-        hovermode= 'x',
+        layout = go.Layout(autosize=True,
+        title=title_text,
+        # go.layout.Title(
+        # text=title_text,
+        # xref="paper",
+        # x=0
+        # ),
+        hovermode= 'closest',
         hoverlabel=dict(bgcolor='white', bordercolor='black'),
         margin={'l': 0, 'r': 0, 'b': 0, 't': 10})
         data = [trace]
