@@ -641,9 +641,9 @@ class DockData(object):
         else :
             raise Exception("You must set scores and RMSDs before using this function")
 
-    def plotFromPoses(self, rankedPoses, name='My complex', title='Docking decoys'):
+    def plotFromPoses(self, rankedPoses, name='My complex', title='Docking decoys', size = (600,400)):
         """ Notebook version """
-        self.scores.plot3D(rankedPoses,name=name,title=title)
+        self.scores.plot3D(rankedPoses,name=name,title=title, size = size)
 
 
     def plot3D(self, element="res_fr_sum", name='My complex', title='Docking decoys'):
@@ -689,7 +689,10 @@ class DockData(object):
 
     def BSAS(self, maxd , element="original_rank", out="dict", start=0,stop=None):
         try :
-            clusters=ClusterColl(BSAS(self.rankedPoses(element=element), maxd, out=out, start=start,stop=stop ), DDObj=self)
+            if out=='dict':
+                clusters=ClusterColl(BSAS(self.rankedPoses(element=element), maxd, out=out, start=start,stop=stop ), DDObj=self)
+            if out=='list' :
+                clusters=BSAS(self.rankedPoses(element=element), maxd, out=out, start=start,stop=stop )
         except KeyError :
             raise Exception("pick a sorting element from \n \
             'original_rank', 'r_size', 'res_fr_sum', 'res_mean_fr', 'res_log_sum', 'res_sq_sum', \

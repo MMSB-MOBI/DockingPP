@@ -106,7 +106,7 @@ class ClusterColl(object):
     def sorted(self, element='original_rank' ,min_size=None):
         if element and self.FromDD :
             ranks=self.FromDD.ranks(element=element)
-            if min_size:
+            if min_size :
                 sorted_clus=sorted([clus for clus in self if clus.size >= min_size], key=lambda o:o.meanRank(ranks))
             else :
                 sorted_clus=sorted([clus for clus in self], key=lambda o:o.meanRank(ranks))
@@ -195,21 +195,26 @@ def birchCluster(zD, maxd, out='dict', N=None, start=0, stop=None ):
         brc.set_params(n_clusters = N )
     brc.partial_fit(np.matrix(X))
     groups=brc.predict(X)
-    clusters=list2dict(zD,groups)
-    if out=="list":
+    if out == 'dict':
+        return list2dict(zD,groups)
+    elif out == 'list':
         return groups
-    elif out=="dict":
-        return clusters
+    else :
+        raise Exception("Out argument must have valus 'dict' or 'list'")
 
-def wardCluster(zD, maxd, start=0, stop=None ):
+def wardCluster(zD, maxd, start=0, stop=None , out='dict'):
     stop = len(zD.pList) if not stop else stop
     data=zD.dictPos
     Z = ward(pdist([[data['x'][i],data['y'][i],data['z'][i],data['a1'][i],data['a2'][i],data['a3'][i]] for i in range(start,stop)]))
     groups = fcluster(Z,maxd, criterion = 'distance')
-    clusters=list2dict(zD,groups)
-    return clusters
+    if out == 'dict':
+        return list2dict(zD,groups)
+    elif out == 'list':
+        return groups
+    else :
+        raise Exception("Out argument must have valus 'dict' or 'list'")
 
-def herarCluster(zD, maxc=None, linkage='complete', start=0, stop=None ):
+def herarCluster(zD, maxc=None, linkage='complete', start=0, stop=None, out='dict'):
     """linkage : {“ward”, “complete”, “average”, “single”} default is complete"""
     stop = len(zD.pList) if not stop else stop
     if maxc:
@@ -218,7 +223,13 @@ def herarCluster(zD, maxc=None, linkage='complete', start=0, stop=None ):
         cluster = AgglomerativeClustering(affinity='euclidean', linkage=linkage)
     data=zD.dictPos
     cluster.fit_predict([[data['x'][i],data['y'][i],data['z'][i]] for i in range(start,stop)])
-    return list2dict(zD, cluster.labels_)
+    groups=cluster.labels_
+    if out == 'dict':
+        return list2dict(zD,groups)
+    elif out == 'list':
+        return groups
+    else :
+        raise Exception("Out argument must have valus 'dict' or 'list'")
 
 
 
@@ -231,17 +242,18 @@ def herarCluster(zD, maxc=None, linkage='complete', start=0, stop=None ):
 
 
 def posesMeanRank(cluster,ranks):
-    "Takes a single list of poses"
+    "Takes a single list of poses and a list of ranks in the same order "
     return sum([(ranks[p.id-1]) for p in cluster])/len(cluster)
 
 
 def sortCluster(clusters,ranks):
-    """Takes a clusters dictionary: {cluster1 : [ p1, p2, p3 ... ], cluster2 : [ p1, p2, p3 ... ]} """
+    """Takes a clusters dictionary: {cluster1 : [ p1, p2, p3 ... ], cluster2 : [ p1, p2, p3 ... ]} and returns a list of cluster sorted by mean rank of each cluster """
     #Sort clusters using clusScore function. The lowest the score, the better the cluster.
     return sorted([cluster[c] for c in cluster], key=lambda o:posesMeanRank(o,ranks))
 
 
 def list2dict(zD,cluster):
+    """Turns a cluster in list of groups [1, 2, 1 , 3, 1, 1, 2, 3, 3, 2 ...]  into a cluster in dictionnary"""
     dictclus={}
     for u,v in enumerate(cluster):
         if v not in dictclus:

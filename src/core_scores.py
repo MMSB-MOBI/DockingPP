@@ -2,12 +2,14 @@
 
 import matplotlib.pyplot as plt
 import math
-
+import numpy as npy
 import pickle
 from math import sqrt
 # Import dependencies
 import plotly
 import plotly.graph_objs as go
+from mpl_toolkits.mplot3d import Axes3D
+import mpld3
 
 
 class Scores(object):
@@ -216,27 +218,25 @@ class Scores(object):
             thickness=20,
             titleside = 'top',
             tickmode = 'array',
-            x=0.75)},
+            x=0.99)},
             name=name,
             text=['id=' + str(p.id) + ', rank=' + str(u+1) + ', rmsd='+ str(p.rmsd) for u,p in enumerate(rankedPoses)])
 
         return trace
 
-    def plot3D(self, rankedPoses, name=' ', title='Docking decoys'):
+    def plot3D(self, rankedPoses, name=' ', title='Docking decoys',  size = (530,480)):
         # ranks=self.ranksFromRankedPoses(rankedPoses)
+        width,height=size
         """ Suited for notebook display """
         """ Warning : ranks must be in the original order, since positions and rmsds are in the original order """
         # Configure Plotly to be rendered inline in the notebook.
         title_text=title
         plotly.offline.init_notebook_mode()
         trace=self.trace(rankedPoses, name)
-        layout = go.Layout(autosize=True,
-        title=title_text,
-        # go.layout.Title(
-        # text=title_text,
-        # xref="paper",
-        # x=0
-        # ),
+        layout = go.Layout(autosize=False,
+        width=width,
+        height=height,
+        title=go.layout.Title(text=title_text, y=0.98 ),
         hovermode= 'closest',
         hoverlabel=dict(bgcolor='white', bordercolor='black'),
         margin={'l': 0, 'r': 0, 'b': 0, 't': 10})
@@ -248,10 +248,11 @@ class Scores(object):
 
     # NB : This function should take different sets of points and not sc object. --> put to core_visuals ?
 
-def multiPlot3D(sc, ranks, names, title='Docking decoys', size = (600,400)):
+def multiPlot3D(sc, ranks, names, title='Docking decoys', size = (530,480)):
     """ Warning : ranks must be in the original order, since positions and rmsds are in the original order
     ranks is a list of lists of ranks"""
     # Configure Plotly to be rendered inline in the notebook.
+    title_text=title
     width,height=size
     plotly.offline.init_notebook_mode()
     traces=[sc[i].trace(ranks[i],names[i]) for i in range(len(ranks))]
@@ -265,7 +266,8 @@ def multiPlot3D(sc, ranks, names, title='Docking decoys', size = (600,400)):
     autosize=False,
     width=width,
     height=height,
-    title=title, hovermode= 'closest',)
+    title=go.layout.Title(text=title_text, y=0.98 ),
+    hovermode= 'closest'),
     margin={'l': 0, 'r': 15, 'b': 0, 't': 10}
     data = traces
     plot_figure = go.Figure(data=data, layout=layout)
@@ -412,11 +414,20 @@ def multiplePlots(num, size=(20,10), ylim=None, xlim=None, title=None):
         axlist.append(ax)
     return axlist
 
-def scatter3d(data,groups):
+def scatter3d(data,groups, title=None):
     fig = plt.figure(figsize=(20,20))
     ax = fig.gca(projection='3d')
-    ax.scatter(data['x'][7:], data['y'][7:], data['z'][7:],'o',c=groups, cmap='rainbow')
+
+    sc=ax.scatter(data['x'], data['y'], data['z'],'o',c=groups, s=[i*10 for i in groups], cmap='autumn', picker=True)
+    ax.set_xlabel('X')
+    ax.set_ylabel('Y')
+    ax.set_zlabel('Z')
     # Rotate it
     ax.view_init(45, 45)
-    plt.set_cmap('rainbow')
+
+    ### NEED TO FIND A WAY TO HANDLE HOVERING OVER POINST
+    ### NEED TO ADD COLOR BAR
+    ### NEED TO TAKE IN POSES
+
+
     plt.show()
