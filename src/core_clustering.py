@@ -82,8 +82,11 @@ class ClusterColl(object):
         return max([c for c in self.clusters])
 
     def set_DDObj(self, DDObj):
+        """ Define DDObj to fetch scores from """
         if not self.FromDD:
             self.FromDD = DDObj
+
+
     def addCluster(self, cluster):
         """ Takes a cluster object together in a cluster """
         self.clusters[max([key for key in self.clusters])+1]=cluster

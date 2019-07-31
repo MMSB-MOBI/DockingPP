@@ -12,6 +12,8 @@
 ---------------------------------
 <a id="chapter-1"></a>
 
+# Branches 
+The ccmapOld branch is compatible with the previous ccmap version. 
 </br> 
 
 ## Dependencies 
@@ -201,50 +203,50 @@ DD.setScores(filename="1BJ1_new_scores.tsv" )
 we will consider as pose_index its original rank 
 
 * Attributes
-	- **complexName** : can be set using method setComplexName
-	- **step** : size of the docking grid cells
-	- **nCells** : size of the docking grid
-	- **eulerREC** : euler angles of the receptors' reference position
-	- **fileREC** : name of the receptor's original pdb file 
-	- **fileLIG** : name of the ligand's original pdb file 
-	- **baryREC** : receptor's barycenter position
-	- **baryLIG** : ligand's reference's barycenter
-	- **pList** : list of poses in the experiment
-	- **pdbObjLigand** : structure object built from PDB file
-	- **pdbObjReceptor** : structure object built from PDB file
-	- **getStats** : returns resStats and contactStats objects into a list
+	- **.complexName** : can be set using method setComplexName.
+	- **.step** : size of the docking grid cells.
+	- **.nCells** : size of the docking grid.
+	- **.eulerREC** : euler angles of the receptors' reference position.
+	- **.fileREC** : name of the receptor's original pdb file.
+	- **.fileLIG** : name of the ligand's original pdb file.
+	- **.baryREC** : receptor's barycenter position.
+	- **.baryLIG** : ligand's reference's barycenter.
+	- **.pList** : list of poses in the experiment.
+	- **.pdbObjLigand** : structure object built from PDB file.
+	- **.pdbObjReceptor** : structure object built from PDB file.
+	- **.getStats** : returns resStats and contactStats objects into a list.
 			`resStats,conStats=DD.getStats`
-	- **contactStats** : returns contactStats object
-	- **resStats** : returns resStats object
+	- **.contactStats** : returns contactStats object.
+	- **.resStats** : returns resStats object.
 * Available Methods<a id="general"></a>
 
 	#### General Functions
 	
-	- **setComplexName**
-	- **ccmap(start=0, stop=1000, dist=5, pSize=100, ncpu=10)** : calculate and store ccmap for each pose using multiprocessing </br>
+	- **.setComplexName**
+	- **.ccmap(start=0, stop=1000, dist=5, pSize=100, ncpu=10)** : calculate and store ccmap for each pose using multiprocessing </br>
 *Use start and stop to choose the number of poses to be computed, dist to set the minimal distance to detect a contact in the interface of the two molecules, pSize (size of the paquets) and ncpu (number of workers) as multiprocessing parameters.* 
-	- **push(pose\_id, pose\_euler, pose\_tr)** : add pose to pList 
-	- **setReceptor(RecFile)** : add PDB reference
-	- **setLigand(LigFile)** : add PDB reference
-	- **loadRMSD(filename="")** : load RMSDs from zDock like rmsd file (tsv :  [ pose id ; RMSDS ] ) 
-	- **dictPos()** : returns a dictionary useful for visualisation { 'x' : [ ] , 'y' : [ ] , 'z' : [ ] } 
-	- **all\_scores()**
-	- **write\_all\_scores()**<a id="rescoring"></a>
+	- **.push(pose\_id, pose\_euler, pose\_tr)** : add pose to pList. 
+	- **.setReceptor(RecFile)** : add PDB reference.
+	- **.setLigand(LigFile)** : add PDB reference.
+	- **.loadRMSD(filename="")** : load RMSDs from zDock like RMSD file (tsv :  [ pose id ; RMSDS ] ). 
+	- **.dictPos()** : returns a dictionary useful for visualisation { 'x' : [ ] , 'y' : [ ] , 'z' : [ ] }. 
+	- **.all\_scores()** : Compute scores for every poses and every rescoring method in the list below. Returns a list of scores for each pose in the original order (ID). 
+	- **.write\_all\_scores()** : Compute and write poses to a tab file. <a id="rescoring"></a>
 
 
 	#### Rescoring and visualization Methods
 	Choose scoring scores from :'original\_rank', 'r\_size', 'res\_fr\_sum', 'res\_mean\_fr', 'res\_log\_sum', 'res\_sq\_sum', 'c\_size', 'con\_fr\_sum', 'con\_mean\_fr', 'con\_log\_sum', 'con\_sq\_sum'")
 		
-	- **.rankedPoses(element=**"original_rank", **start**=0, **stop**=None ): add PDB reference
-	- **.rankedIDs(element**="original_rank", **start**=0, **stop**=None ) : add PDB reference
-	- **.ranks(element**="original_rank") : returns rank values from 1 to n 
-	- **.rmsds()** : add PDB reference
-	- **.rankedRmsds(element**="original_rank", **start**=0, **stop**= None) : add PDB reference
-	- **.rankedPoses(element**="original_rank", **cutoff**=5 ) : add PDB reference
-	- **.countNatives(element**="original_rank", **cutoff**=5 ) : add PDB reference
-	- **.plot3D(element**="original_rank", **name**="",  title="") : add PDB reference
-	- **.mutliPlot3D( wanted_scores**,  **title**='Docking decoys', **size**=(600,400)) : add PDB reference
-	- **.rmsdPlot(element**="original_rank", **start**=0, **stop**=None, **plot**=None, **title**=None ) : add PDB reference<a id="clustering"></a>
+	- **.rankedPoses(element=**"original_rank", **start**=0, **stop**=None ): returns a list of poses in a ranked by score order where score is element.
+	- **.rankedIDs(element**="original_rank", **start**=0, **stop**=None ) : returns a list of poses' IDs in a ranked by score order where score is element. 
+	- **.ranks(element**="original_rank") : returns rank values for poses in original order.
+	*example:* [ 7 , 4, 3, 6 , 5, 1 , 2 ] : pose with ID 1 has rank 7, pose with ID 2 has rank 4 ... 
+	- **.rmsds()** : returns poses' RMSDs in the original order
+	- **.rankedRmsds(element**="original_rank", **start**=0, **stop**= None) : returns poses' RMSDs list in a rescoring order
+	- **.countNatives(element**="original_rank", **cutoff**=5 ) : Returns near-native poses counts amongst the first 5, 10, 100, 200 poses under a cutoff in RMSD (Amstrongs). 
+	- **.plot3D(element**="original_rank", **name**="",  title="") : Build a 3D plot with colored poses by ranks and near-native represented with bigger size. 
+	- **.mutliPlot3D( wanted_scores**,  **title**='Docking decoys', **size**=(600,400)) : many 3Dplots for comparison. Takes a list of elements. 
+	- **.rmsdPlot(element**="original_rank", **start**=0, **stop**=None, **plot**=None, **title**=None ) : Build a plot showing the fluctuation of the RMSD depending on rank. <a id="clustering"></a>
 
 	#### Clustering Methods
 		
@@ -262,52 +264,38 @@ we will consider as pose_index its original rank
 	- **.translate : (x,y,z)** translation distances from the original pdb ligand to the pose
 	- **.ccmap**: json formatted contact map, dictionary of contacts between residues   </br> 
 format : {'type': 'contactList', 'data': [{'root': {'resID': '  50 ', 'chainID': 'A'}, 'partners': [{'resID': ' 650 ', 'chainID': 'B'}]}, ... ]} 
-	- **.belongsTo** : returns DockData object containing the pose
-	- **.dictorizedReceptor** : positions for the receptors atoms
-	- **.dictorizedLigand** : positions for the ligands atoms
-	- **.rmsd** : if set, returns the rmsd between the pose and the native pose
-	- **.resMapList** : returns the list of residues implied in the contact map for this pose in the form of the concatenation of the residue number, its chain and its original molecule </br> 
+	- **.belongsTo** : returns DockData object containing the pose.
+	- **.dictorizedReceptor** : positions for the receptors atoms.
+	- **.dictorizedLigand** : positions for the ligands atoms.
+	- **.rmsd** : if set, returns the RMSD between the pose and the native pose.
+	- **.resMapList** : returns the list of residues implied in the contact map for this pose in the form of the concatenation of the residue number, its chain and its original molecule. </br> 
 *format* : ['171ALig', '175ALig' , ... ]
-	- **.resSize** : number of residues in pose contactmap
-	- **.conSize** : number of contacts in pose contactmap 
-	- **.scores** : returns a dictionnary of poses' scores in data set if scores have been calculated
+	- **.resSize** : number of residues in pose contactmap.
+	- **.conSize** : number of contacts in pose contactmap.
+	- **.scores** : returns a dictionnary of poses' scores in data set if scores have been calculated.
 
 * Available Methods
 	- **.has_ccmap(error=False)** : Returns boolean, checks wether pose's ccmap has been calculated
-	- **.has_rmsd()** : checks wether pose's ccmap has been calculated
-	- **.ccmap(dist=5)** : calculate contact map
-	- **.dump()** : returns a pdb-like content describing the pose, ligand and receptor , rotations have been applied if pose's ccmap has been calculated
+	- **.has_rmsd()** : checks wether pose's ccmap has been calculated.
+	- **.ccmap(dist=5)** : calculate contact map.
+	- **.dump()** : returns a pdb-like content describing the pose, ligand and receptor , rotations have been applied if pose's ccmap has been calculated.
 
 </br>
 
 <a id="stats"></a>
 ### src.core_stats
-<span style="color:Crimson ;font-weight=500"> *class CmapRes* </span> _ *store residues from ccmap and their counts* 
-
-* Attributes 
-	- **.resID** : residue id
-	- **.chainID** : residue chain in the form of the original PDB name
-	- **.role** : Residue origin : receptor or ligand ('Rec' and 'Lig') 
-	- **.count** : number of occurences in residues counts
-	- **.cCount** : number of occurences in contacts counts
-	- **.index** : unique index for each residue ( concatenation of the residue number, its chain and its original molecule ) 
-* Available Methods
-	- **.increase_count(count='plain')** : add 1 to the pose count number in residue counts if *count='plain'*, in contact counts if *count='pond'*
-	- **.reset_all()** : resets all counts to 0
-
-</br>
 <span style="color:Crimson ;font-weight=500"> *class ResStats* </span> _ *storage and transformation of the statistics on the residues of the contact maps in a zDock or MegaDock experiment* 
 
 * Attributes 
-	- **.rDict** : dictionary allowing access to every residue from its index 
-	- **.expSize** : Total number of decoys taken into account for statistical calculation
-	- **.plainResDict** : counts dictionary {residue : count}
-	- **.resFreq** : residue frequency dictionary {residue : frequency}
-	- **.pondResDict** : counts in contacts dictionary 
+	- **.rDict** : dictionary allowing access to every residue from its index.
+	- **.expSize** : Total number of decoys taken into account for statistical calculation.
+	- **.plainResDict** : counts dictionary {residue : count}.
+	- **.resFreq** : residue frequency dictionary {residue : frequency}.
+	- **.pondResDict** : counts in contacts dictionary. 
 * Available Methods
-	- **.setSize(n)** : set a size used for normalisation in frequencies
-	- **.addRes(residue)** : add a residue to the statistics 
-	- **.write(filename)** : write the residue frequencies of the docking experiment to a file
+	- **.setSize(n)** : set a size used for normalisation in frequencies.
+	- **.addRes(residue)** : add a residue to the statistics. 
+	- **.write(filename)** : write the residue frequencies of the docking experiment to a file.
 
 </br>
 
@@ -316,13 +304,13 @@ format : {'type': 'contactList', 'data': [{'root': {'resID': '  50 ', 'chainID':
 
 * Attributes 
 	- **.expSize** : Total number of decoys taken into account for statistical calculation
-* Available Methods
-	- **.incrMdTree(A,B)** : adds 1 to the count of contact ocurrences between A and B
-	- **.setSize(n)** : set a size used for normalisation in frequencies
-	- **.all()** : returns all contact counts in the dataset allowing to perform statistical analyses and overall view of the counts distribution
-	- **.get(A,B)** : returns the number of contact ocurrences between A and B
-	- **.render_table(n=None)** : returns a table of size n**2 with counts in the intersection of columns and lines, each contact has a starting count of 1/expSize
-	- **.write(filename)** : write the residue frequencies of the docking experiment to a file
+* Available Methods.
+	- **.incrMdTree(A,B)** : adds 1 to the count of contact ocurrences between A and B.
+	- **.setSize(n)** : set a size used for normalisation in frequencies.
+	- **.all()** : returns all contact counts in the dataset allowing to perform statistical analyses and overall view of the counts distribution.
+	- **.get(A,B)** : returns the number of contact ocurrences between A and B.
+	- **.render_table(n=None)** : returns a table of size n**2 with counts in the intersection of columns and lines, each contact has a starting count of 1/expSize.
+	- **.write(filename)** : write the residue frequencies of the docking experiment to a file.
 
 </br>
 <a id="clustering"></a>
@@ -331,10 +319,10 @@ format : {'type': 'contactList', 'data': [{'root': {'resID': '  50 ', 'chainID':
 
 
 * Attributes 
-	- **.size** : number of poses in cluster
-	- **.poses**: list of poses objects in cluster
-	- **.bounds** : Returns maximal and minimal value of points in cluster for each axis ([xmin,xmax],[ymin,ymax],[zmin,zmax])
-	- **.representative** : returns 1st pose in cluster
+	- **.size** : number of poses in cluster.
+	- **.poses**: list of poses objects in cluster.
+	- **.bounds** : Returns maximal and minimal value of points in cluster for each axis ([xmin,xmax],[ymin,ymax],[zmin,zmax]).
+	- **.representative** : returns 1<sup>st</sup> pose in cluster.
 * Available Methods
 	- **.meanRank(ranks)** : Takes ranks of poses in the original order (by id) and returns the average rank of the cluster.
 
@@ -343,14 +331,14 @@ format : {'type': 'contactList', 'data': [{'root': {'resID': '  50 ', 'chainID':
 <span style="color:Crimson ;font-weight=500"> *class ClusterColl* </span> _ *store cluster :  group of clusters obtained from clustering* 
 
 * Attributes 
-	- **.size** : number of clusters in collection
+	- **.size** : number of clusters in collection.
 * Available Methods
-	- **.addCluster(cluster):** : Manually add a cluser object to the collection. It will be added last
-	- **.setClusters(clusters):**  Build ClusterColl from a cluster's python dictionnary containing Docking poses and errase the previous clusters in collection
-	- **.sorted(element='original_rank' ,min_size=None):** Returns a list of sorted cluster objects based on mean rank of the clusters 
+	- **.addCluster(cluster):** : Manually add a cluser object to the collection. It will be added last.
+	- **.setClusters(clusters):**  Build ClusterColl from a cluster's python dictionnary containing Docking poses and errase the previous clusters in collection.
+	- **.set_DDObj(DDObj) :** Define DDObj to fetch scores from.	- **.sorted(element='original_rank' ,min_size=None):** Returns a list of sorted cluster objects based on mean rank of the clusters.
 	- **.representatives(element =None, min_size=None):** Returns cluster's representatives in a particular order (sorted with average rank of clusters). It also allows you to suppress from the list those clusters with sizes below threshold.
-	- **.addCluster(cluster):** : Manually add a cluser object to the collection. It will be added last
-countNatives(self, poseList, cutoff=5):
+	- **.addCluster(cluster):** Manually add a cluser object to the collection. It will be added last
+	- **countNatives(poseList, cutoff=5) :** Returns near-native poses counts in the first 5, 10 , 100 , 200 poses under a cutoff in RMSD (Amstrongs). 
 </br>
 
 -------------------------------
