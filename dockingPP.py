@@ -594,7 +594,7 @@ class DockData(object):
             except KeyError :
                 raise Exception("pick a sorting element from \n \
 'original_rank', 'r_size', 'res_fr_sum', 'res_mean_fr', 'res_log_sum', 'res_sq_sum', \n \
-'c_size', 'con_fr_sum', 'con_mean_fr', 'con_log_sum', 'con_sq_sum', 'rmsd'")
+'c_size', 'con_fr_sum', 'con_mean_fr', 'con_log_sum', 'con_sq_sum'")
         else :
             raise Exception("You must set scores using self.setScores() or compute them with self.all_scores() before using rescoring functions")
 
@@ -604,7 +604,7 @@ class DockData(object):
         except KeyError :
             raise Exception("pick a sorting element from \n \
             'original_rank', 'r_size', 'res_fr_sum', 'res_mean_fr', 'res_log_sum', 'res_sq_sum', \
-            'c_size', 'con_fr_sum', 'con_mean_fr', 'con_log_sum', 'con_sq_sum', 'rmsd'")
+            'c_size', 'con_fr_sum', 'con_mean_fr', 'con_log_sum', 'con_sq_sum'")
         return [p.id for p in self.rankedPoses(element=element, start=start, stop=stop)]
 
     def ranks(self,element="original_rank"):
@@ -614,7 +614,7 @@ class DockData(object):
             except KeyError :
                 raise Exception("pick a sorting element from \n \
                 'original_rank', 'r_size', 'res_fr_sum', 'res_mean_fr', 'res_log_sum', 'res_sq_sum', \
-                'c_size', 'con_fr_sum', 'con_mean_fr', 'con_log_sum', 'con_sq_sum', 'rmsd'")
+                'c_size', 'con_fr_sum', 'con_mean_fr', 'con_log_sum', 'con_sq_sum'")
         else :
             raise Exception("You must set scores before using rescoring functions")
 
@@ -629,7 +629,7 @@ class DockData(object):
             except KeyError :
                 raise Exception("pick a sorting element from \n \
                 'original_rank', 'r_size', 'res_fr_sum', 'res_mean_fr', 'res_log_sum', 'res_sq_sum', \
-                'c_size', 'con_fr_sum', 'con_mean_fr', 'con_log_sum', 'con_sq_sum', 'rmsd'")
+                'c_size', 'con_fr_sum', 'con_mean_fr', 'con_log_sum', 'con_sq_sum'")
         else :
             raise Exception("You must compute scores ( use self.all_scores()) and set RMSDs (use loadRMSD(filename=FILENAME)) before using this function")
 
@@ -642,7 +642,7 @@ class DockData(object):
             except KeyError :
                 raise Exception("pick a sorting element from \n \
                 'original_rank', 'r_size', 'res_fr_sum', 'res_mean_fr', 'res_log_sum', 'res_sq_sum', \
-                'c_size', 'con_fr_sum', 'con_mean_fr', 'con_log_sum', 'con_sq_sum', 'rmsd'")
+                'c_size', 'con_fr_sum', 'con_mean_fr', 'con_log_sum', 'con_sq_sum'")
         else :
             raise Exception("You must set scores and RMSDs before using this function")
 
@@ -660,7 +660,7 @@ class DockData(object):
             except KeyError :
                 raise Exception("pick a sorting element from \n \
                 'original_rank', 'r_size', 'res_fr_sum', 'res_mean_fr', 'res_log_sum', 'res_sq_sum', \
-                'c_size', 'con_fr_sum', 'con_mean_fr', 'con_log_sum', 'con_sq_sum', 'rmsd'")
+                'c_size', 'con_fr_sum', 'con_mean_fr', 'con_log_sum', 'con_sq_sum'")
         else :
             raise Exception("You must set scores before using rescoring functions")
 
@@ -672,7 +672,7 @@ class DockData(object):
             except KeyError :
                 raise Exception("pick a sorting element from \n \
                 'original_rank', 'r_size', 'res_fr_sum', 'res_mean_fr', 'res_log_sum', 'res_sq_sum', \
-                'c_size', 'con_fr_sum', 'con_mean_fr', 'con_log_sum', 'con_sq_sum', 'rmsd'")
+                'c_size', 'con_fr_sum', 'con_mean_fr', 'con_log_sum', 'con_sq_sum'")
         else :
             raise Exception("You must set scores before using rescoring functions")
 
@@ -683,7 +683,7 @@ class DockData(object):
         except KeyError :
             raise Exception("pick a sorting element from \n \
             'original_rank', 'r_size', 'res_fr_sum', 'res_mean_fr', 'res_log_sum', 'res_sq_sum', \
-            'c_size', 'con_fr_sum', 'con_mean_fr', 'con_log_sum', 'con_sq_sum', 'rmsd'")
+            'c_size', 'con_fr_sum', 'con_mean_fr', 'con_log_sum', 'con_sq_sum'")
 
 
                 ###############################################

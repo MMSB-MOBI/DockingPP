@@ -11,6 +11,9 @@
 
 ---------------------------------
 <a id="chapter-1"></a>
+
+</br> 
+
 ## Dependencies 
 dockingPP has the following dependencies : 
 
@@ -25,7 +28,7 @@ dockingPP has the following dependencies :
 * plotly (<https://plot.ly/python/>) 
 * mpl_toolkits (<https://matplotlib.org/1.4.3/mpl\_toolkits/index.html>)
 
-</br>
+
 Install dependencies using 
 
 ```sh
@@ -33,6 +36,8 @@ pip install -r LOCAL_PATH_TO_REPO/requirements.txt
 ``` 
 
 <a id="chapter-2"></a>
+
+</br> 
 ## Quick Start 
 
 
@@ -44,10 +49,14 @@ Check for dependencies in LOCAL\_PATH\_TO\_REPO/requirments.txt
 ```python
 sys.path.append(LOCAL_PATH_TO_REPO/src)
 ``` 
-</br>
 
 
 <a id="chapter-3"></a>
+
+----------------------------
+
+</br> 
+
 ## The megadock format 
 
 A typical megadock results file is derived from the [ZDOCK format](http://zdock.umassmed.edu/zdock_output_format.php). 
@@ -87,9 +96,11 @@ So for each pose, the ccmap libray has to:
 3. translate ligand  
 4. compute interaction matrix an return contact map 
  
- </br> 
-<a id="chapter-1"></a>
-### The ccmap format 
+<a id="chapter-6"></a>
+
+</br> 
+
+## The ccmap format 
 The ccmap Library (<https://github.com/glaunay/ccmap>) reconstructs docking poses using euler angles and translation values and analyses the formed complex to identify the contacts at the interface, and returns what is called the contact map. 
 #### Docking data processing 
 This library can be used with data from MEGADOCK or data from ZDOCK.
@@ -101,19 +112,23 @@ Then the translation values in grid cells unit are converted into Amstrong unit 
 
 #### Ccmap reconstruction 
 
+In order to analyse poses, ccmap reconstructs the pose by computing the position of every atom. It applies a rotation of the ligand using euler (x-z-x) angles and then translates every atom ligand (x) from initial barycenter  of the ligand (l<sub>0</sub>) to center of the grid : x = x- l<sub>0</sub> then adds translation x = x + t. 
 
 #### The contact map format 
 
+For the identification of contacts in a pose, ccmap discretizes space again in order to reduce complexity. It returns a list of integers with maximal size of **(number of receptor residues * number of ligand residues)** the maximal number of contacts. </br>
+Those integers represent the none-zero positions in a sparse matrix with indexes (i,j) </br>.
+The integers are obtained by multiplying the number of residues in ligand(i_max) by j (receptor's index in matrix) and adding i (ligand's index in matrix). This way, each integer represents a contact between the ligand residue of index i and receptor residue of index j. 
 
 ----------------------
-</br>
 <a id="chapter-4"></a>
-### Getting started with Docking Post-Processing 
+</br> 
+## Getting started with Docking Post-Processing 
 #### Docking prediction Output reading 
 
 ```python
 from dockingPP import parse
-DD= parse('/PATH_TO_FILE/1BJ1_r-1BJ1_l.detail', maxPose =45) # maxpose default is 0
+DD= parse('PATH_TO_FILE/1BJ1_r-1BJ1_l.detail', maxPose =45) # maxpose default is 0
 ```
 *Be careful, since docking outputs vary and may even provide near native solutions for the study.*   
 *For now, the program expects 7 near native solutions in the beginning of the file. These are not taken into account for residue or contact statistics. Therefore if maxpose=4000 you will get 7 near native solutions and 3993 computed poses*
@@ -122,8 +137,8 @@ DD= parse('/PATH_TO_FILE/1BJ1_r-1BJ1_l.detail', maxPose =45) # maxpose default i
 #### Add reference PDB for receptor and ligand
 
 ```python
-DD.setReceptor('/PATH/1BJ1_r_u.pdb')
-DD.setLigand('/PATH/1BJ1_l_u.pdb')
+DD.setReceptor('PATH/1BJ1_r_u.pdb')
+DD.setLigand('PATH/1BJ1_l_u.pdb')
 ```
 Make sure you use unbound molecules to do your predictions, since the bound version of the structures is supposedly unknown. 
 #### Add name to Docking object
@@ -149,23 +164,19 @@ DD.ccmap(start=0,stop=n,dist=5, pSize=50)
 #### Calculate new scores for the Docking results
 
 ```python
-DD.write_all_scores(fname="1BJ1_new_scores", title="Rescoring 1BJ1")
+DD.all_scores()
 ```
-#### Now use the core_scores source to parse results
+#### ... Or write them to a file 
+
+```python
+DD.write_all_scores(filename="1BJ1_new_scores", title="Rescoring 1BJ1")
+```
+
+#### ... Or import them from a file 
 
 ```python
 DD.setScores(filename="1BJ1_new_scores.tsv" )
-# or use the all_scores function for smaller data sets
-DD.setScores(data=DD.all_scores()) 
 ```
-
-#### The scores object has many functionnalities 
-
-```python
-pose15_score=DD.scores.getScore(15, "res_fr_sum")
-sorted_poses=DD.rankedPoses(element="con_mean_fr") 
-```
-
 
 *See more in the tuto file : <https://github.com/juliaprieto/DockingPP/blob/master/tuto.md>*
 </br>
@@ -222,6 +233,7 @@ we will consider as pose_index its original rank
 
 
 	#### Rescoring and visualization Methods
+	Choose scoring scores from :'original\_rank', 'r\_size', 'res\_fr\_sum', 'res\_mean\_fr', 'res\_log\_sum', 'res\_sq\_sum', 'c\_size', 'con\_fr\_sum', 'con\_mean\_fr', 'con\_log\_sum', 'con\_sq\_sum'")
 		
 	- **.rankedPoses(element=**"original_rank", **start**=0, **stop**=None ): add PDB reference
 	- **.rankedIDs(element**="original_rank", **start**=0, **stop**=None ) : add PDB reference
@@ -261,10 +273,10 @@ format : {'type': 'contactList', 'data': [{'root': {'resID': '  50 ', 'chainID':
 	- **.scores** : returns a dictionnary of poses' scores in data set if scores have been calculated
 
 * Available Methods
-	- **has_ccmap(error=False)** : Returns boolean, checks wether pose's ccmap has been calculated
-	- **has_rmsd()** : checks wether pose's ccmap has been calculated
-	- **ccmap(dist=5)** : calculate contact map
-	- **dump()** : returns a pdb-like content describing the pose, ligand and receptor , rotations have been applied if pose's ccmap has been calculated
+	- **.has_ccmap(error=False)** : Returns boolean, checks wether pose's ccmap has been calculated
+	- **.has_rmsd()** : checks wether pose's ccmap has been calculated
+	- **.ccmap(dist=5)** : calculate contact map
+	- **.dump()** : returns a pdb-like content describing the pose, ligand and receptor , rotations have been applied if pose's ccmap has been calculated
 
 </br>
 
@@ -273,29 +285,29 @@ format : {'type': 'contactList', 'data': [{'root': {'resID': '  50 ', 'chainID':
 <span style="color:Crimson ;font-weight=500"> *class CmapRes* </span> _ *store residues from ccmap and their counts* 
 
 * Attributes 
-	- **resID** : residue id
-	- **chainID** : residue chain in the form of the original PDB name
-	- **role** : Residue origin : receptor or ligand ('Rec' and 'Lig') 
-	- **count** : number of occurences in residues counts
-	- **cCount** : number of occurences in contacts counts
-	- **index** : unique index for each residue ( concatenation of the residue number, its chain and its original molecule ) 
+	- **.resID** : residue id
+	- **.chainID** : residue chain in the form of the original PDB name
+	- **.role** : Residue origin : receptor or ligand ('Rec' and 'Lig') 
+	- **.count** : number of occurences in residues counts
+	- **.cCount** : number of occurences in contacts counts
+	- **.index** : unique index for each residue ( concatenation of the residue number, its chain and its original molecule ) 
 * Available Methods
-	- **increase_count(count='plain')** : add 1 to the pose count number in residue counts if *count='plain'*, in contact counts if *count='pond'*
-	- **reset_all()** : resets all counts to 0
+	- **.increase_count(count='plain')** : add 1 to the pose count number in residue counts if *count='plain'*, in contact counts if *count='pond'*
+	- **.reset_all()** : resets all counts to 0
 
 </br>
 <span style="color:Crimson ;font-weight=500"> *class ResStats* </span> _ *storage and transformation of the statistics on the residues of the contact maps in a zDock or MegaDock experiment* 
 
 * Attributes 
-	- **rDict** : dictionary allowing access to every residue from its index 
-	- **expSize** : Total number of decoys taken into account for statistical calculation
-	- **plainResDict** : counts dictionary {residue : count}
-	- **resFreq** : residue frequency dictionary {residue : frequency}
-	- **pondResDict** : counts in contacts dictionary 
+	- **.rDict** : dictionary allowing access to every residue from its index 
+	- **.expSize** : Total number of decoys taken into account for statistical calculation
+	- **.plainResDict** : counts dictionary {residue : count}
+	- **.resFreq** : residue frequency dictionary {residue : frequency}
+	- **.pondResDict** : counts in contacts dictionary 
 * Available Methods
-	- **setSize(n)** : set a size used for normalisation in frequencies
-	- **addRes(residue)** : add a residue to the statistics 
-	- **write(filename)** : write the residue frequencies of the docking experiment to a file
+	- **.setSize(n)** : set a size used for normalisation in frequencies
+	- **.addRes(residue)** : add a residue to the statistics 
+	- **.write(filename)** : write the residue frequencies of the docking experiment to a file
 
 </br>
 
@@ -303,23 +315,20 @@ format : {'type': 'contactList', 'data': [{'root': {'resID': '  50 ', 'chainID':
 *see also <https://github.com/glaunay/pyproteins/tree/master/src/pyproteins/container/Core.py> for inherited attributes and functions from MdTree*
 
 * Attributes 
-	- **expSize**
-	- **expName**
-	- **plainResDict**
-	- **resFreq**
-	- **pondResDict**
+	- **.expSize** : Total number of decoys taken into account for statistical calculation
 * Available Methods
-	- **incrMdTree(A,B)** : adds 1 to the count of contact ocurrences between A and B
-	- **setSize(n)** : set a size used for normalisation in frequencies
-	- **all()** : returns all contact counts in the dataset allowing to perform statistical analyses and overall view of the counts distribution
-	- **get(A,B)** : returns the number of contact ocurrences between A and B
-	- **render_table(n=None)** : returns a table of size n**2 with counts in the intersection of columns and lines, each contact has a starting count of 1/expSize
-	- **write(filename)** : write the residue frequencies of the docking experiment to a file
+	- **.incrMdTree(A,B)** : adds 1 to the count of contact ocurrences between A and B
+	- **.setSize(n)** : set a size used for normalisation in frequencies
+	- **.all()** : returns all contact counts in the dataset allowing to perform statistical analyses and overall view of the counts distribution
+	- **.get(A,B)** : returns the number of contact ocurrences between A and B
+	- **.render_table(n=None)** : returns a table of size n**2 with counts in the intersection of columns and lines, each contact has a starting count of 1/expSize
+	- **.write(filename)** : write the residue frequencies of the docking experiment to a file
 
 </br>
 <a id="clustering"></a>
 ### src.core_clustering
-<span style="color:Crimson ;font-weight=500"> *class Cluster* </span> _ *store cluster :  group of poses* 
+<span style="color:Crimson ;font-weight=500"> *class Cluster* </span> _ *store clusters : group of poses* 
+
 
 * Attributes 
 	- **.size** : number of poses in cluster
@@ -328,14 +337,20 @@ format : {'type': 'contactList', 'data': [{'root': {'resID': '  50 ', 'chainID':
 	- **.representative** : returns 1st pose in cluster
 * Available Methods
 	- **.meanRank(ranks)** : Takes ranks of poses in the original order (by id) and returns the average rank of the cluster.
-	- **setSize(n)** : set a size used for normalisation in frequencies
-	- **all()** : returns all contact counts in the dataset allowing to perform statistical analyses and overall view of the counts distribution
-	- **get(A,B)** : returns the number of contact ocurrences between A and B
-	- **render_table(n=None)** : returns a table of size n**2 with counts in the intersection of columns and lines, each contact has a starting count of 1/expSize
-	- **write(filename)** : write the residue frequencies of the docking experiment to a file
 
+</br>
 
+<span style="color:Crimson ;font-weight=500"> *class ClusterColl* </span> _ *store cluster :  group of clusters obtained from clustering* 
 
+* Attributes 
+	- **.size** : number of clusters in collection
+* Available Methods
+	- **.addCluster(cluster):** : Manually add a cluser object to the collection. It will be added last
+	- **.setClusters(clusters):**  Build ClusterColl from a cluster's python dictionnary containing Docking poses and errase the previous clusters in collection
+	- **.sorted(element='original_rank' ,min_size=None):** Returns a list of sorted cluster objects based on mean rank of the clusters 
+	- **.representatives(element =None, min_size=None):** Returns cluster's representatives in a particular order (sorted with average rank of clusters). It also allows you to suppress from the list those clusters with sizes below threshold.
+	- **.addCluster(cluster):** : Manually add a cluser object to the collection. It will be added last
+countNatives(self, poseList, cutoff=5):
 </br>
 
 -------------------------------

@@ -104,6 +104,7 @@ class ClusterColl(object):
                 return [self[c].representative for c in self.clusters]
 
     def sorted(self, element='original_rank' ,min_size=None):
+        """Returns a list of sorted cluster objects based on mean rank"""
         if element and self.FromDD :
             ranks=self.FromDD.ranks(element=element)
             if min_size :
@@ -116,7 +117,7 @@ class ClusterColl(object):
             raise Exception("clusters cannot be sorted without DockingDataObject  \n \
                             Use self.set_DDObj(DDObj) and pick a sorting element from :\n \
                             'original_rank', 'r_size', 'res_fr_sum', 'res_mean_fr', 'res_log_sum', 'res_sq_sum', \
-                            'c_size', 'con_fr_sum', 'con_mean_fr', 'con_log_sum', 'con_sq_sum', 'rmsd'")
+                            'c_size', 'con_fr_sum', 'con_mean_fr', 'con_log_sum', 'con_sq_sum'")
 
     def countNatives(self, poseList, cutoff=5):
         return countNative([p.rmsd for p in poseList], cutoff=cutoff)
