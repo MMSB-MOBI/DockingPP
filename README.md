@@ -5,6 +5,7 @@
   * [Dependencies](#chapter-1)
   * [Quick Start](#chapter-2)
   * [The megadock format](#chapter-3)
+  * [The ccmap format](#chapter-6)
   * [Getting started](#chapter-4)
   * [Available objects and functions](#chapter-5)
 
@@ -87,8 +88,25 @@ So for each pose, the ccmap libray has to:
 4. compute interaction matrix an return contact map 
  
  </br> 
+<a id="chapter-1"></a>
+### The ccmap format 
+The ccmap Library (<https://github.com/glaunay/ccmap>) reconstructs docking poses using euler angles and translation values and analyses the formed complex to identify the contacts at the interface, and returns what is called the contact map. 
+#### Docking data processing 
+This library can be used with data from MEGADOCK or data from ZDOCK.
+If more than one rotation is applied to the ligand, the dockingPP library computes a set of Euler angles equivalent to both rotations. </br>
+The ligand translations are cropped in order to fit the docking grid. 
+If translation value (t\_value) is larger than half grid size (nCells / 2) , translation value becomes :  **t\_value - nCells** </br>
+Then the translation values in grid cells unit are converted into Amstrong unit : 
+**t = (-1) * t * step**
+
+#### Ccmap reconstruction 
+
+
+#### The contact map format 
+
 
 ----------------------
+</br>
 <a id="chapter-4"></a>
 ### Getting started with Docking Post-Processing 
 #### Docking prediction Output reading 

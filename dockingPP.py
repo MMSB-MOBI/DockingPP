@@ -43,6 +43,7 @@ class Pose(object):
         self.rmsd=RMSD
 
     def ccmap(self, dist=5):
+        ## Check Receptor and ligand have been set
         self.has_rec()
         self.has_lig()
 
@@ -56,6 +57,8 @@ class Pose(object):
             #print dist
             pccmap = ccmap.zmap( (self.dictorizedReceptor, self.dictorizedLigand), dist,
                                    self.euler, self.translate, self.recOffset,  self.ligOffset)
+
+            # Turn ccmap values into sparse matrix indexes : [(i,j) , ... ] euclidian division
             indexes=[(int(i/ligResCount), i% ligResCount)   for i in pccmap]
             self._ccmap = indexes
         return self._ccmap
@@ -73,6 +76,7 @@ class Pose(object):
 
     @property
     def translatedCcmap(self) :
+        """This function turns ccmap indexes into Contacts list [(recResidue, ligResidue), ... ]"""
         self.has_ccmap()
         def index(ResID):
             items=ResID.replace(":","").split()
@@ -86,7 +90,7 @@ class Pose(object):
 
     @property
     def resMapList(self):
-        """Returns a list of all residues implied in the contact between this Pose and the receptor"""
+        """Returns a list of all residues implied in the contact between ligand and receptor in this Pose"""
         self.has_ccmap()
         residues=[]
         for contact in self.translatedCcmap:
@@ -96,6 +100,7 @@ class Pose(object):
 
     @property
     def contactMapList(self):
+        """Returns a list of all contacts between ligand and receptor in this Pose"""
         self.has_ccmap ()
         contacts=[]
         for contact in self.translatedCcmap:
@@ -104,13 +109,13 @@ class Pose(object):
 
     @property
     def resSize(self):
-        """Returns the number of residues in the contact map between this pose and the receptor """
+        """Returns the number of residues in the contact map between ligand and receptor in this Pose """
         self.has_ccmap()
         return len(self.resMapList)
 
     @property
     def conSize(self):
-        """Returns the number of contacts between this pose and the receptor """
+        """Returns the number of contacts between ligand and receptor in this Pose"""
         self.has_ccmap()
         consize=0
         for contact in self.translatedCcmap:
@@ -261,7 +266,7 @@ class DockData(object):
         self._name="complex"
         self.step = None
         self.nCells = None
-        self.eulerREC = None
+        self.eulerRand = None
         self.fileREC = None
         self.fileLIG = None
         self.baryREC = None
@@ -563,7 +568,7 @@ class DockData(object):
         return rmsd
 
     def __str__(self):
-        return str({ 'step' : self.step, 'nCells' : self.nCells , 'EulerREC' : self.eulerREC,
+        return str({ 'step' : self.step, 'nCells' : self.nCells , 'eulerRand' : self.eulerRand,
                        'fileREC' : self.fileREC, 'baryREC' : self.baryREC,
                        'fileLIG' : self.fileLIG, 'baryLIG' : self.baryLIG,
                         'pList'  : self.pList
@@ -745,7 +750,7 @@ def parse(fileName, maxPose = 0):
                 continue
             m = re.match(reL2, line)
             if m :
-                dockdataObj.eulerREC = ( float(m.groups()[0]), float(m.groups()[1]),float(m.groups()[2]) )
+                dockdataObj.eulerRand = ( float(m.groups()[0]), float(m.groups()[1]),float(m.groups()[2]) )
                 continue
             m = re.match(reL3, line)
             if m :
@@ -772,7 +777,13 @@ def parse(fileName, maxPose = 0):
                         raise
                     # print(RMSD)
                     euler = (float(m.groups()[1]), float(m.groups()[2]), float(m.groups()[3]))
-
+                    if dockdataObject.eulerRand != (0,0,0) :
+                        rand_rot=trans_matrix(*dockdataObj.eulerRand)
+                        pose_rot=trans_matrix(*euler)
+                        # Combine into one matrix
+                        double=pose_rot.dot(rand_rot)
+                        # Recover combined angles
+                        euler=eulerFromMatrix(double)
 
                     tr = [int(m.groups()[4]), int(m.groups()[5]), int(m.groups()[6])]
                     tr=tuple([ t - dockdataObj.nCells if t > dockdataObj.nCells / 2 else t for t in tr ])
@@ -804,7 +815,7 @@ def zParse(fileName, maxPose = 0):
                 continue
             m = re.match(reL2, line)
             if m :
-                dockdataObj.eulerREC = ( float(m.groups()[0]), float(m.groups()[1]),float(m.groups()[2]) )
+                dockdataObj.eulerRand = ( float(m.groups()[0]), float(m.groups()[1]),float(m.groups()[2]) )
                 continue
             m = re.match(reL3, line)
             if m :
@@ -818,13 +829,15 @@ def zParse(fileName, maxPose = 0):
             m = re.match(reZPOSE, line)
             if m:
                 euler = (float(m.groups()[0]), float(m.groups()[1]), float(m.groups()[2]))
-                # Make rotation matrices
-                rand_rot=trans_matrix(*dockdataObj.eulerREC)
-                pose_rot=trans_matrix(*euler)
-                # Combine into one matrix
-                double=pose_rot.dot(rand_rot)
-                # Recover combined angles
-                euler=eulerFromMatrix(double)
+                # If two rotations are applied
+                if dockdataObject.eulerRand != (0,0,0) :
+                    # Make rotation matrices
+                    rand_rot=trans_matrix(*dockdataObj.eulerRand)
+                    pose_rot=trans_matrix(*euler)
+                    # Combine into one matrix
+                    double=pose_rot.dot(rand_rot)
+                    # Recover combined angles
+                    euler=eulerFromMatrix(double)
 
                 tr = [int(m.groups()[3]), int(m.groups()[4]), int(m.groups()[5])]
                 tr=tuple([ t - dockdataObj.nCells if t > dockdataObj.nCells / 2 else t for t in tr ])
