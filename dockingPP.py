@@ -1,10 +1,10 @@
 #! /usr/bin/env python3
 
 import sys, os, re, pickle, json,math, numpy as np
-path=["/Users/jprieto/Docking/modules/pyproteinsExt/src", "/Users/jprieto/Docking/scripts/dockingPP"]
-for way in path :
-    if path not in sys.path :
-        sys.path.append(way)
+#path=["/home/chilpert/Dev/pyproteinsExt/src", "/Users/jprieto/Docking/scripts/dockingPP"]
+#for way in path :
+#    if path not in sys.path :
+#        sys.path.append(way)
 import pyproteinsExt.structure.coordinates as PDB
 import pyproteinsExt.structure.operations as PDBop
 from src.core_scores import Scores, multiPlot3D, countNative
@@ -319,7 +319,6 @@ class DockData(object):
         start = kwargs['start'] if 'start' in kwargs else 0
         stop  = kwargs['stop']  if 'stop' in kwargs else len(self.pList)
         dist  = kwargs['dist']  if 'dist' in kwargs else 5
-
         #default distance value
 
         self.threadPacketSize =  kwargs['pSize'] if 'pSize' in kwargs else 200
@@ -830,7 +829,7 @@ def zParse(fileName, maxPose = 0):
             if m:
                 euler = (float(m.groups()[0]), float(m.groups()[1]), float(m.groups()[2]))
                 # If two rotations are applied
-                if dockdataObject.eulerRand != (0,0,0) :
+                if dockdataObj.eulerRand != (0,0,0) :
                     # Make rotation matrices
                     rand_rot=trans_matrix(*dockdataObj.eulerRand)
                     pose_rot=trans_matrix(*euler)
