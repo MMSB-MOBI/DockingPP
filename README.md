@@ -1,6 +1,5 @@
 ### DOCKING POST-PROCESSING Utility Class and functions
 
-
 # Table of Contents
   * [Dependencies](#chapter-1)
   * [Quick Start](#chapter-2)
@@ -10,6 +9,43 @@
   * [Available objects and functions](#chapter-5)
 
 ---------------------------------
+# Installation
+
+You have to use python 3 (tested with python 3.7.4, feel free to test other python3 versions and give feedback). A simple solution is to create a new conda environment with python 3.
+```
+conda create -n dockingPP python=3.7.4
+conda activate dockingPP
+```
+Each time you want to work with dockingPP you will have to active the environment. 
+
+Clone the repository and go inside
+``` 
+git clone https://github.com/MMSB-MOBI/DockingPP
+cd DockingPP
+```
+
+Install python dependencies
+```
+pip install -r requirements.txt
+```
+
+Compile and install ccmap
+```
+git clone https://github.com/MMSB-MOBI/ccmap
+cd ccmap
+python setup.py build
+python setup.py install
+```
+
+To work with DockingPP as module, add the src directory into your PYTHONPATH : 
+```
+export PYTHONPATH=$PYTHONPATH:DOCKINGPP_LOCAL_PATH
+```
+OR add the src directory directly in the beginning of the python script that calls the module : 
+```
+sys.path.append(DOCKINGPP_LOCAL_PATH)
+```
+
 <a id="chapter-1"></a>
 
 # Branches 
