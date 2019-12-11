@@ -7,13 +7,17 @@ import sys, os, re, pickle, json,math, numpy as np
 #        sys.path.append(way)
 import pyproteinsExt.structure.coordinates as PDB
 import pyproteinsExt.structure.operations as PDBop
-from src.core_scores import Scores, multiPlot3D, countNative
-from src.core_stats import ResStats, ContactStats , CmapRes, writeScores
-from src.core_clustering import BSAS, birchCluster, wardCluster, herarCluster, ClusterColl
-from src.rotation_utils import trans_matrix, eulerFromMatrix
+from DockingPP.core_scores import Scores, multiPlot3D, countNative
+from DockingPP.core_stats import ResStats, ContactStats , CmapRes, writeScores
+from DockingPP.core_clustering import BSAS, birchCluster, wardCluster, herarCluster, ClusterColl
+from DockingPP.rotation_utils import trans_matrix, eulerFromMatrix
 import ccmap
 
 from multiprocessing import Pool
+
+sys.path.append("/home/chilpert/Dev/pythonLogger")
+import pythonLogger as pl 
+LOGGER = pl.init_logger("dockingPP.py", "debug")
 
 parserPDB = PDB.Parser()
 
@@ -27,6 +31,8 @@ class Pose(object):
         self.euler = euler
         self.translate = tuple([ (-1) * t * belongsTo.step for t in tr ])
         self._ccmap = None
+        #LOGGER.debug(f"Pose translate {self.translate}")
+
         self.belongsTo = belongsTo
         self.ligOffset = tuple( [ (-1) * o for o in belongsTo.baryLIG] )
         self.recOffset = tuple( [ (-1) * o for o in belongsTo.baryREC] )
@@ -55,6 +61,8 @@ class Pose(object):
             self.dictorizedReceptor = pdbObjRec.atomDictorize
             self.dictorizedLigand = pdbObjLig.atomDictorize
             #print dist
+            #LOGGER.debug(pdbObjRec.name)
+            #LOGGER.debug(f"euler {self.euler}\ntranslate{self.translate}\nrecOffset{self.recOffset}\tligOffSet{self.ligOffset}")
             pccmap = ccmap.zmap( (self.dictorizedReceptor, self.dictorizedLigand), dist,
                                    self.euler, self.translate, self.recOffset,  self.ligOffset)
 

@@ -3,7 +3,7 @@ import sys ,pickle, time
 from math import sqrt
 from statistics import mean
 import numpy as np
-from src.core_scores import countNative
+from DockingPP.core_scores import countNative
 from sklearn.cluster import AgglomerativeClustering, Birch
 from scipy.cluster.hierarchy import linkage, dendrogram , fcluster , ward
 from scipy.spatial.distance import pdist
