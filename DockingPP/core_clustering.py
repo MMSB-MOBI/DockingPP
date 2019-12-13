@@ -253,7 +253,7 @@ def posesMeanRank(cluster,ranks):
 def sortCluster(clusters,ranks):
     """Takes a clusters dictionary: {cluster1 : [ p1, p2, p3 ... ], cluster2 : [ p1, p2, p3 ... ]} and returns a list of cluster sorted by mean rank of each cluster """
     #Sort clusters using clusScore function. The lowest the score, the better the cluster.
-    return sorted([cluster[c] for c in cluster], key=lambda o:posesMeanRank(o,ranks))
+    return sorted([clusters[c] for c in clusters], key=lambda o:posesMeanRank(o,ranks))
 
 
 def list2dict(zD,cluster):
