@@ -15,10 +15,6 @@ import ccmap
 
 from multiprocessing import Pool
 
-sys.path.append("/home/chilpert/Dev/pythonLogger")
-import pythonLogger as pl 
-LOGGER = pl.init_logger("dockingPP.py", "debug")
-
 parserPDB = PDB.Parser()
 
 # self.columns={"original_rank":0,"r_size":1,"res_fr_sum":2,"res_mean_fr": 3, "res_log_sum": 4, "res_sq_sum": 5, "c_size": 6, "con_fr_sum": 7,"con_mean_fr" : 8,"con_log_sum" : 9,"con_sq_sum" : 10, "rmsd": 11}
@@ -31,7 +27,6 @@ class Pose(object):
         self.euler = euler
         self.translate = tuple([ (-1) * t * belongsTo.step for t in tr ])
         self._ccmap = None
-        #LOGGER.debug(f"Pose translate {self.translate}")
 
         self.belongsTo = belongsTo
         self.ligOffset = tuple( [ (-1) * o for o in belongsTo.baryLIG] )
@@ -61,8 +56,6 @@ class Pose(object):
             self.dictorizedReceptor = pdbObjRec.atomDictorize
             self.dictorizedLigand = pdbObjLig.atomDictorize
             #print dist
-            #LOGGER.debug(pdbObjRec.name)
-            #LOGGER.debug(f"euler {self.euler}\ntranslate{self.translate}\nrecOffset{self.recOffset}\tligOffSet{self.ligOffset}")
             pccmap = ccmap.zmap( (self.dictorizedReceptor, self.dictorizedLigand), dist,
                                    self.euler, self.translate, self.recOffset,  self.ligOffset)
 
