@@ -117,7 +117,6 @@ class Scores(object):
         "original_rank","s_size","res_fr_sum","res_mean_fr","res_log_sum","res_sq_sum",
         "c_size","con_fr_sum","con_mean_fr","con_log_sum","con_sq_sum"
         Means the pose classified 1st is 1st position of the list.   """
-
         try :
             p=self.getPoses
         except :
@@ -129,6 +128,7 @@ class Scores(object):
             r=sorted(self.data[int(start):int(stop)],key=lambda o:float(o[col]))
         else:
             r=sorted(self.data[int(start):int(stop)],key=lambda o:float(o[col]),reverse=True)
+
         sorted_i=[self.getPoses[int(pose[0])-1] for pose in r] # get pose from ID with getPoses function
         return sorted_i
 

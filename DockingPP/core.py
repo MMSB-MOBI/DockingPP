@@ -1,10 +1,7 @@
 #! /usr/bin/env python3
 
 import sys, os, re, pickle, json,math, numpy as np
-#path=["/home/chilpert/Dev/pyproteinsExt/src", "/Users/jprieto/Docking/scripts/dockingPP"]
-#for way in path :
-#    if path not in sys.path :
-#        sys.path.append(way)
+
 import pyproteinsExt.structure.coordinates as PDB
 import pyproteinsExt.structure.operations as PDBop
 from DockingPP.core_scores import Scores, multiPlot3D, countNative
@@ -476,11 +473,20 @@ class DockData(object):
 
         return res_stats
 
-    def write_all_scores(self, size=1 , filename="scores", title='Exp1', header=None, F=False) :
+    def write_all_scores(self, size=1 , filename="scores", title='Exp1', header=None, F=False,resStats=None,conStats=None,maxPose=None) :
         header = ["Surface size", "Residue freq sum", "Residue mean freq", "Residue log sum", "Residue square sum", "Number of contacts", "Contact freq sum", "Contact mean freq", "Contact log sum", "Contact square sum"]
 
-        resS , conS=self.getStats
-        scores=self.all_scores(resStats=resS, conStats=conS)
+        if resStats and conStats:
+            resS,conS=resStats,conStats
+        else:
+            resS , conS=self.getStats
+        scores=self.all_scores(resStats=resS, conStats=conS,maxPose=maxPose)
+
+        if maxPose:
+            maxP=maxPose
+        else:
+            maxP=len(scores)
+
         resS.write(filename+"_resstats.tab", F=F)
         conS.write(filename+"_constats.tab",F=F)
         assert len(list(set([len(i) for i in scores])))==1
@@ -509,12 +515,12 @@ class DockData(object):
             f.write("# Experiment_size : " + str(size) + "\n")
             f.write("Pose" + "\t" + "\t".join(header)+ "\n")
 
-            for pose in range(len(scores)):
+            for pose in range(maxP):
                 f.write("\t".join([str(i) for i in scores[pose]]) + "\n")
         self.setScores(scores=scores)
         return score_file
 
-    def all_scores(self, resStats=None, conStats=None) :
+    def all_scores(self, resStats=None, conStats=None,maxPose=None) :
         header = ["Surface size", "Residue freq sum", "Residue mean freq", "Residue log sum", "Residue square sum", "Number of contacts", "Contact freq sum", "Contact mean freq", "Contact log sum", "Contact square sum"]
         scores= []
         if resStats and conStats :
@@ -522,7 +528,11 @@ class DockData(object):
         else :
             resS , conS = self.getStats
 
-        size=resS.expSize
+        if maxPose:
+            size=maxPose
+        else:
+            size=resS.expSize
+
         rfreqs=resS.resFreq
         cfreqs=conS.contactFreq
         for i,p in enumerate(self.pList[:size]) :

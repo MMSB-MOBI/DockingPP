@@ -235,7 +235,7 @@ def writeScore(scores , size=1, filename="scores.tsv", title='Experiment', F=Fal
 
     return filename
 
-def writeScores(scores , size=1, filename="scores.tsv", title='Exp1', header=None, F=False):
+def writeScores(scores , size=1, filename="scores.tsv", title='Exp1', header=None, F=False, maxPose=None):
     """This function allows to write a list of scores to a file :
     each pose is a new line, each score is a new column"""
     if F :
@@ -265,7 +265,12 @@ def writeScores(scores , size=1, filename="scores.tsv", title='Exp1', header=Non
     C="# Title : " + title + "\n"
     C+="# Experiment_size : " + str(size) + "\n"
     C+="Pose\t" + "\t".join(header)+ "\n"
-    for pose in range(len(scores)):
+    if maxPose:
+        maxP=maxPose
+    else:
+        maxP=len(scores)
+
+    for pose in range(maxP):
         C+=str(pose)+"\t"+ "\t".join([str(i) for i in scores[pose]]) + "\n"
     with open(filename,'w+') as f:
         f.write(C)
