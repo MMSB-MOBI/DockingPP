@@ -472,7 +472,7 @@ class DockData(object):
         return res_stats
 
 
-    def write_all_scores(self, size=1 , filename="scores", title='Exp1', header=None, F=False,resStats=None,conStats=None,maxPose=None) :
+    def write_all_scores(self, size=1 , filename="scores", title='Exp1', header=None, F=False,resStats=None,conStats=None,maxPose=None,output_freq=False) :
         header = ["Residue_Number", "Residue_Sum", "Residue_Average", "Residue_Log_Sum", "Residue_square_sum", "Contact_Number", "Contact_Sum", "Contact_Average", "Contact_Log_Sum", "Contact_Square_Sum"]
 
         if resStats and conStats:
@@ -486,8 +486,9 @@ class DockData(object):
         else:
             maxP=len(scores)
 
-        resS.write(filename+"_resstats.tab", F=F)
-        conS.write(filename+"_constats.tab",F=F)
+        if output_freq:
+            resS.write(filename+"_resstats.tab", F=F)
+            conS.write(filename+"_constats.tab",F=F)
         assert len(list(set([len(i) for i in scores])))==1
         if F :
             e=False
