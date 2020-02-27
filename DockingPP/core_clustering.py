@@ -119,8 +119,8 @@ class ClusterColl(object):
         else :
             raise Exception("clusters cannot be sorted without DockingDataObject  \n \
                             Use self.set_DDObj(DDObj) and pick a sorting element from :\n \
-                            'original_rank', 'r_size', 'res_fr_sum', 'res_mean_fr', 'res_log_sum', 'res_sq_sum', \
-                            'c_size', 'con_fr_sum', 'con_mean_fr', 'con_log_sum', 'con_sq_sum'")
+                            'original_rank', 'r_size', 'residue_sum', 'residue_average', 'residue_log_sum', 'residue_sq_sum', \
+                            'c_size', 'contact_sum', 'contact_average', 'contact_log_sum', 'contact_sq_sum'")
 
     def countNatives(self, poseList, cutoff=5):
         return countNative([p.rmsd for p in poseList], cutoff=cutoff)

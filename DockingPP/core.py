@@ -14,8 +14,6 @@ from multiprocessing import Pool
 
 parserPDB = PDB.Parser()
 
-# self.columns={"original_rank":0,"r_size":1,"res_fr_sum":2,"res_mean_fr": 3, "res_log_sum": 4, "res_sq_sum": 5, "c_size": 6, "con_fr_sum": 7,"con_mean_fr" : 8,"con_log_sum" : 9,"con_sq_sum" : 10, "rmsd": 11}
-
 class Pose(object):
     """Object containing a pose of a Docking prediction output and calculating its coordinates to
     fit to the reference receptor's docking position"""
@@ -603,8 +601,8 @@ class DockData(object):
                 return self.scores.rankedPoses(element=element, start=start, stop=stop)
             except KeyError :
                 raise Exception("pick a sorting element from \n \
-'original_rank', 'r_size', 'res_fr_sum', 'res_mean_fr', 'res_log_sum', 'res_sq_sum', \n \
-'c_size', 'con_fr_sum', 'con_mean_fr', 'con_log_sum', 'con_sq_sum'")
+'original_rank', 'r_size', 'residue_sum', 'residue_average', 'residue_log_sum', 'residue_sq_sum', \n \
+'c_size', 'contact_sum', 'contact_average', 'contact_log_sum', 'contact_sq_sum'")
         else :
             raise Exception("You must set scores using self.setScores() or compute them with self.all_scores() before using rescoring functions")
 
@@ -613,8 +611,8 @@ class DockData(object):
             return [p.id for p in self.rankedPoses(element=element, start=start, stop=stop)]
         except KeyError :
             raise Exception("pick a sorting element from \n \
-            'original_rank', 'r_size', 'res_fr_sum', 'res_mean_fr', 'res_log_sum', 'res_sq_sum', \
-            'c_size', 'con_fr_sum', 'con_mean_fr', 'con_log_sum', 'con_sq_sum'")
+            'original_rank', 'r_size', 'residue_sum', 'residue_average', 'residue_log_sum', 'residue_sq_sum', \
+            'c_size', 'contact_sum', 'contact_average', 'contact_log_sum', 'contact_sq_sum'")
         return [p.id for p in self.rankedPoses(element=element, start=start, stop=stop)]
 
     def ranks(self,element="original_rank"):
@@ -623,8 +621,8 @@ class DockData(object):
                 return self.scores.ranks(element=element)
             except KeyError :
                 raise Exception("pick a sorting element from \n \
-                'original_rank', 'r_size', 'res_fr_sum', 'res_mean_fr', 'res_log_sum', 'res_sq_sum', \
-                'c_size', 'con_fr_sum', 'con_mean_fr', 'con_log_sum', 'con_sq_sum'")
+                'original_rank', 'r_size', 'residue_sum', 'residue_average', 'residue_log_sum', 'residue_sq_sum', \
+                'c_size', 'contact_sum', 'contact_average', 'contact_log_sum', 'contact_sq_sum'")
         else :
             raise Exception("You must set scores before using rescoring functions")
 
@@ -638,8 +636,8 @@ class DockData(object):
                 return self.scores.rankedRmsds(rankedPoses)
             except KeyError :
                 raise Exception("pick a sorting element from \n \
-                'original_rank', 'r_size', 'res_fr_sum', 'res_mean_fr', 'res_log_sum', 'res_sq_sum', \
-                'c_size', 'con_fr_sum', 'con_mean_fr', 'con_log_sum', 'con_sq_sum'")
+                'original_rank', 'r_size', 'residue_sum', 'residue_average', 'residue_log_sum', 'residue_sq_sum', \
+                'c_size', 'contact_sum', 'contact_average', 'contact_log_sum', 'contact_sq_sum'")
         else :
             raise Exception("You must compute scores ( use self.all_scores()) and set RMSDs (use loadRMSD(filename=FILENAME)) before using this function")
 
@@ -651,8 +649,8 @@ class DockData(object):
                 return countNative(rankedRmsds, cutoff=cutoff)
             except KeyError :
                 raise Exception("pick a sorting element from \n \
-                'original_rank', 'r_size', 'res_fr_sum', 'res_mean_fr', 'res_log_sum', 'res_sq_sum', \
-                'c_size', 'con_fr_sum', 'con_mean_fr', 'con_log_sum', 'con_sq_sum'")
+                'original_rank', 'r_size', 'residue_sum', 'residue_average', 'residue_log_sum', 'residue_sq_sum', \
+                'c_size', 'contact_sum', 'contact_average', 'contact_log_sum', 'contact_sq_sum'")
         else :
             raise Exception("You must set scores and RMSDs before using this function")
 
@@ -661,7 +659,7 @@ class DockData(object):
         self.scores.plot3D(rankedPoses,name=name,title=title, size = size)
 
 
-    def plot3D(self, element="res_fr_sum", name='My complex', title='Docking decoys'):
+    def plot3D(self, element="residue_sum", name='My complex', title='Docking decoys'):
         """ Notebook version """
         if self.has_scores() or element=="original_rank":
             try :
@@ -669,8 +667,8 @@ class DockData(object):
                 self.scores.plot3D(rankedPoses,name=name,title=title)
             except KeyError :
                 raise Exception("pick a sorting element from \n \
-                'original_rank', 'r_size', 'res_fr_sum', 'res_mean_fr', 'res_log_sum', 'res_sq_sum', \
-                'c_size', 'con_fr_sum', 'con_mean_fr', 'con_log_sum', 'con_sq_sum'")
+                'original_rank', 'r_size', 'residue_sum', 'residue_average', 'residue_log_sum', 'residue_sq_sum', \
+                'c_size', 'contact_sum', 'contact_average', 'contact_log_sum', 'contact_sq_sum'")
         else :
             raise Exception("You must set scores before using rescoring functions")
 
@@ -681,8 +679,8 @@ class DockData(object):
                 self.scores.rmsdGraphGenerator(rankedPoses, start=start, stop=stop, plot=plot, title=title )
             except KeyError :
                 raise Exception("pick a sorting element from \n \
-                'original_rank', 'r_size', 'res_fr_sum', 'res_mean_fr', 'res_log_sum', 'res_sq_sum', \
-                'c_size', 'con_fr_sum', 'con_mean_fr', 'con_log_sum', 'con_sq_sum'")
+                'original_rank', 'r_size', 'residue_sum', 'residue_average', 'residue_log_sum', 'residue_sq_sum', \
+                'c_size', 'contact_sum', 'contact_average', 'contact_log_sum', 'contact_sq_sum'")
         else :
             raise Exception("You must set scores before using rescoring functions")
 
@@ -692,8 +690,8 @@ class DockData(object):
             multiPlot3D([self.scores for i in wanted_scores], ranks, wanted_scores, title=title,size=size)
         except KeyError :
             raise Exception("pick a sorting element from \n \
-            'original_rank', 'r_size', 'res_fr_sum', 'res_mean_fr', 'res_log_sum', 'res_sq_sum', \
-            'c_size', 'con_fr_sum', 'con_mean_fr', 'con_log_sum', 'con_sq_sum'")
+            'original_rank', 'r_size', 'residue_sum', 'residue_average', 'residue_log_sum', 'residue_sq_sum', \
+            'c_size', 'contact_sum', 'contact_average', 'contact_log_sum', 'contact_sq_sum'")
 
 
                 ###############################################
@@ -710,8 +708,8 @@ class DockData(object):
                 clusters=BSAS(self.rankedPoses(element=element), maxd, out=out, start=start,stop=stop )
         except KeyError :
             raise Exception("pick a sorting element from \n \
-            'original_rank', 'r_size', 'res_fr_sum', 'res_mean_fr', 'res_log_sum', 'res_sq_sum', \
-            'c_size', 'con_fr_sum', 'con_mean_fr', 'con_log_sum', 'con_sq_sum', 'rmsd'")
+            'original_rank', 'r_size', 'residue_sum', 'residue_average', 'residue_log_sum', 'residue_sq_sum', \
+            'c_size', 'contact_sum', 'contact_average', 'contact_log_sum', 'contact_sq_sum', 'rmsd'")
 
         return clusters
 

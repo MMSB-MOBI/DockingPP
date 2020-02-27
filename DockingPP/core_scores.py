@@ -20,7 +20,7 @@ class Scores(object):
             self.loadFile(filename)
         elif data:
             self.loadScores(data)
-        self.columns={"original_rank":0,"r_size":1,"res_fr_sum":2,"res_mean_fr": 3, "res_log_sum": 4, "res_sq_sum": 5, "c_size": 6, "con_fr_sum": 7,"con_mean_fr" : 8,"con_log_sum" : 9,"con_sq_sum" : 10}
+        self.columns={"original_rank":0,"r_size":1,"residue_sum":2,"residue_average": 3, "residue_log_sum": 4, "residue_sq_sum": 5, "c_size": 6, "contact_sum": 7,"contact_average" : 8,"contact_log_sum" : 9,"contact_sq_sum" : 10}
         self.belongsTo=None
         self.poses=None
 
@@ -114,8 +114,8 @@ class Scores(object):
 
     def rankedPoses(self, element="res_mean_fr", start=0, stop=None):
         """Returns poses' ids,  sorted according to rescoring element : ]
-        "original_rank","s_size","res_fr_sum","res_mean_fr","res_log_sum","res_sq_sum",
-        "c_size","con_fr_sum","con_mean_fr","con_log_sum","con_sq_sum"
+        'original_rank', 'r_size', 'residue_sum', 'residue_average', 'residue_log_sum', 'residue_sq_sum',
+        'c_size', 'contact_sum', 'contact_average', 'contact_log_sum', 'contact_sq_sum'
         Means the pose classified 1st is 1st position of the list.   """
         try :
             p=self.getPoses
@@ -147,8 +147,8 @@ class Scores(object):
         At position 0 we have pose 0 with rank 37 : rank[0] = 37
         Means the pose in original rank 0 is in 37th position according to rescoring
         element:
-        "original_rank","s_size","res_fr_sum","res_mean_fr","res_log_sum","res_sq_sum",
-        "c_size","con_fr_sum","con_mean_fr","con_log_sum","con_sq_sum"  """
+        'original_rank', 'r_size', 'residue_sum', 'residue_average', 'residue_log_sum', 'residue_sq_sum',
+        'c_size', 'contact_sum', 'contact_average', 'contact_log_sum', 'contact_sq_sum' """
 
         return self.ranksFromRankedPoses(self.rankedPoses(element=element, start=start, stop=stop))
 
