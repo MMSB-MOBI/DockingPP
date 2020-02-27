@@ -471,8 +471,9 @@ class DockData(object):
 
         return res_stats
 
+
     def write_all_scores(self, size=1 , filename="scores", title='Exp1', header=None, F=False,resStats=None,conStats=None,maxPose=None) :
-        header = ["Surface size", "Residue freq sum", "Residue mean freq", "Residue log sum", "Residue square sum", "Number of contacts", "Contact freq sum", "Contact mean freq", "Contact log sum", "Contact square sum"]
+        header = ["Residue_Number", "Residue_Sum", "Residue_Average", "Residue_Log_Sum", "Residue_square_sum", "Contact_Number", "Contact_Sum", "Contact_Average", "Contact_Log_Sum", "Contact_Square_Sum"]
 
         if resStats and conStats:
             resS,conS=resStats,conStats
