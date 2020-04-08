@@ -1,0 +1,4 @@
+typeguard
+jupyter
+pyproteinsExt
+ccmap
