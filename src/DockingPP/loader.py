@@ -16,8 +16,6 @@ def loadZdock(zdock_results:str, nb_pose:int = -1) -> DockingHandler:
 
     reZPOSE =  r'^([\d\.-]+)[\s]+([\d\.-]+)[\s]+([\d\.-]+)[\s]+([\d]+)[\s]+([\d]+)[\s]+([\d]+)[\s]+.*'
 
-    docking_collection = DockingHandler()
-
     with open(zdock_results, 'r') as f:
         #Check header lines formatting
         re_line1 = re.match(reL1, f.readline())
@@ -36,11 +34,13 @@ def loadZdock(zdock_results:str, nb_pose:int = -1) -> DockingHandler:
 
         #Set docking_collection attributes
 
-        docking_collection.grid_dimension = int(re_line1.groups()[0])
-        docking_collection.step = float(re_line1.groups()[1])
-        docking_collection.initial_euler = ( float(re_line2.groups()[0]), float(re_line2.groups()[1]), float(re_line2.groups()[2]) )
-        docking_collection.baryRec =  ( float(re_line3.groups()[1]), float(re_line3.groups()[2]), float(re_line3.groups()[3]) )
-        docking_collection.baryLig = ( float(re_line4.groups()[1]), float(re_line4.groups()[2]), float(re_line4.groups()[3]) ) 
+        grid_dimension = int(re_line1.groups()[0])
+        step = float(re_line1.groups()[1])
+        initial_euler = ( float(re_line2.groups()[0]), float(re_line2.groups()[1]), float(re_line2.groups()[2]) )
+        baryRec =  ( float(re_line3.groups()[1]), float(re_line3.groups()[2]), float(re_line3.groups()[3]) )
+        baryLig = ( float(re_line4.groups()[1]), float(re_line4.groups()[2]), float(re_line4.groups()[3]) ) 
+
+        docking_collection = DockingHandler(grid_dimension, step, initial_euler, baryRec, baryLig)
 
         pose_index = 1
         #Parse poses lines 
@@ -50,9 +50,9 @@ def loadZdock(zdock_results:str, nb_pose:int = -1) -> DockingHandler:
                 raise error.ZdockFormatError("A pose line has wrong format")
             euler = (float(m.groups()[0]), float(m.groups()[1]), float(m.groups()[2]))
             
-            if docking_collection.initial_euler != (0, 0, 0): # Rotation has to be applied
+            if initial_euler != (0, 0, 0): # Rotation has to be applied
                 #Make rotation matrices
-                rand_rot=trans_matrix(*docking_collection.initial_euler)
+                rand_rot=trans_matrix(*initial_euler)
                 pose_rot=trans_matrix(*euler)
                 # Combine into one matrix
                 double=pose_rot.dot(rand_rot)
@@ -60,7 +60,9 @@ def loadZdock(zdock_results:str, nb_pose:int = -1) -> DockingHandler:
                 euler=eulerFromMatrix(double)
 
             _translation = [int(m.groups()[3]), int(m.groups()[4]), int(m.groups()[5])]
-            translation = tuple([ t - docking_collection.grid_dimension if t > docking_collection.grid_dimension / 2 else t for t in _translation ])
+            translation = tuple([ t - grid_dimension if t > grid_dimension / 2 else t for t in _translation ])
+            translation = tuple([ -1 * t * step for t in translation]) #Copy Julia's calculations
+
             docking_collection.addPose(pose_index, euler, translation)
 
             if nb_pose == pose_index:
