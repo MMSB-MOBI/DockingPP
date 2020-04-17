@@ -8,6 +8,17 @@ import DockingPP.typecheck as typecheck
 
 @typechecked
 def loadZdock(zdock_results:str, nb_pose:int = -1) -> DockingHandler:
+    """[summary]
+    
+    :param zdock_results: [description]
+    :type zdock_results: str
+    :param nb_pose: [description], defaults to -1
+    :type nb_pose: int, optional
+    :raises error.ZdockFormatError: [description]
+    :raises error.IncompatiblePoseNumber: [description]
+    :return: [description]
+    :rtype: DockingHandler
+    """
     typecheck.validFile(zdock_results) #Check if the file exists
     logging.info(f"== Load zDock results ==\n path : {zdock_results}\n number of poses : {'All' if nb_pose == -1 else nb_pose}")
     reL1 = r'^([\d]+)[\s]+([\d\.]+)[\s]*$'
