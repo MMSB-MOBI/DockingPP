@@ -23,7 +23,6 @@ PdbAtoms = TypedDict("PdbAtoms", {
      "name" : List[str]
 })
 
-@typechecked
 class DockingHandler: 
     def __init__(self, grid_dimension : int, step : float, initial_euler : Tuple[float, float, float], baryRec : Tuple[float, float, float], baryLig : Tuple[float, float, float]):
         """[summary]
@@ -39,19 +38,20 @@ class DockingHandler:
         :param baryLig: [description]
         :type baryLig: Tuple[float, float, float]
         """
-       self.grid_dimension : int = grid_dimension
-       self.step : float = step 
-       self.initial_euler : Tuple[float, float, float] = initial_euler
-       self.baryRec : Tuple[float, float, float] = baryRec
-       self.baryLig : Tuple[float, float, float] = baryLig
-       self.ligand : PdbAtoms = None 
-       self.receptor : PdbAtoms = None 
-       self.poses : List[Pose] = []
-       self.offsetRec : Tuple[float, float, float] = tuple( [ -1 * bary for bary in self.baryRec]) 
-       self.offsetLig : Tuple[float, float, float] = tuple( [ -1 * bary for bary in self.baryLig])
-       self._raw_contact_map : List[List[int]] = None #Raw contact map from ccmap
-       self._cmap_poses : List[Pose] = None
-       self.freq : Frequencies = None
+        self.grid_dimension : int = grid_dimension
+        self.step : float = step 
+        self.initial_euler : Tuple[float, float, float] = initial_euler
+        self.baryRec : Tuple[float, float, float] = baryRec
+        self.baryLig : Tuple[float, float, float] = baryLig
+        self.ligand : PdbAtoms = None 
+        self.receptor : PdbAtoms = None 
+        self.poses : List[Pose] = []
+        self.offsetRec : Tuple[float, float, float] = tuple( [ -1 * bary for bary in self.baryRec]) 
+        self.offsetLig : Tuple[float, float, float] = tuple( [ -1 * bary for bary in self.baryLig])
+        self._raw_contact_map : List[List[int]] = None #Raw contact map from ccmap
+        self._cmap_poses : List[Pose] = None
+        self.freq : Frequencies = None
+        self._nb_rescored_poses:int = 0
 
     @property
     def cmap_poses(self):
@@ -144,6 +144,8 @@ class DockingHandler:
         :type nb_poses: int
         :raises error.IncompatiblePoseNumber: [description]
         """
+        logging.info(f"== Compute frequencies ==\nNumber of poses:{nb_poses}")
+
         if not self._raw_contact_map:
             logging.error("Contact map doesn't exist. Call computeContactMap first.")
             return 
@@ -162,12 +164,14 @@ class DockingHandler:
         :type nb_poses: int
         :raises error.IncompatiblePoseNumber: [description]
         """
+
         if nb_poses > len(self.cmap_poses):
             raise error.IncompatiblePoseNumber(f"Impossible to rescore {nb_poses} poses, only {len(self.cmap_poses)} have contact map")
         if not self.freq:
             logging.error("Frequencies doesn't exist. Call computeFrequencies first.")
             return
 
+        self._nb_rescored_poses = nb_poses
         for pose in self.cmap_poses[:nb_poses]:
             pose.computeScore(type_score, self.freq)
 
@@ -189,7 +193,7 @@ class DockingHandler:
         output[thread_number] = ccmap.lzmap(self.receptor.atomDictorize, self.ligand.atomDictorize, eulers, translations, d = distance, encode = True, offsetRec = self.offsetRec, offsetLig = self.offsetLig)
         return
 
-    def _split_poses(self, nb_to_keep:int, nb_split:int):
+    def _split_poses(self, nb_to_keep:int, nb_split:int) -> Tuple[int, List['DockingPP.pose.Pose']]:
         """[summary]
         
         :param nb_to_keep: [description]
@@ -219,6 +223,27 @@ class DockingHandler:
         """
         p = Pose(pose_index, euler, translation)
         self.poses.append(p)
+
+    def serializeRescoring(self, output_file:str, scores_to_write: List[str] = ["residues_sum", "residues_average", "residues_log_sum", "residues_square_sum", "contacts_sum", "contacts_average", "contacts_log_sum", "contacts_square_sum"]):
+        """[summary]
+        
+        :param output_file: [description]
+        :type output_file: str
+        :param scores_to_write: [description], defaults to ["residues_sum", "residues_average", "residues_log_sum", "residues_square_sum", "contacts_sum", "contacts_average", "contacts_log_sum", "contacts_square_sum"]
+        :type scores_to_write: List[str], optional
+        """
+
+        if not self._nb_rescored_poses : 
+            logging.error("Poses has not been rescored, call rescorePoses")
+            return
+
+        o = open(output_file, "w")
+        o.write(f"#Rescoring of {self._nb_rescored_poses} poses with frequencies computed on {self.freq.nb_poses_used} poses.\n")
+        o.write("#Pose\t" + "\t".join(scores_to_write) + "\n")
+        for p in self.cmap_poses[:self._nb_rescored_poses]:
+            o.write(f"{p.index}\t{p.serializeScores(scores_to_write)}\n")
+        o.close()
+        logging.info(f"Scores writes to {output_file}")
 
     def __str__(self):
         return f"#DockingHandler object\nGrid dimension : {self.grid_dimension}\nStep : {self.step}\nInitial euler vector : {self.initial_euler}\nNumber of poses : {len(self.poses)}\nLigand offset : {self.offsetLig}\nReceptor offset : {self.offsetRec}"

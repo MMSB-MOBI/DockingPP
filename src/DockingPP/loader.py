@@ -6,7 +6,6 @@ import logging
 from typeguard import typechecked
 import DockingPP.typecheck as typecheck
 
-@typechecked
 def loadZdock(zdock_results:str, nb_pose:int = -1) -> DockingHandler:
     """[summary]
     

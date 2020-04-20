@@ -1,9 +1,11 @@
+from typing import List, Dict, Tuple, Set
+import math
+
 class Frequencies:
-    def __init__(self, poses: List[DockingPP.pose.Pose]):
+    def __init__(self, poses: List['DockingPP.pose.Pose']):
         self.nb_poses_used : int = len(poses)
         self.count_contact : Dict[Tuple[int, int], int]= {}
-        self.count_ligand_residue : Dict[int, int]= {}
-        self.count_receptor_residue : Dict[int, int] = {}
+        self.count_residue : Dict[str, Dict[int,int]]= {"ligand": {}, "receptor": {}}
         self._computeCount(poses)
 
     @property
@@ -18,29 +20,15 @@ class Frequencies:
         return self._rel_frequencies_contact
     
     @property
-    def rel_frequencies_ligand_residue(self) -> Dict[int, float]:
-        """[summary]
-        
-        :return: [description]
-        :rtype: Dict[int, float]
-        """
-        if not hasattr(self, "_rel_frequencies_ligand_residue"):
-            self._rel_frequencies_ligand_residue = { key : val/self.nb_poses_used for key, val in self.count_ligand_residue.items()}
-        return self._rel_frequencies_ligand_residue
+    def rel_frequencies_residue(self) -> Dict[str, Dict[int, float]]:
+        if not hasattr(self, "_rel_frequencies_residue"):
+            self._rel_frequencies_residue = {"ligand":{}, "receptor": {}}
+            for role in self.count_residue:
+                for idx in self.count_residue[role]:
+                    self._rel_frequencies_residue[role][idx] = self.count_residue[role][idx] / self.nb_poses_used
+        return self._rel_frequencies_residue
 
-    @property
-    def rel_frequencies_receptor_residue(self) -> Dict[int, float]:
-        """[summary]
-        
-        :return: [description]
-        :rtype: Dict[int, float]
-        """
-        if not hasattr(self, "_rel_frequencies_receptor_residue"):
-            self._rel_frequencies_receptor_residue = { key : val/self.nb_poses_used for key, val in self.count_ligand_residue.items()}
-        return self._rel_frequencies_receptor_residue
-
-
-    def _computeCount(self, poses : List[DockingPP.pose.Pose]):
+    def _computeCount(self, poses : List['DockingPP.pose.Pose']):
         """[summary]
         
         :param poses: [description]
@@ -52,12 +40,69 @@ class Frequencies:
                     self.count_contact[contact] = 0
                 self.count_contact[contact] += 1
             
-            for ligand_residue in p.ligand_residues_interface:
-                if not ligand_residue in self.count_ligand_residue:
-                    self.count_ligand_residue[ligand_residue] = 0
-                self.count_ligand_residue[ligand_residue] += 1
+            for role in ["ligand", "receptor"]:
+                for residue in p.residues_interface[role]:
+                    if not residue in self.count_residue[role]:
+                        self.count_residue[role][residue] = 0
+                    self.count_residue[role][residue] += 1
 
-            for rec_residue in p.receptor_residues_interface:
-                if not rec_residue in self.count_receptor_residue:
-                    self.count_receptor_residue[rec_residue] = 0
-                self.count_receptor_residue[rec_residue] += 1
+    def getResidueFrequenciesSum(self, list_residue:Dict[int,Set[int]]) -> float:
+        """[summary]
+        
+        :param list_residue: [description]
+        :type list_residue: Dict[int,Set[int]]
+        :return: [description]
+        :rtype: float
+        """
+        return sum([self.rel_frequencies_residue[role].get(idx, 1 / self.nb_poses_used) for role in list_residue for idx in list_residue[role]])
+
+    def getResidueFrequenciesLogSum(self, list_residue:Dict[int,Set[int]]) -> float:
+        """[summary]
+        
+        :param list_residue: [description]
+        :type list_residue: Dict[int,Set[int]]
+        :return: [description]
+        :rtype: float
+        """
+        return sum([math.log(self.rel_frequencies_residue[role].get(idx, 1 / self.nb_poses_used)) for role in list_residue for idx in list_residue[role]])
+
+    def getResidueFrequenciesSquareSum(self, list_residue:Dict[int,Set[int]]) -> float:
+        """[summary]
+        
+        :param list_residue: [description]
+        :type list_residue: Dict[int,Set[int]]
+        :return: [description]
+        :rtype: float
+        """
+        return sum([self.rel_frequencies_residue[role].get(idx, 1 / self.nb_poses_used)**2 for role in list_residue for idx in list_residue[role]])
+
+    def getContactFrequenciesSum(self, list_contact:Dict[Tuple[int, int], int]) -> float: 
+        """[summary]
+        
+        :param list_contact: [description]
+        :type list_contact: Dict[Tuple[int, int], int]
+        :return: [description]
+        :rtype: float
+        """
+        return sum([self.rel_frequencies_contact.get(contact, 1 / self.nb_poses_used) for contact in list_contact])
+
+    def getContactFrequenciesLogSum(self, list_contact:Dict[Tuple[int, int], int]) -> float: 
+        """[summary]
+        
+        :param list_contact: [description]
+        :type list_contact: Dict[Tuple[int, int], int]
+        :return: [description]
+        :rtype: float
+        """
+        return sum([math.log(self.rel_frequencies_contact.get(contact, 1 / self.nb_poses_used)) for contact in list_contact])
+
+    def getContactFrequenciesSquareSum(self, list_contact:Dict[Tuple[int, int], int]) -> float: 
+        """[summary]
+        
+        :param list_contact: [description]
+        :type list_contact: Dict[Tuple[int, int], int]
+        :return: [description]
+        :rtype: float
+        """
+        return sum([self.rel_frequencies_contact.get(contact, 1 / self.nb_poses_used)**2 for contact in list_contact])
+        

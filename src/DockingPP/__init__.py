@@ -1,4 +1,4 @@
-from DockingPP.loader import loadZdock
+from .loader import loadZdock
 import logging
 import sys
 
