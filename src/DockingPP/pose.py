@@ -12,6 +12,7 @@ class Pose :
         self.contacts : Set[Tuple[int, int]] = set() #tuple(receptor_index, ligand_index)
         self.rescoring : Dict [str, float] = {}
         self.contact_computed : bool = False
+        self.rmsd: int = None
 
     @property
     def nb_residues(self):
@@ -94,3 +95,17 @@ class Pose :
                 raise error.InvalidScore(f"{sc} is invalid or not computed")
         
         return serialized
+
+    def getScore(self, score):
+        if not score in self.rescoring:
+            raise error.InvalidScore(f"{score} is invalid or not computed")
+
+        return self.rescoring[score]
+
+    def setRMSD(self, rmsd:float):
+        self.rmsd = float(rmsd)
+
+    def isNative(self, rmsd_cutoff:float) -> bool:
+        if self.rmsd <= rmsd_cutoff : 
+            return True
+        return False

@@ -6,6 +6,7 @@ from DockingPP.pose import Pose
 import DockingPP.error as error
 import logging
 from DockingPP.frequencies import Frequencies
+import DockingPP.loader as loader
 
 import threading
 import ccmap
@@ -49,9 +50,9 @@ class DockingHandler:
         self.offsetRec : Tuple[float, float, float] = tuple( [ -1 * bary for bary in self.baryRec]) 
         self.offsetLig : Tuple[float, float, float] = tuple( [ -1 * bary for bary in self.baryLig])
         self._raw_contact_map : List[List[int]] = None #Raw contact map from ccmap
-        self._cmap_poses : List[Pose] = None
         self.freq : Frequencies = None
         self._nb_rescored_poses:int = 0
+        self._nb_cmap_poses:int = 0
 
     @property
     def cmap_poses(self):
@@ -60,9 +61,11 @@ class DockingHandler:
         :return: [description]
         :rtype: [type]
         """
-        if self._cmap_poses == None : 
-            self._cmap_poses = [p for p in self.poses if p.contact_computed]
-        return self._cmap_poses
+        return self.poses[:self._nb_cmap_poses]
+
+    @property
+    def rescored_poses(self):
+        return self.poses[:self._nb_rescored_poses]
 
     def setLigand(self, ligand_pdb:str):
         """[summary]
@@ -103,6 +106,7 @@ class DockingHandler:
             logging.error("Receptor is not set. Call setReceptor first.")
             return
     
+        self._nb_cmap_poses = nb_poses
         output = [ None for i in range(nb_threads) ]
         threadPool = []
         for i, poses in self._split_poses(nb_poses, nb_threads):
@@ -150,8 +154,8 @@ class DockingHandler:
             logging.error("Contact map doesn't exist. Call computeContactMap first.")
             return 
 
-        if nb_poses > len(self.cmap_poses):
-            raise error.IncompatiblePoseNumber(f"You try to compute frequencies for {nb_poses} but only {len(self.cmap_poses)} have contact map.")
+        if nb_poses > self._nb_cmap_poses:
+            raise error.IncompatiblePoseNumber(f"You try to compute frequencies for {nb_poses} but only {self._nb_cmap_poses} have contact map.")
 
         self.freq = Frequencies(self.cmap_poses[:nb_poses])
 
@@ -165,14 +169,14 @@ class DockingHandler:
         :raises error.IncompatiblePoseNumber: [description]
         """
 
-        if nb_poses > len(self.cmap_poses):
-            raise error.IncompatiblePoseNumber(f"Impossible to rescore {nb_poses} poses, only {len(self.cmap_poses)} have contact map")
+        if nb_poses > self._nb_cmap_poses:
+            raise error.IncompatiblePoseNumber(f"Impossible to rescore {nb_poses} poses, only {self._nb_cmap_poses} have contact map")
         if not self.freq:
             logging.error("Frequencies doesn't exist. Call computeFrequencies first.")
             return
 
         self._nb_rescored_poses = nb_poses
-        for pose in self.cmap_poses[:nb_poses]:
+        for pose in self.rescored_poses:
             pose.computeScore(type_score, self.freq)
 
 
@@ -240,10 +244,39 @@ class DockingHandler:
         o = open(output_file, "w")
         o.write(f"#Rescoring of {self._nb_rescored_poses} poses with frequencies computed on {self.freq.nb_poses_used} poses.\n")
         o.write("#Pose\t" + "\t".join(scores_to_write) + "\n")
-        for p in self.cmap_poses[:self._nb_rescored_poses]:
+        for p in self.rescored_poses:
             o.write(f"{p.index}\t{p.serializeScores(scores_to_write)}\n")
         o.close()
         logging.info(f"Scores writes to {output_file}")
+
+    def getOriginalPoses(self, nb_poses):
+        if nb_poses > len(self.poses):
+           raise error.IncompatiblePoseNumber(f"Try to get {nb_poses} but only {len(self.poses)} have been load, including {self._nb_cmap_poses} with contact map.")
+
+        return self.poses[:nb_poses]
+        
+
+    def getRankedPoses(self, score, nb_poses):
+        if nb_poses > self._nb_rescored_poses:
+            raise error.IncompatiblePoseNumber(f"Try to rank {nb_poses} but only {self._nb_rescored_poses} have been rescored.")
+
+        sorted_poses = sorted(self.poses[:nb_poses], key=lambda pose:pose.getScore(score), reverse = True)
+        return sorted_poses
+
+    def storeRMSD(self, rmsd_file: str): 
+        rmsds = loader.loadRMSD(rmsd_file, len(self.poses))
+        for i in range(len(rmsds)):
+            self.poses[i].setRMSD(rmsds[i])
+
+    def getNativePoses(self, topX : int, rmsd_cutoff: float, ranked_by: str) -> List['DockingPP.pose.Pose']:
+        if ranked_by == "original":
+            if topX > len(self.poses):
+                raise error.IncompatiblePoseNumber(f"Try to get native poses from top {topX} poses but only {len(self.poses)} have been stored.")
+            poses_to_proceed = self.poses
+        else:
+            poses_to_proceed = self.getRankedPoses(ranked_by, self._nb_rescored_poses)
+
+        return [p for p in poses_to_proceed[:topX] if p.isNative(rmsd_cutoff)]
 
     def __str__(self):
         return f"#DockingHandler object\nGrid dimension : {self.grid_dimension}\nStep : {self.step}\nInitial euler vector : {self.initial_euler}\nNumber of poses : {len(self.poses)}\nLigand offset : {self.offsetLig}\nReceptor offset : {self.offsetRec}"

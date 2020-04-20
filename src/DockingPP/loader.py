@@ -3,10 +3,10 @@ from DockingPP.dockingHandler import DockingHandler
 import DockingPP.error as error
 from DockingPP.rotation_utils import trans_matrix, eulerFromMatrix
 import logging
-from typeguard import typechecked
 import DockingPP.typecheck as typecheck
+from typing import List 
 
-def loadZdock(zdock_results:str, nb_pose:int = -1) -> DockingHandler:
+def loadZdock(zdock_results:str, nb_pose:int = -1) -> 'DockingHandler':
     """[summary]
     
     :param zdock_results: [description]
@@ -85,9 +85,18 @@ def loadZdock(zdock_results:str, nb_pose:int = -1) -> DockingHandler:
         
         raise error.IncompatiblePoseNumber(f"You ask too much poses, only {pose_index} are present in the result file.")
 
-        
-
-
+def loadRMSD(rmsd_file:str, nb_poses:str) -> List[float]:
+    typecheck.validFile(rmsd_file)
+    rmsds = []
+    with open(rmsd_file) as f:
+        i = 0
+        for l in f:
+            i += 1
+            rmsds.append(l.split("\t")[1])
+            if i == nb_poses:
+                break
+    return rmsds
+    
 
         
 
