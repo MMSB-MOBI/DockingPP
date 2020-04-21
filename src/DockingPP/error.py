@@ -17,3 +17,8 @@ class InvalidScore(Exception):
     """Raised when invalid score is provided
     """
     pass
+
+class InvalidArgument(Exception):
+    """Raised when invalid argument provided in command line
+    """
+    pass

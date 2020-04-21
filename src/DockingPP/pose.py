@@ -41,42 +41,22 @@ class Pose :
         except KeyError:
             raise error.InvalidRole(f"{role} is not a valid role.")
 
-    def computeScore(self, type_score:str, freq: 'DockingPP.frequencies.Frequencies'):
+    def computeScore(self, type_score: str, name_score:str, score_fn):
         """[summary]
         
-        :param type_score: [description]
-        :type type_score: str
-        :param freq: [description]
-        :type freq: DockingPP.frequencies.Frequencies
+        :param score_fn: [description]
+        :type score_fn: 
         :raises error.InvalidScore: [description]
         """
-        if type_score == "contacts_sum":
-            score = freq.getContactFrequenciesSum(self.contacts)
 
-        elif type_score == "contacts_average":
-            score = freq.getContactFrequenciesSum(self.contacts) / len(self.contacts)
-
-        elif type_score == "contacts_log_sum":
-            score = freq.getContactFrequenciesLogSum(self.contacts)
-
-        elif type_score == "contacts_square_sum":
-            score = freq.getContactFrequenciesSquareSum(self.contacts)
-        
-        elif type_score == "residues_sum":
-            score = freq.getResidueFrequenciesSum(self.residues_interface)
-        
-        elif type_score == "residues_average":
-            score = freq.getResidueFrequenciesSum(self.residues_interface) / self.nb_residues
-
-        elif type_score == "residues_log_sum":
-            score = freq.getResidueFrequenciesLogSum(self.residues_interface)
-        
-        elif type_score == "residues_square_sum":
-            score = freq.getResidueFrequenciesSquareSum(self.residues_interface)
+        if type_score == "contacts":
+            score = score_fn(self.contacts)
+        elif type_score == "residues":
+            score = score_fn(self.residues_interface)
         else:
-            raise error.InvalidScore(f"{type_score} is invalid")
+            raise error.InvalidScore(f"{type_score} is not valid. Choose contacts or residues")
 
-        self.rescoring[type_score] = score
+        self.rescoring[name_score] = score
 
     def serializeScores(self, scores:List[str]) -> str:
         """[summary]

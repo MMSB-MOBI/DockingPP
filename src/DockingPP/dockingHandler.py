@@ -73,6 +73,7 @@ class DockingHandler:
         :param ligand_pdb: [description]
         :type ligand_pdb: str
         """
+        logging.info(f"== Set ligand ==\nfile: {ligand_pdb}")
         self.ligand = PARSER_PDB.load(file = ligand_pdb)
     
     def setReceptor(self, receptor_pdb:str):
@@ -81,6 +82,7 @@ class DockingHandler:
         :param receptor_pdb: [description]
         :type receptor_pdb: str
         """
+        logging.info(f"== Set receptor ==\nfile: {receptor_pdb}")
         self.receptor = PARSER_PDB.load(file = receptor_pdb)
 
     def computeContactMap(self, nb_threads:int, nb_poses:int, distance:float = 5):
@@ -148,7 +150,7 @@ class DockingHandler:
         :type nb_poses: int
         :raises error.IncompatiblePoseNumber: [description]
         """
-        logging.info(f"== Compute frequencies ==\nNumber of poses:{nb_poses}")
+        logging.info(f"== Compute frequencies ==\nNumber of poses: {nb_poses}")
 
         if not self._raw_contact_map:
             logging.error("Contact map doesn't exist. Call computeContactMap first.")
@@ -159,7 +161,7 @@ class DockingHandler:
 
         self.freq = Frequencies(self.cmap_poses[:nb_poses])
 
-    def rescorePoses(self, type_score:str, nb_poses:int):
+    def rescorePoses(self, nb_poses:int, type_score:str):
         """[summary]
         
         :param type_score: [description]
@@ -168,17 +170,27 @@ class DockingHandler:
         :type nb_poses: int
         :raises error.IncompatiblePoseNumber: [description]
         """
+        logging.info(f'== Rescore poses ==\nNumber of poses : {nb_poses}\n Scores : {type_score}')
 
         if nb_poses > self._nb_cmap_poses:
             raise error.IncompatiblePoseNumber(f"Impossible to rescore {nb_poses} poses, only {self._nb_cmap_poses} have contact map")
+        
         if not self.freq:
             logging.error("Frequencies doesn't exist. Call computeFrequencies first.")
             return
 
         self._nb_rescored_poses = nb_poses
-        for pose in self.rescored_poses:
-            pose.computeScore(type_score, self.freq)
 
+        if type_score == "all": 
+            scores_to_compute = self.freq.available_scores
+        else:
+            if not type_score in self.freq.available_scores:
+                raise error.InvalidScore(f"{score} score is not valid")
+            scores_to_compute = {type_score : self.freq.available_scores[type_score]}
+
+        for pose in self.rescored_poses:
+            for score, score_info in scores_to_compute.items():
+                pose.computeScore(score_info[0], score, score_info[1])
 
     def _ccmap_thread(self, eulers:List[Tuple[float, float, float]], translations: List[Tuple[float, float, float]], thread_number:int, output:List[Optional[int]], distance:float):
         """[summary]

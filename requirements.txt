@@ -2,3 +2,4 @@ typeguard
 jupyter
 pyproteinsExt
 ccmap
+docopt
