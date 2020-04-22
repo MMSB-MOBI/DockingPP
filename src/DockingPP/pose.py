@@ -54,7 +54,7 @@ class Pose :
         elif type_score == "residues":
             score = score_fn(self.residues_interface)
         else:
-            raise error.InvalidScore(f"{type_score} is not valid. Choose contacts or residues")
+            raise error.InvalidScore(f"{type_score} is invalid. Choose contacts or residues")
 
         self.rescoring[name_score] = score
 
@@ -72,13 +72,13 @@ class Pose :
             try:
                 serialized += f"\t{self.rescoring[sc]}"
             except KeyError:
-                raise error.InvalidScore(f"{sc} is invalid or not computed")
+                raise error.InvalidScore(f"{sc} score is invalid or not computed")
         
         return serialized
 
     def getScore(self, score):
         if not score in self.rescoring:
-            raise error.InvalidScore(f"{score} is invalid or not computed")
+            raise error.InvalidScore(f"{score} score is invalid or not computed")
 
         return self.rescoring[score]
 

@@ -7,6 +7,7 @@ import DockingPP.error as error
 import logging
 from DockingPP.frequencies import Frequencies
 import DockingPP.loader as loader
+import DockingPP.clustering as clustering
 
 import threading
 import ccmap
@@ -53,6 +54,7 @@ class DockingHandler:
         self.freq : Frequencies = None
         self._nb_rescored_poses:int = 0
         self._nb_cmap_poses:int = 0
+        self.clusters : Dict[str, Dict[Pose,List[Pose]]] = {}
 
     @property
     def cmap_poses(self):
@@ -259,23 +261,20 @@ class DockingHandler:
         for p in self.rescored_poses:
             o.write(f"{p.index}\t{p.serializeScores(scores_to_write)}\n")
         o.close()
-        logging.info(f"Scores writes to {output_file}")
-
-    def getOriginalPoses(self, nb_poses):
-        if nb_poses > len(self.poses):
-           raise error.IncompatiblePoseNumber(f"Try to get {nb_poses} but only {len(self.poses)} have been load, including {self._nb_cmap_poses} with contact map.")
-
-        return self.poses[:nb_poses]
-        
+        logging.info(f"Scores writes to {output_file}")        
 
     def getRankedPoses(self, score, nb_poses):
-        if nb_poses > self._nb_rescored_poses:
+        if score != "original" and nb_poses > self._nb_rescored_poses:
             raise error.IncompatiblePoseNumber(f"Try to rank {nb_poses} but only {self._nb_rescored_poses} have been rescored.")
+        
+        if score == "original":
+            return self.poses[:nb_poses]
 
         sorted_poses = sorted(self.poses[:nb_poses], key=lambda pose:pose.getScore(score), reverse = True)
         return sorted_poses
 
-    def storeRMSD(self, rmsd_file: str): 
+    #Don't compute this here ?? 
+    '''def storeRMSD(self, rmsd_file: str): 
         rmsds = loader.loadRMSD(rmsd_file, len(self.poses))
         for i in range(len(rmsds)):
             self.poses[i].setRMSD(rmsds[i])
@@ -288,7 +287,15 @@ class DockingHandler:
         else:
             poses_to_proceed = self.getRankedPoses(ranked_by, self._nb_rescored_poses)
 
-        return [p for p in poses_to_proceed[:topX] if p.isNative(rmsd_cutoff)]
+        return [p for p in poses_to_proceed[:topX] if p.isNative(rmsd_cutoff)]'''
+
+    def clusterPoses(self, ranked_by:str, dist_cutoff:float, nb_poses:int):
+        logging.info(f"== Cluster poses ==\nRanked by : {ranked_by}")
+        poses_to_cluster = self.getRankedPoses(ranked_by, nb_poses)
+        self.clusters[ranked_by] = clustering.BSAS(poses_to_cluster, dist_cutoff)
+
+    def getRankedClusterRepresentatives(self, ranked_by:str, nb_poses:int):
+        print("YO")
 
     def __str__(self):
         return f"#DockingHandler object\nGrid dimension : {self.grid_dimension}\nStep : {self.step}\nInitial euler vector : {self.initial_euler}\nNumber of poses : {len(self.poses)}\nLigand offset : {self.offsetLig}\nReceptor offset : {self.offsetRec}"
