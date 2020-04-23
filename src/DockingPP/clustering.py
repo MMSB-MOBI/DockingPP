@@ -3,7 +3,7 @@ from collections import OrderedDict
 from typing import List, Dict
 
 def computeDistance(pose1: 'DockingPP.pose.Pose', pose2 : 'DockingPP.pose.Pose') -> float:
-    """[summary]
+    """Compute distance
 
     Args:
         pose1 ([type]): [description]
