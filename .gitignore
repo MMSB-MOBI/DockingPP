@@ -1,6 +1,8 @@
 __pycache__
 .ipynb_checkpoints
-sphinx-doc/
 .DS_Store
 default.profraw
-notebook/dockingPP.log
+dockingPP.log
+example_results/
+notebook/usage_old.ipynb
+
