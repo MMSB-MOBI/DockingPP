@@ -14,6 +14,6 @@ Soon : DockingPP will be a pip package.
 
 ## API usage 
 
-Documentation of API functions : SOON 
+Documentation of API functions : [link](sphinx-doc/build/html/index.html) 
 
 Example of API usage in python notebook : [notebook/usage.ipynb](notebook/usage.ipynb)
