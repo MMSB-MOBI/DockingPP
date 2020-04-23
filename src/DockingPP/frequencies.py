@@ -19,9 +19,9 @@ class Frequencies:
     @property
     def rel_frequencies_contact(self) -> Dict[Tuple[int, int], float]:
         """[summary]
-        
-        :return: [description]
-        :rtype: Dict[Tuple[int, int], float]
+
+        Returns:
+            Dict[Tuple[int, int], float]: [description]
         """
         if not hasattr(self, "_rel_frequencies_contact"):
             self._rel_frequencies_contact = { key : val/self.nb_poses_used for key, val in self.count_contact.items()}
@@ -29,6 +29,11 @@ class Frequencies:
     
     @property
     def rel_frequencies_residue(self) -> Dict[str, Dict[int, float]]:
+        """[summary]
+
+        Returns:
+            Dict[str, Dict[int, float]]: [description]
+        """
         if not hasattr(self, "_rel_frequencies_residue"):
             self._rel_frequencies_residue = {"ligand":{}, "receptor": {}}
             for role in self.count_residue:
@@ -38,9 +43,9 @@ class Frequencies:
 
     def _computeCount(self, poses : List['DockingPP.pose.Pose']):
         """[summary]
-        
-        :param poses: [description]
-        :type poses: List[DockingPP.pose.Pose]
+
+        Args:
+            poses (List[): [description]
         """
         for p in poses: 
             for contact in p.contacts: 
@@ -57,67 +62,89 @@ class Frequencies:
 
     def getResidueFrequenciesSum(self, list_residue:Dict[str, Dict[int,Set[int]]]) -> float:
         """[summary]
-        
-        :param list_residue: [description]
-        :type list_residue: Dict[int,Set[int]]
-        :return: [description]
-        :rtype: float
+
+        Args:
+            list_residue (Dict[str, Dict[int,Set[int]]]): [description]
+
+        Returns:
+            float: [description]
         """
         return sum([self.rel_frequencies_residue[role].get(idx, 1 / self.nb_poses_used) for role in list_residue for idx in list_residue[role]])
     
     def getResidueFrequenciesLogSum(self, list_residue:Dict[str, Dict[int,Set[int]]]) -> float:
         """[summary]
-        
-        :param list_residue: [description]
-        :type list_residue: Dict[int,Set[int]]
-        :return: [description]
-        :rtype: float
+
+        Args:
+            list_residue (Dict[str, Dict[int,Set[int]]]): [description]
+
+        Returns:
+            float: [description]
         """
         return sum([math.log(self.rel_frequencies_residue[role].get(idx, 1 / self.nb_poses_used)) for role in list_residue for idx in list_residue[role]])
 
     def getResidueFrequenciesSquareSum(self, list_residue:Dict[str, Dict[int,Set[int]]]) -> float:
         """[summary]
-        
-        :param list_residue: [description]
-        :type list_residue: Dict[int,Set[int]]
-        :return: [description]
-        :rtype: float
+
+        Args:
+            list_residue (Dict[str, Dict[int,Set[int]]]): [description]
+
+        Returns:
+            float: [description]
         """
         return sum([self.rel_frequencies_residue[role].get(idx, 1 / self.nb_poses_used)**2 for role in list_residue for idx in list_residue[role]])
 
     def getResidueFrequenciesAverage(self, list_residue:Dict[str, Dict[int,Set[int]]]) -> float:
+        """[summary]
+
+        Args:
+            list_residue (Dict[str, Dict[int,Set[int]]]): [description]
+
+        Returns:
+            float: [description]
+        """
         nb_residues = len([residues for role in list_residue for residues in list_residue[role]])
         return self.getResidueFrequenciesSum(list_residue) / nb_residues
 
     def getContactFrequenciesSum(self, list_contact:Dict[Tuple[int, int], int]) -> float: 
         """[summary]
-        
-        :param list_contact: [description]
-        :type list_contact: Dict[Tuple[int, int], int]
-        :return: [description]
-        :rtype: float
+
+        Args:
+            list_contact (Dict[Tuple[int, int], int]): [description]
+
+        Returns:
+            float: [description]
         """
         return sum([self.rel_frequencies_contact.get(contact, 1 / self.nb_poses_used) for contact in list_contact])
 
     def getContactFrequenciesLogSum(self, list_contact:Dict[Tuple[int, int], int]) -> float: 
         """[summary]
-        
-        :param list_contact: [description]
-        :type list_contact: Dict[Tuple[int, int], int]
-        :return: [description]
-        :rtype: float
+
+        Args:
+            list_contact (Dict[Tuple[int, int], int]): [description]
+
+        Returns:
+            float: [description]
         """
         return sum([math.log(self.rel_frequencies_contact.get(contact, 1 / self.nb_poses_used)) for contact in list_contact])
 
     def getContactFrequenciesSquareSum(self, list_contact:Dict[Tuple[int, int], int]) -> float: 
         """[summary]
-        
-        :param list_contact: [description]
-        :type list_contact: Dict[Tuple[int, int], int]
-        :return: [description]
-        :rtype: float
+
+        Args:
+            list_contact (Dict[Tuple[int, int], int]): [description]
+
+        Returns:
+            float: [description]
         """
         return sum([self.rel_frequencies_contact.get(contact, 1 / self.nb_poses_used)**2 for contact in list_contact])
         
     def getContactFrequenciesAverage(self, list_contact:Dict[Tuple[int, int], int]) -> float:
+        """[summary]
+
+        Args:
+            list_contact (Dict[Tuple[int, int], int]): [description]
+
+        Returns:
+            float: [description]
+        """
         return self.getContactFrequenciesSum(list_contact) / len(list_contact)

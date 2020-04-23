@@ -22,3 +22,27 @@ class InvalidArgument(Exception):
     """Raised when invalid argument provided in command line
     """
     pass
+
+class ClustersNotComputed(Exception):
+    """Raised when clusters are needed and not computed
+    """
+    pass
+
+class RescoringNotComputed(Exception):
+    """Raised when rescoring is needed and not computed
+    """
+    pass
+
+class PdbNotSet(Exception):
+    """Raised when a pdb file is not set"""
+    pass
+
+class ContactMapNotComputed(Exception):
+    """Raised when contact map is needed and not computed
+    """
+    pass
+
+class FrequenciesNotComputed(Exception):
+    """Raised when frequencies are needed and not computed
+    """
+    pass

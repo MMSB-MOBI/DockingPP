@@ -6,17 +6,20 @@ import logging
 import DockingPP.typecheck as typecheck
 from typing import List 
 
-def loadZdock(zdock_results:str, nb_pose:int = -1) -> 'DockingHandler':
-    """[summary]
-    
-    :param zdock_results: [description]
-    :type zdock_results: str
-    :param nb_pose: [description], defaults to -1
-    :type nb_pose: int, optional
-    :raises error.ZdockFormatError: [description]
-    :raises error.IncompatiblePoseNumber: [description]
-    :return: [description]
-    :rtype: DockingHandler
+def loadZdock(zdock_results:str, nb_pose:int = -1) -> 'DockingPP.dockingHandler.DockingHandler':
+    """Load zdock results
+
+    Args:
+        zdock_results (str): path to zdock results file
+        nb_pose (int, optional): number of poses to load. If -1, all poses will be loaded. Defaults to -1. 
+
+    Raises:
+        error.ZdockFormatError: Raise if error is detected in zdock format
+        error.IncompatiblePoseNumber: Raise if you try to load more poses than possible.
+
+    Returns:
+        DockingPP.dockingHandler.DockingHandler: DockingHandler object for this zdock results.
+
     """
     typecheck.validFile(zdock_results) #Check if the file exists
     logging.info(f"== Load zDock results ==\n path : {zdock_results}\n number of poses : {'All' if nb_pose == -1 else nb_pose}")
