@@ -14,6 +14,6 @@ Soon : DockingPP will be a pip package.
 
 ## API usage 
 
-Documentation of API functions : [link](sphinx-doc/build/html/index.html) 
+Documentation of API functions : [DockingPP documentation](https://mmsb-mobi.github.io/DockingPP/) 
 
 Example of API usage in python notebook : [notebook/usage.ipynb](notebook/usage.ipynb)
