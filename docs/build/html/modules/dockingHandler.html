@@ -163,134 +163,74 @@
 <dd><p>Class that handle docking results</p>
 <dl class="py attribute">
 <dt id="DockingPP.dockingHandler.DockingHandler.grid_dimension">
-<code class="sig-name descname">grid_dimension</code><a class="headerlink" href="#DockingPP.dockingHandler.DockingHandler.grid_dimension" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">grid_dimension</code><em class="property">: int</em><em class="property"> = None</em><a class="headerlink" href="#DockingPP.dockingHandler.DockingHandler.grid_dimension" title="Permalink to this definition">¶</a></dt>
 <dd><p>size N of the NxNxN grid used in the docking</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p>int</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt id="DockingPP.dockingHandler.DockingHandler.step">
-<code class="sig-name descname">step</code><a class="headerlink" href="#DockingPP.dockingHandler.DockingHandler.step" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">step</code><em class="property">: float</em><em class="property"> = None</em><a class="headerlink" href="#DockingPP.dockingHandler.DockingHandler.step" title="Permalink to this definition">¶</a></dt>
 <dd><p>spacing between grid cells</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p>float</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt id="DockingPP.dockingHandler.DockingHandler.initial_euler">
-<code class="sig-name descname">initial_euler</code><a class="headerlink" href="#DockingPP.dockingHandler.DockingHandler.initial_euler" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">initial_euler</code><em class="property">: Tuple[float, float, float]</em><em class="property"> = None</em><a class="headerlink" href="#DockingPP.dockingHandler.DockingHandler.initial_euler" title="Permalink to this definition">¶</a></dt>
 <dd><p>initial rotation of the ligand in Euler angles</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p>Tuple[float, float, float]</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt id="DockingPP.dockingHandler.DockingHandler.baryRec">
-<code class="sig-name descname">baryRec</code><a class="headerlink" href="#DockingPP.dockingHandler.DockingHandler.baryRec" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">baryRec</code><em class="property">: Tuple[float, float, float]</em><em class="property"> = None</em><a class="headerlink" href="#DockingPP.dockingHandler.DockingHandler.baryRec" title="Permalink to this definition">¶</a></dt>
 <dd><p>receptor initial translation to center</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p>Tuple[float, float, float]</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt id="DockingPP.dockingHandler.DockingHandler.baryLig">
-<code class="sig-name descname">baryLig</code><a class="headerlink" href="#DockingPP.dockingHandler.DockingHandler.baryLig" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">baryLig</code><em class="property">: Tuple[float, float, float]</em><em class="property"> = None</em><a class="headerlink" href="#DockingPP.dockingHandler.DockingHandler.baryLig" title="Permalink to this definition">¶</a></dt>
 <dd><p>ligand initial translation to center</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p>Tuple[float, float, float]</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt id="DockingPP.dockingHandler.DockingHandler.ligand">
-<code class="sig-name descname">ligand</code><a class="headerlink" href="#DockingPP.dockingHandler.DockingHandler.ligand" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">ligand</code><em class="property">: 'pyproteinsExt.structure.coordinates.Structure'</em><em class="property"> = None</em><a class="headerlink" href="#DockingPP.dockingHandler.DockingHandler.ligand" title="Permalink to this definition">¶</a></dt>
 <dd><p>ligand pdb parsed by pyproteinsExt. Set with setLigand method.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p>pyproteinsExt.structure.coordinates.Structure</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt id="DockingPP.dockingHandler.DockingHandler.receptor">
-<code class="sig-name descname">receptor</code><a class="headerlink" href="#DockingPP.dockingHandler.DockingHandler.receptor" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">receptor</code><em class="property">: 'pyproteinsExt.structure.coordinates.Structure'</em><em class="property"> = None</em><a class="headerlink" href="#DockingPP.dockingHandler.DockingHandler.receptor" title="Permalink to this definition">¶</a></dt>
 <dd><p>receptor pdb parsed by pyproteinsExt. Set with setReceptor method</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p>pyproteinsExt.structure.coordinates.Structure</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt id="DockingPP.dockingHandler.DockingHandler.poses">
-<code class="sig-name descname">poses</code><a class="headerlink" href="#DockingPP.dockingHandler.DockingHandler.poses" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">poses</code><em class="property">: List[Pose]</em><em class="property"> = None</em><a class="headerlink" href="#DockingPP.dockingHandler.DockingHandler.poses" title="Permalink to this definition">¶</a></dt>
 <dd><p>List of docking poses. Set with calls to addPose method.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p>List[DockingPP.pose.Pose]</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt id="DockingPP.dockingHandler.DockingHandler.offsetRec">
-<code class="sig-name descname">offsetRec</code><a class="headerlink" href="#DockingPP.dockingHandler.DockingHandler.offsetRec" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">offsetRec</code><em class="property">: Tuple[float, float, float]</em><em class="property"> = None</em><a class="headerlink" href="#DockingPP.dockingHandler.DockingHandler.offsetRec" title="Permalink to this definition">¶</a></dt>
 <dd><p>Corrected initial translation of receptor</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p>Tuple[float, float, float]</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt id="DockingPP.dockingHandler.DockingHandler.offsetLig">
-<code class="sig-name descname">offsetLig</code><a class="headerlink" href="#DockingPP.dockingHandler.DockingHandler.offsetLig" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">offsetLig</code><em class="property">: Tuple[float, float, float]</em><em class="property"> = None</em><a class="headerlink" href="#DockingPP.dockingHandler.DockingHandler.offsetLig" title="Permalink to this definition">¶</a></dt>
 <dd><p>Corrected initial translation of ligand</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p>Tuple[float, float, float]</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt id="DockingPP.dockingHandler.DockingHandler.freq">
-<code class="sig-name descname">freq</code><a class="headerlink" href="#DockingPP.dockingHandler.DockingHandler.freq" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">freq</code><em class="property">: Frequencies</em><em class="property"> = None</em><a class="headerlink" href="#DockingPP.dockingHandler.DockingHandler.freq" title="Permalink to this definition">¶</a></dt>
 <dd><p>Object that stores frequencies computations. Set with computeFrequencies method.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p>DockingPP.frequencies.Frequencies</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt id="DockingPP.dockingHandler.DockingHandler.clusters">
-<code class="sig-name descname">clusters</code><a class="headerlink" href="#DockingPP.dockingHandler.DockingHandler.clusters" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">clusters</code><em class="property">: Dict[str, Dict[Pose, List[Pose]]]</em><em class="property"> = None</em><a class="headerlink" href="#DockingPP.dockingHandler.DockingHandler.clusters" title="Permalink to this definition">¶</a></dt>
 <dd><p>Poses clusters. Dictionary with score as key and dictionnary as value with representative pose as key and other poses that belongs to cluster as value. Set with clusterPoses.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p>Dict[score, clusters] where score is str and clusters is Dict[DockingPP.pose.Pose, List[DockingPP.pose.Pose]]</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py method">

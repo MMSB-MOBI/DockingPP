@@ -27,38 +27,36 @@ PdbAtoms = TypedDict("PdbAtoms", {
 
 class DockingHandler: 
     """Class that handle docking results
-
-    Attributes:
-        grid_dimension (int): size N of the NxNxN grid used in the docking
-        step (float): spacing between grid cells
-        initial_euler (Tuple[float, float, float]) : initial rotation of the ligand in Euler angles
-        baryRec (Tuple[float, float, float]) : receptor initial translation to center
-        baryLig (Tuple[float, float, float]) : ligand initial translation to center
-        ligand (pyproteinsExt.structure.coordinates.Structure) : ligand pdb parsed by pyproteinsExt. Set with setLigand method.
-        receptor (pyproteinsExt.structure.coordinates.Structure) : receptor pdb parsed by pyproteinsExt. Set with setReceptor method
-        poses (List[DockingPP.pose.Pose]) : List of docking poses. Set with calls to addPose method.
-        offsetRec (Tuple[float, float, float]) : Corrected initial translation of receptor
-        offsetLig (Tuple[float, float, float]) : Corrected initial translation of ligand
-        freq (DockingPP.frequencies.Frequencies) : Object that stores frequencies computations. Set with computeFrequencies method.
-        clusters (Dict[score, clusters] where score is str and clusters is Dict[DockingPP.pose.Pose, List[DockingPP.pose.Pose]]) : Poses clusters. Dictionary with score as key and dictionnary as value with representative pose as key and other poses that belongs to cluster as value. Set with clusterPoses.
-
     """
+    
     def __init__(self, grid_dimension : int, step : float, initial_euler : Tuple[float, float, float], baryRec : Tuple[float, float, float], baryLig : Tuple[float, float, float]):
         self.grid_dimension : int = grid_dimension
+        """size N of the NxNxN grid used in the docking"""
         self.step : float = step 
+        """spacing between grid cells"""
         self.initial_euler : Tuple[float, float, float] = initial_euler
+        """initial rotation of the ligand in Euler angles"""
         self.baryRec : Tuple[float, float, float] = baryRec
+        """receptor initial translation to center"""
         self.baryLig : Tuple[float, float, float] = baryLig
+        """ligand initial translation to center"""
         self.ligand :  'pyproteinsExt.structure.coordinates.Structure' = None 
+        """ligand pdb parsed by pyproteinsExt. Set with setLigand method."""
         self.receptor : 'pyproteinsExt.structure.coordinates.Structure' = None 
+        """receptor pdb parsed by pyproteinsExt. Set with setReceptor method"""
         self.poses : List[Pose] = []
+        """List of docking poses. Set with calls to addPose method."""
         self.offsetRec : Tuple[float, float, float] = tuple( [ -1 * bary for bary in self.baryRec]) 
+        """Corrected initial translation of receptor"""
         self.offsetLig : Tuple[float, float, float] = tuple( [ -1 * bary for bary in self.baryLig])
+        """Corrected initial translation of ligand"""
         self._raw_contact_map : List[List[int]] = None #Raw contact map from ccmap
         self.freq : Frequencies = None
+        """Object that stores frequencies computations. Set with computeFrequencies method."""
         self._nb_rescored_poses:int = 0
         self._nb_cmap_poses:int = 0
         self.clusters : Dict[str, Dict[Pose,List[Pose]]] = {}
+        """Poses clusters. Dictionary with score as key and dictionnary as value with representative pose as key and other poses that belongs to cluster as value. Set with clusterPoses."""
 
     @property
     def cmap_poses(self):
