@@ -358,7 +358,12 @@ class DockingHandler:
         """
         logging.info(f"== Cluster poses ==\nRanked by : {ranked_by}")
         poses_to_cluster = self.getRankedPoses(ranked_by, nb_poses)
-        self.clusters[ranked_by] = clustering.BSAS(poses_to_cluster, dist_cutoff)
+
+        raw_clusters = clustering.BSAS([p.index for p in poses_to_cluster], [p.translation for p in poses_to_cluster], dist_cutoff)
+
+        self.clusters[ranked_by] = {}
+        for rep, others in raw_clusters.items():
+            self.clusters[ranked_by][self.getPose(rep[0])] = [self.getPose(p[0]) for p in others]
 
     def getRankedClusterRepresentatives(self, ranked_by:str) -> List[Tuple[int, 'DockingPP.pose.Pose']]:
         """Get clusters representatives in decreasing order of given score
@@ -459,5 +464,10 @@ class DockingHandler:
                     self.poses[pose_index - 1].rescoring[scores[i]] = float(pose_scores[i])
         self._nb_rescored_poses = nb_poses
 
+    def getPose(self, pose_index:int):
+        return self.poses[pose_index - 1]
+
     def __str__(self):
         return f"#DockingHandler object\nGrid dimension : {self.grid_dimension}\nStep : {self.step}\nInitial euler vector : {self.initial_euler}\nNumber of poses : {len(self.poses)}\nLigand offset : {self.offsetLig}\nReceptor offset : {self.offsetRec}"
+
+
