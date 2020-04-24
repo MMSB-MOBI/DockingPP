@@ -1,5 +1,6 @@
 dockingHandler
 ------------------
+**DockingPP.dockingHandler** module.
 
 .. autoclass:: DockingPP.dockingHandler.DockingHandler 
     :members:

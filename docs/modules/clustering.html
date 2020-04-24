@@ -156,6 +156,47 @@
             
   <div class="section" id="clustering">
 <h1>Clustering<a class="headerlink" href="#clustering" title="Permalink to this headline">¶</a></h1>
+<p><strong>DockingPP.clustering</strong> module</p>
+<span class="target" id="module-DockingPP.clustering"></span><dl class="py function">
+<dt id="DockingPP.clustering.computeDistance">
+<code class="sig-name descname">computeDistance</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">pose1</span><span class="p">:</span> <span class="n"><a class="reference internal" href="pose.html#DockingPP.pose.Pose" title="DockingPP.pose.Pose">DockingPP.pose.Pose</a></span></em>, <em class="sig-param"><span class="n">pose2</span><span class="p">:</span> <span class="n"><a class="reference internal" href="pose.html#DockingPP.pose.Pose" title="DockingPP.pose.Pose">DockingPP.pose.Pose</a></span></em><span class="sig-paren">)</span> &#x2192; float<a class="headerlink" href="#DockingPP.clustering.computeDistance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute distance between two poses. The distance is the distance between the center of mass of each pose, calculated from the translation vector.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>pose1</strong> (<em>[</em><a class="reference internal" href="pose.html#DockingPP.pose.Pose" title="DockingPP.pose.Pose"><em>DockingPP.pose.Pose</em></a><em>]</em>) – </p></li>
+<li><p><strong>pose2</strong> (<em>[</em><a class="reference internal" href="pose.html#DockingPP.pose.Pose" title="DockingPP.pose.Pose"><em>DockingPP.pose.Pose</em></a><em>]</em>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The distance between the two poses</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="DockingPP.clustering.BSAS">
+<code class="sig-name descname">BSAS</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">poses</span><span class="p">:</span> <span class="n">List<span class="p">[</span><a class="reference internal" href="pose.html#DockingPP.pose.Pose" title="DockingPP.pose.Pose">DockingPP.pose.Pose</a><span class="p">]</span></span></em>, <em class="sig-param"><span class="n">dist_cutoff</span><span class="p">:</span> <span class="n">float</span></em><span class="sig-paren">)</span> &#x2192; Dict<span class="p">[</span>DockingP.pose.Pose<span class="p">, </span>List<span class="p">[</span><a class="reference internal" href="pose.html#DockingPP.pose.Pose" title="DockingPP.pose.Pose">DockingPP.pose.Pose</a><span class="p">]</span><span class="p">]</span><a class="headerlink" href="#DockingPP.clustering.BSAS" title="Permalink to this definition">¶</a></dt>
+<dd><p>BSAS clustering from a list of poses. Browse the poses in the given order and add the pose to the first cluster where the distance between the pose and the representative pose of the cluster is below given distance cutoff. If the pose can’t be added to any cluster, a new one is created.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>poses</strong> (<em>List</em><em>[</em><a class="reference internal" href="pose.html#DockingPP.pose.Pose" title="DockingPP.pose.Pose"><em>DockingPP.pose.Pose</em></a><em>]</em>) – List of poses to cluster.</p></li>
+<li><p><strong>dist_cutoff</strong> (<em>float</em>) – Distance cutoff below which a pose is assigned to a cluster.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Dictionary that stores the clusters. It has representative pose object as key and list of other poses object in the cluster as value.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Dict[<a class="reference internal" href="pose.html#DockingPP.pose.Pose" title="DockingPP.pose.Pose">DockingPP.pose.Pose</a>, List[<a class="reference internal" href="pose.html#DockingPP.pose.Pose" title="DockingPP.pose.Pose">DockingPP.pose.Pose</a>]]</p>
+</dd>
+</dl>
+</dd></dl>
+
 </div>
 
 

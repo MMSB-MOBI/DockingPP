@@ -157,6 +157,33 @@
             
   <div class="section" id="loader">
 <h1>Loader<a class="headerlink" href="#loader" title="Permalink to this headline">¶</a></h1>
+<p><strong>DockingPP.loader</strong> module</p>
+<span class="target" id="module-DockingPP.loader"></span><dl class="py function">
+<dt id="DockingPP.loader.loadZdock">
+<code class="sig-name descname">loadZdock</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">zdock_results</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">nb_pose</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">- 1</span></em><span class="sig-paren">)</span> &#x2192; <a class="reference internal" href="dockingHandler.html#DockingPP.dockingHandler.DockingHandler" title="DockingPP.dockingHandler.DockingHandler">DockingPP.dockingHandler.DockingHandler</a><a class="headerlink" href="#DockingPP.loader.loadZdock" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load zdock results into DockingHandler object</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>zdock_results</strong> (<em>str</em>) – path to zdock results file</p></li>
+<li><p><strong>nb_pose</strong> (<em>int</em><em>, </em><em>optional</em>) – number of poses to load. If -1, all poses will be loaded. Defaults to -1.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>error.ZdockFormatError</strong> – Raise if error is detected in zdock format</p></li>
+<li><p><strong>error.IncompatiblePoseNumber</strong> – Raise if you try to load more poses than possible.</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>DockingHandler object for this zdock results.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="dockingHandler.html#DockingPP.dockingHandler.DockingHandler" title="DockingPP.dockingHandler.DockingHandler">DockingPP.dockingHandler.DockingHandler</a></p>
+</dd>
+</dl>
+</dd></dl>
+
 </div>
 
 

@@ -5,23 +5,20 @@ import math
 
 class Pose :
     """Object to handle single docking pose
-
-    Attributes:
-        index (int) : pose index
-        euler (Tuple[float, float, float]) : pose euler angles
-        translation (Tuple[float, float, float]) : pose translation vectors
-        residues_interface (Dict[role, residues_index] where role is ligand|receptor and residues_index is Set[int]) : list of residues index at interface in ligand and receptor. Set with calls to addResidueAtInterface.
-        contacts (Set[Tuple[int, int]]) : Set of (i,j) tuples with i index of receptor residue and j index of ligand residue and i is in contact with j. Set with calls to addContact
-        rescoring (Dict[str, float]) : Dictionnary that store rescoring for the pose. Dictionnary with type of score as key and score value as value. Set with calls to computeScore.
-
     """
     def __init__(self, index:int, euler:Tuple[float, float, float], translation: Tuple[float, float, float]):
         self.index : int = index
+        """pose index"""
         self.euler : Tuple[float, float, float] = euler
+        """pose euler angles"""
         self.translation : Tuple[float, float, float] = translation
+        """pose translation vector"""
         self.residues_interface : Dict[str,Set[int]] = {"ligand" : set(), "receptor" : set()}
+        """Dictionary of residues index at the interface in ligand and receptor. It has molecule type as key and associated set of residues index as value. Set with calls to addResidueAtInterface."""
         self.contacts : Set[Tuple[int, int]] = set() #tuple(receptor_index, ligand_index)
+        """Set of (i,j) tuples with i is the index of receptor residue and j is the index of ligand residue and i is in contact with j. Set with calls to addContact."""
         self.rescoring : Dict [str, float] = {}
+        """Dictionary that stores rescoring for the pose. It has name of the score as key and score value as value. Set with calls to computeScore."""
 
     def addContact(self, contact:Tuple[int, int]):
         """Add a contact to pose. 
@@ -106,11 +103,3 @@ class Pose :
             raise error.InvalidScore(f"{score} score is invalid or not computed")
 
         return self.rescoring[score]
-
-    def setRMSD(self, rmsd:float):
-        self.rmsd = float(rmsd)
-
-    def isNative(self, rmsd_cutoff:float) -> bool:
-        if self.rmsd <= rmsd_cutoff : 
-            return True
-        return False

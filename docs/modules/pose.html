@@ -157,6 +157,135 @@
             
   <div class="section" id="pose">
 <h1>Pose<a class="headerlink" href="#pose" title="Permalink to this headline">¶</a></h1>
+<p><strong>DockingPP.pose</strong> module</p>
+<dl class="py class">
+<dt id="DockingPP.pose.Pose">
+<em class="property">class </em><code class="sig-name descname">Pose</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">index</span><span class="p">:</span> <span class="n">int</span></em>, <em class="sig-param"><span class="n">euler</span><span class="p">:</span> <span class="n">Tuple<span class="p">[</span>float<span class="p">, </span>float<span class="p">, </span>float<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">translation</span><span class="p">:</span> <span class="n">Tuple<span class="p">[</span>float<span class="p">, </span>float<span class="p">, </span>float<span class="p">]</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#DockingPP.pose.Pose" title="Permalink to this definition">¶</a></dt>
+<dd><p>Object to handle single docking pose</p>
+<dl class="py attribute">
+<dt id="DockingPP.pose.Pose.index">
+<code class="sig-name descname">index</code><em class="property">: int</em><em class="property"> = None</em><a class="headerlink" href="#DockingPP.pose.Pose.index" title="Permalink to this definition">¶</a></dt>
+<dd><p>pose index</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="DockingPP.pose.Pose.euler">
+<code class="sig-name descname">euler</code><em class="property">: Tuple[float, float, float]</em><em class="property"> = None</em><a class="headerlink" href="#DockingPP.pose.Pose.euler" title="Permalink to this definition">¶</a></dt>
+<dd><p>pose euler angles</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="DockingPP.pose.Pose.translation">
+<code class="sig-name descname">translation</code><em class="property">: Tuple[float, float, float]</em><em class="property"> = None</em><a class="headerlink" href="#DockingPP.pose.Pose.translation" title="Permalink to this definition">¶</a></dt>
+<dd><p>pose translation vector</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="DockingPP.pose.Pose.residues_interface">
+<code class="sig-name descname">residues_interface</code><em class="property">: Dict[str, Set[int]]</em><em class="property"> = None</em><a class="headerlink" href="#DockingPP.pose.Pose.residues_interface" title="Permalink to this definition">¶</a></dt>
+<dd><p>Dictionary of residues index at the interface in ligand and receptor. It has molecule type as key and associated set of residues index as value. Set with calls to addResidueAtInterface.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="DockingPP.pose.Pose.contacts">
+<code class="sig-name descname">contacts</code><em class="property">: Set[Tuple[int, int]]</em><em class="property"> = None</em><a class="headerlink" href="#DockingPP.pose.Pose.contacts" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set of (i,j) tuples with i is the index of receptor residue and j is the index of ligand residue and i is in contact with j. Set with calls to addContact.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="DockingPP.pose.Pose.rescoring">
+<code class="sig-name descname">rescoring</code><em class="property">: Dict[str, float]</em><em class="property"> = None</em><a class="headerlink" href="#DockingPP.pose.Pose.rescoring" title="Permalink to this definition">¶</a></dt>
+<dd><p>Dictionary that stores rescoring for the pose. It has name of the score as key and score value as value. Set with calls to computeScore.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="DockingPP.pose.Pose.addContact">
+<code class="sig-name descname">addContact</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">contact</span><span class="p">:</span> <span class="n">Tuple<span class="p">[</span>int<span class="p">, </span>int<span class="p">]</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#DockingPP.pose.Pose.addContact" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a contact to pose.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>contact</strong> (<em>Tuple</em><em>[</em><em>int</em><em>, </em><em>int</em><em>]</em>) – contact (i,j) between residue i of receptor and residue j of ligand</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="DockingPP.pose.Pose.addResidueAtInferface">
+<code class="sig-name descname">addResidueAtInferface</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">role</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">residue_i</span><span class="p">:</span> <span class="n">int</span></em><span class="sig-paren">)</span><a class="headerlink" href="#DockingPP.pose.Pose.addResidueAtInferface" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a residue at pose interface</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>role</strong> (<em>str</em>) – To which residue belongs, ligand or receptor</p></li>
+<li><p><strong>residue_i</strong> (<em>int</em>) – Index of the residue</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><strong>error.InvalidRole</strong> – Raise if role is not valid, so is not ligand or receptor</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="DockingPP.pose.Pose.computeScore">
+<code class="sig-name descname">computeScore</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">type_score</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">name_score</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">score_fn</span></em><span class="sig-paren">)</span><a class="headerlink" href="#DockingPP.pose.Pose.computeScore" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the given score with given function. Complete rescoring attribute.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>type_score</strong> (<em>str</em>) – Global type of the score, if it’s derived from contacts frequencies or residues interface frequencies. Can be contacts|residues.</p></li>
+<li><p><strong>name_score</strong> (<em>str</em>) – Name of the score</p></li>
+<li><p><strong>score_fn</strong> (<em>[</em><em>type</em><em>]</em>) – Function to compute score</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><strong>error.InvalidScore</strong> – Raise if global type of the score is invalid</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="DockingPP.pose.Pose.serializeScores">
+<code class="sig-name descname">serializeScores</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">scores</span><span class="p">:</span> <span class="n">List<span class="p">[</span>str<span class="p">]</span></span></em><span class="sig-paren">)</span> &#x2192; str<a class="headerlink" href="#DockingPP.pose.Pose.serializeScores" title="Permalink to this definition">¶</a></dt>
+<dd><p>Str representation of rescoring</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>scores</strong> (<em>List</em><em>[</em><em>str</em><em>]</em>) – Scores for which you want the representation</p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><strong>error.InvalidScore</strong> – Raises if a score is not computed or invalid.</p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Str representation of scores, ”        ” separated, in the order given in scores attributes.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="DockingPP.pose.Pose.getScore">
+<code class="sig-name descname">getScore</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">score</span></em><span class="sig-paren">)</span> &#x2192; float<a class="headerlink" href="#DockingPP.pose.Pose.getScore" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a specific score</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>score</strong> (<em>[</em><em>type</em><em>]</em>) – Score to get</p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><strong>error.InvalidScore</strong> – Raise if score is not computed or invalid.</p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>score value</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
 </div>
 
 

@@ -3,28 +3,28 @@ from collections import OrderedDict
 from typing import List, Dict
 
 def computeDistance(pose1: 'DockingPP.pose.Pose', pose2 : 'DockingPP.pose.Pose') -> float:
-    """Compute distance
+    """Compute distance between two poses. The distance is the distance between the center of mass of each pose, calculated from the translation vector.
 
     Args:
-        pose1 ([type]): [description]
-        pose2 ([type]): [description]
+        pose1 ([DockingPP.pose.Pose])
+        pose2 ([DockingPP.pose.Pose])
 
     Returns:
-        float: [description]
+        float: The distance between the two poses
     """
 
     dist= sqrt(sum([(pose1.translation[i]-pose2.translation[i])**2 for i in range(3)]))
     return dist
 
 def BSAS(poses : List['DockingPP.pose.Pose'], dist_cutoff: float) -> Dict['DockingP.pose.Pose', List['DockingPP.pose.Pose']]:
-    """[summary]
+    """BSAS clustering from a list of poses. Browse the poses in the given order and add the pose to the first cluster where the distance between the pose and the representative pose of the cluster is below given distance cutoff. If the pose can't be added to any cluster, a new one is created.
 
     Args:
-        poses (List[DockingPP.pose.Pose]): [description]
-        dist_cutoff (float): [description]
+        poses (List[DockingPP.pose.Pose]): List of poses to cluster.
+        dist_cutoff (float): Distance cutoff below which a pose is assigned to a cluster. 
 
     Returns:
-        Dict[DockingP.pose.Pose, List[DockingPP.pose.Pose]]: [description]
+        Dict[DockingPP.pose.Pose, List[DockingPP.pose.Pose]]: Dictionary that stores the clusters. It has representative pose object as key and list of other poses object in the cluster as value.
     """
 
     clusters = OrderedDict()

@@ -26,7 +26,7 @@ PdbAtoms = TypedDict("PdbAtoms", {
 })
 
 class DockingHandler: 
-    """Class that handle docking results
+    """A class that handles docking results
     """
     
     def __init__(self, grid_dimension : int, step : float, initial_euler : Tuple[float, float, float], baryRec : Tuple[float, float, float], baryLig : Tuple[float, float, float]):
@@ -107,7 +107,7 @@ class DockingHandler:
         self.poses.append(p)
 
     def computeContactMap(self, nb_threads:int, nb_poses:int, distance:float = 5):
-        """Compute contact map for given poses and distance. Use ccmap module, decode and store its results.  
+        """Function that compute contact map for given poses and distance. It uses ccmap module, decode and store its results.  
 
         Args:
             nb_threads (int): Number of threads to compute contact map
@@ -163,11 +163,11 @@ class DockingHandler:
 
 
     def computeFrequencies(self, nb_poses:int):
-        """Compute contact frequencies and residues at interface frequencies for given poses. Contact map has to be compute before.  
+        """Compute contact frequencies and residues at interface frequencies for given poses. Contact map has to be computed before.  
 
-        Contact frequencies : For each contact between residue i of ligand and residue j of receptor, count and relative frequency among poses is computed. 
+        Contact frequencies : For each contact between residue i of ligand and residue j of the receptor, count and relative frequency among poses are computed. 
 
-        Residues at interface frequencies : For each residue of ligand and each residue of receptor, count and relative frequency of the number of time the residue appears at interface among poses is computed. 
+        Frequencies of residues at interface : For each residue of the ligand and each residue of the receptor, count and relative frequency of the number of time the residue appears at interface among poses is computed. 
 
         Set freq attribute of the class. freq is a DockingPP.frequencies.Frequencies object. 
 
@@ -273,6 +273,7 @@ class DockingHandler:
 
         Yields:
             Tuple[int, List[DockingPP.pose.Pose]]: Tuple with index of the packet, and list of poses in the packet. 
+
         """
         current_poses = self.poses[:nb_to_keep]
         assert(nb_split <= nb_to_keep)
@@ -287,7 +288,7 @@ class DockingHandler:
         """Write rescoring results in a file. 
 
         Args:
-            output_file (str): File to write results. First line is a comment that resumes number of poses used. Second line is the header with pose index followed by scores as given in scores_to_write list. Next lines are scores for each pose.
+            output_file (str): File to write results. The first line is a comment that resumes the number of poses used. The second line is the header with pose index followed by scores as given in scores_to_write list. The next lines are the scores for each pose.
             scores_to_write (List[str], optional): List of scores to write. The scores will be write in the given order. Defaults to ["residues_sum", "residues_average", "residues_log_sum", "residues_square_sum", "contacts_sum", "contacts_average", "contacts_log_sum", "contacts_square_sum"].
 
         """
@@ -343,11 +344,11 @@ class DockingHandler:
         return [p for p in poses_to_proceed[:topX] if p.isNative(rmsd_cutoff)]'''
 
     def clusterPoses(self, ranked_by:str, dist_cutoff:float, nb_poses:int):
-        """Cluster poses according to BSAS clustering. Cluster are computed for poses ranked by the given score in descending order. 
+        """Cluster the poses according to BSAS clustering. Clusters are computed for poses ranked by the given score in descending order. 
 
-        BSAS clustering : Each pose is assigned to the first cluster where distance between the pose and the representative of the cluster is less than given cutoff. If pose can't be assign to any cluster, it creates a new one.  
+        BSAS clustering : Each pose is assigned to the first cluster when the distance between the pose and the representative of the cluster is less than given cutoff. If pose can't be assigned to any cluster, it creates a new one.  
 
-        Set cluster attribute of class. cluster is an ordered dictionnary with representative Pose object as key and other Pose objects that belongs to the cluster as values. 
+        Set cluster attribute of the class. cluster is an ordered dictionary with representative Pose object as key and other Pose objects that belong to the cluster as values. 
 
         Args:
             ranked_by (str): Score for ranking

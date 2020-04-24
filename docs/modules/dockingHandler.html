@@ -157,10 +157,11 @@
             
   <div class="section" id="dockinghandler">
 <h1>dockingHandler<a class="headerlink" href="#dockinghandler" title="Permalink to this headline">¶</a></h1>
+<p><strong>DockingPP.dockingHandler</strong> module.</p>
 <dl class="py class">
 <dt id="DockingPP.dockingHandler.DockingHandler">
 <em class="property">class </em><code class="sig-name descname">DockingHandler</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">grid_dimension</span><span class="p">:</span> <span class="n">int</span></em>, <em class="sig-param"><span class="n">step</span><span class="p">:</span> <span class="n">float</span></em>, <em class="sig-param"><span class="n">initial_euler</span><span class="p">:</span> <span class="n">Tuple<span class="p">[</span>float<span class="p">, </span>float<span class="p">, </span>float<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">baryRec</span><span class="p">:</span> <span class="n">Tuple<span class="p">[</span>float<span class="p">, </span>float<span class="p">, </span>float<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">baryLig</span><span class="p">:</span> <span class="n">Tuple<span class="p">[</span>float<span class="p">, </span>float<span class="p">, </span>float<span class="p">]</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#DockingPP.dockingHandler.DockingHandler" title="Permalink to this definition">¶</a></dt>
-<dd><p>Class that handle docking results</p>
+<dd><p>A class that handles docking results</p>
 <dl class="py attribute">
 <dt id="DockingPP.dockingHandler.DockingHandler.grid_dimension">
 <code class="sig-name descname">grid_dimension</code><em class="property">: int</em><em class="property"> = None</em><a class="headerlink" href="#DockingPP.dockingHandler.DockingHandler.grid_dimension" title="Permalink to this definition">¶</a></dt>
@@ -242,7 +243,7 @@
 <dd class="field-odd"><p>Poses with contact map computed</p>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p>List[DockingPP.pose.Pose]</p>
+<dd class="field-even"><p>List[<a class="reference internal" href="pose.html#DockingPP.pose.Pose" title="DockingPP.pose.Pose">DockingPP.pose.Pose</a>]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -256,7 +257,7 @@
 <dd class="field-odd"><p>Poses with rescoring</p>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p>List[DockingPP.pose.Pose]</p>
+<dd class="field-even"><p>List[<a class="reference internal" href="pose.html#DockingPP.pose.Pose" title="DockingPP.pose.Pose">DockingPP.pose.Pose</a>]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -301,7 +302,7 @@
 <dl class="py method">
 <dt id="DockingPP.dockingHandler.DockingHandler.computeContactMap">
 <code class="sig-name descname">computeContactMap</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">nb_threads</span><span class="p">:</span> <span class="n">int</span></em>, <em class="sig-param"><span class="n">nb_poses</span><span class="p">:</span> <span class="n">int</span></em>, <em class="sig-param"><span class="n">distance</span><span class="p">:</span> <span class="n">float</span> <span class="o">=</span> <span class="default_value">5</span></em><span class="sig-paren">)</span><a class="headerlink" href="#DockingPP.dockingHandler.DockingHandler.computeContactMap" title="Permalink to this definition">¶</a></dt>
-<dd><p>Compute contact map for given poses and distance. Use ccmap module, decode and store its results.</p>
+<dd><p>Function that compute contact map for given poses and distance. It uses ccmap module, decode and store its results.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -319,9 +320,9 @@
 <dl class="py method">
 <dt id="DockingPP.dockingHandler.DockingHandler.computeFrequencies">
 <code class="sig-name descname">computeFrequencies</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">nb_poses</span><span class="p">:</span> <span class="n">int</span></em><span class="sig-paren">)</span><a class="headerlink" href="#DockingPP.dockingHandler.DockingHandler.computeFrequencies" title="Permalink to this definition">¶</a></dt>
-<dd><p>Compute contact frequencies and residues at interface frequencies for given poses. Contact map has to be compute before.</p>
-<p>Contact frequencies : For each contact between residue i of ligand and residue j of receptor, count and relative frequency among poses is computed.</p>
-<p>Residues at interface frequencies : For each residue of ligand and each residue of receptor, count and relative frequency of the number of time the residue appears at interface among poses is computed.</p>
+<dd><p>Compute contact frequencies and residues at interface frequencies for given poses. Contact map has to be computed before.</p>
+<p>Contact frequencies : For each contact between residue i of ligand and residue j of the receptor, count and relative frequency among poses are computed.</p>
+<p>Frequencies of residues at interface : For each residue of the ligand and each residue of the receptor, count and relative frequency of the number of time the residue appears at interface among poses is computed.</p>
 <p>Set freq attribute of the class. freq is a DockingPP.frequencies.Frequencies object.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -393,7 +394,7 @@
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>output_file</strong> (<em>str</em>) – File to write results. First line is a comment that resumes number of poses used. Second line is the header with pose index followed by scores as given in scores_to_write list. Next lines are scores for each pose.</p></li>
+<li><p><strong>output_file</strong> (<em>str</em>) – File to write results. The first line is a comment that resumes the number of poses used. The second line is the header with pose index followed by scores as given in scores_to_write list. The next lines are the scores for each pose.</p></li>
 <li><p><strong>scores_to_write</strong> (<em>List</em><em>[</em><em>str</em><em>]</em><em>, </em><em>optional</em>) – List of scores to write. The scores will be write in the given order. Defaults to [“residues_sum”, “residues_average”, “residues_log_sum”, “residues_square_sum”, “contacts_sum”, “contacts_average”, “contacts_log_sum”, “contacts_square_sum”].</p></li>
 </ul>
 </dd>
@@ -402,7 +403,7 @@
 
 <dl class="py method">
 <dt id="DockingPP.dockingHandler.DockingHandler.getRankedPoses">
-<code class="sig-name descname">getRankedPoses</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">score</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">nb_poses</span><span class="p">:</span> <span class="n">int</span></em><span class="sig-paren">)</span> &#x2192; List<span class="p">[</span>DockingPP.pose.Pose<span class="p">]</span><a class="headerlink" href="#DockingPP.dockingHandler.DockingHandler.getRankedPoses" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">getRankedPoses</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">score</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">nb_poses</span><span class="p">:</span> <span class="n">int</span></em><span class="sig-paren">)</span> &#x2192; List<span class="p">[</span><a class="reference internal" href="pose.html#DockingPP.pose.Pose" title="DockingPP.pose.Pose">DockingPP.pose.Pose</a><span class="p">]</span><a class="headerlink" href="#DockingPP.dockingHandler.DockingHandler.getRankedPoses" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get poses ranked by given score</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -418,7 +419,7 @@
 <dd class="field-odd"><p>List of poses in decreasing score order</p>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p>List[DockingPP.pose.Pose]</p>
+<dd class="field-even"><p>List[<a class="reference internal" href="pose.html#DockingPP.pose.Pose" title="DockingPP.pose.Pose">DockingPP.pose.Pose</a>]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -426,9 +427,9 @@
 <dl class="py method">
 <dt id="DockingPP.dockingHandler.DockingHandler.clusterPoses">
 <code class="sig-name descname">clusterPoses</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">ranked_by</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">dist_cutoff</span><span class="p">:</span> <span class="n">float</span></em>, <em class="sig-param"><span class="n">nb_poses</span><span class="p">:</span> <span class="n">int</span></em><span class="sig-paren">)</span><a class="headerlink" href="#DockingPP.dockingHandler.DockingHandler.clusterPoses" title="Permalink to this definition">¶</a></dt>
-<dd><p>Cluster poses according to BSAS clustering. Cluster are computed for poses ranked by the given score in descending order.</p>
-<p>BSAS clustering : Each pose is assigned to the first cluster where distance between the pose and the representative of the cluster is less than given cutoff. If pose can’t be assign to any cluster, it creates a new one.</p>
-<p>Set cluster attribute of class. cluster is an ordered dictionnary with representative Pose object as key and other Pose objects that belongs to the cluster as values.</p>
+<dd><p>Cluster the poses according to BSAS clustering. Clusters are computed for poses ranked by the given score in descending order.</p>
+<p>BSAS clustering : Each pose is assigned to the first cluster when the distance between the pose and the representative of the cluster is less than given cutoff. If pose can’t be assigned to any cluster, it creates a new one.</p>
+<p>Set cluster attribute of the class. cluster is an ordered dictionary with representative Pose object as key and other Pose objects that belong to the cluster as values.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -442,7 +443,7 @@
 
 <dl class="py method">
 <dt id="DockingPP.dockingHandler.DockingHandler.getRankedClusterRepresentatives">
-<code class="sig-name descname">getRankedClusterRepresentatives</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">ranked_by</span><span class="p">:</span> <span class="n">str</span></em><span class="sig-paren">)</span> &#x2192; List<span class="p">[</span>Tuple<span class="p">[</span>int<span class="p">, </span>DockingPP.pose.Pose<span class="p">]</span><span class="p">]</span><a class="headerlink" href="#DockingPP.dockingHandler.DockingHandler.getRankedClusterRepresentatives" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">getRankedClusterRepresentatives</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">ranked_by</span><span class="p">:</span> <span class="n">str</span></em><span class="sig-paren">)</span> &#x2192; List<span class="p">[</span>Tuple<span class="p">[</span>int<span class="p">, </span><a class="reference internal" href="pose.html#DockingPP.pose.Pose" title="DockingPP.pose.Pose">DockingPP.pose.Pose</a><span class="p">]</span><span class="p">]</span><a class="headerlink" href="#DockingPP.dockingHandler.DockingHandler.getRankedClusterRepresentatives" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get clusters representatives in decreasing order of given score</p>
 <dl class="field-list simple">
 <dt class="field-odd">Raises</dt>
@@ -455,7 +456,7 @@
 <dd class="field-even"><p>List of tuple where first element is the cluster number and second is the representative pose.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>List[Tuple[int, DockingPP.pose.Pose]]</p>
+<dd class="field-odd"><p>List[Tuple[int, <a class="reference internal" href="pose.html#DockingPP.pose.Pose" title="DockingPP.pose.Pose">DockingPP.pose.Pose</a>]]</p>
 </dd>
 </dl>
 <p class="rubric">Examples</p>
@@ -471,7 +472,7 @@
 
 <dl class="py method">
 <dt id="DockingPP.dockingHandler.DockingHandler.getRankedClusters">
-<code class="sig-name descname">getRankedClusters</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">ranked_by</span><span class="p">:</span> <span class="n">str</span></em><span class="sig-paren">)</span> &#x2192; List<span class="p">[</span>Tuple<span class="p">[</span>int<span class="p">, </span>List<span class="p">[</span>DockingPP.pose.Pose<span class="p">]</span><span class="p">]</span><span class="p">]</span><a class="headerlink" href="#DockingPP.dockingHandler.DockingHandler.getRankedClusters" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">getRankedClusters</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">ranked_by</span><span class="p">:</span> <span class="n">str</span></em><span class="sig-paren">)</span> &#x2192; List<span class="p">[</span>Tuple<span class="p">[</span>int<span class="p">, </span>List<span class="p">[</span><a class="reference internal" href="pose.html#DockingPP.pose.Pose" title="DockingPP.pose.Pose">DockingPP.pose.Pose</a><span class="p">]</span><span class="p">]</span><span class="p">]</span><a class="headerlink" href="#DockingPP.dockingHandler.DockingHandler.getRankedClusters" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get clusters in decreasing order of given score</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -487,7 +488,7 @@
 <dd class="field-odd"><p>List of tuples where first element is cluster number and second is the list of poses inside the cluster.</p>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p>List[Tuple[int, List[DockingPP.pose.Pose]]]</p>
+<dd class="field-even"><p>List[Tuple[int, List[<a class="reference internal" href="pose.html#DockingPP.pose.Pose" title="DockingPP.pose.Pose">DockingPP.pose.Pose</a>]]]</p>
 </dd>
 </dl>
 <p class="rubric">Examples</p>

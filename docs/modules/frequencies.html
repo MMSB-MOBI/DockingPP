@@ -157,6 +157,201 @@
             
   <div class="section" id="frequencies">
 <h1>Frequencies<a class="headerlink" href="#frequencies" title="Permalink to this headline">¶</a></h1>
+<p><strong>DockingPP.frequencies</strong> module</p>
+<dl class="py class">
+<dt id="DockingPP.frequencies.Frequencies">
+<em class="property">class </em><code class="sig-name descname">Frequencies</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">poses</span><span class="p">:</span> <span class="n">List<span class="p">[</span><a class="reference internal" href="pose.html#DockingPP.pose.Pose" title="DockingPP.pose.Pose">DockingPP.pose.Pose</a><span class="p">]</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#DockingPP.frequencies.Frequencies" title="Permalink to this definition">¶</a></dt>
+<dd><p>An object that stores frequencies computed for a list of poses</p>
+<dl class="py attribute">
+<dt id="DockingPP.frequencies.Frequencies.nb_poses_used">
+<code class="sig-name descname">nb_poses_used</code><em class="property">: int</em><em class="property"> = None</em><a class="headerlink" href="#DockingPP.frequencies.Frequencies.nb_poses_used" title="Permalink to this definition">¶</a></dt>
+<dd><p>The number of poses used for frequencies computation</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="DockingPP.frequencies.Frequencies.count_contact">
+<code class="sig-name descname">count_contact</code><em class="property">: Dict[Tuple[int, int], int]</em><em class="property"> = None</em><a class="headerlink" href="#DockingPP.frequencies.Frequencies.count_contact" title="Permalink to this definition">¶</a></dt>
+<dd><p>Dictionary that stores raw counts of contacts in poses.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="DockingPP.frequencies.Frequencies.count_residue">
+<code class="sig-name descname">count_residue</code><em class="property">: Dict[str, Dict[int, int]]</em><em class="property"> = None</em><a class="headerlink" href="#DockingPP.frequencies.Frequencies.count_residue" title="Permalink to this definition">¶</a></dt>
+<dd><p>Dictionary that stores raw counts of residues at interface in poses.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="DockingPP.frequencies.Frequencies.available_scores">
+<code class="sig-name descname">available_scores</code><em class="property"> = None</em><a class="headerlink" href="#DockingPP.frequencies.Frequencies.available_scores" title="Permalink to this definition">¶</a></dt>
+<dd><p>A dictionary that stores available scores for rescoring. These scores are computed for a given list of contacts or a given list of residues at interface from contacts relative frequencies or relative frequencies of residues at interface  calculated here. The available scores are stored with their name, their type (if we need frequencies of contacts or residues at interface to compute them), and the function to compute them.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="DockingPP.frequencies.Frequencies.rel_frequencies_contact">
+<em class="property">property </em><code class="sig-name descname">rel_frequencies_contact</code><a class="headerlink" href="#DockingPP.frequencies.Frequencies.rel_frequencies_contact" title="Permalink to this definition">¶</a></dt>
+<dd><p>The relative frequencies of contacts in poses.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Dictionary with tuple (i,j) as key (where i is the index of residue in receptor and j is the index of residue in ligand) and score as value.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>Dict[Tuple[int, int], float]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="DockingPP.frequencies.Frequencies.rel_frequencies_residue">
+<em class="property">property </em><code class="sig-name descname">rel_frequencies_residue</code><a class="headerlink" href="#DockingPP.frequencies.Frequencies.rel_frequencies_residue" title="Permalink to this definition">¶</a></dt>
+<dd><p>The relative frequencies of residues at interface in poses.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Dictionary with molecule role as key (ligand or receptor) and dictionary of frequencies for the molecule as value. Dictionary of frequencies has residue index as key and score as value.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>Dict[str, Dict[int, float]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="DockingPP.frequencies.Frequencies.getResidueFrequenciesSum">
+<code class="sig-name descname">getResidueFrequenciesSum</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">list_residue</span><span class="p">:</span> <span class="n">Dict<span class="p">[</span>str<span class="p">, </span>Set<span class="p">[</span>int<span class="p">]</span><span class="p">]</span></span></em><span class="sig-paren">)</span> &#x2192; float<a class="headerlink" href="#DockingPP.frequencies.Frequencies.getResidueFrequenciesSum" title="Permalink to this definition">¶</a></dt>
+<dd><p>For a given ensemble of residues, compute their relative frequencies sum.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>list_residue</strong> (<em>Dict</em><em>[</em><em>str</em><em>, </em><em>Set</em><em>[</em><em>int</em><em>]</em><em>]</em>) – Ensemble of residues to compute frequencies sum. It’s a dictionary with same format as DockingPP.pose.Pose residues_interface attribute (dictionary with molecule type as key and set of residues index as value).</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The sum of residues relative frequencies.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="DockingPP.frequencies.Frequencies.getResidueFrequenciesLogSum">
+<code class="sig-name descname">getResidueFrequenciesLogSum</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">list_residue</span><span class="p">:</span> <span class="n">Dict<span class="p">[</span>str<span class="p">, </span>Set<span class="p">[</span>int<span class="p">]</span><span class="p">]</span></span></em><span class="sig-paren">)</span> &#x2192; float<a class="headerlink" href="#DockingPP.frequencies.Frequencies.getResidueFrequenciesLogSum" title="Permalink to this definition">¶</a></dt>
+<dd><p>For a given ensemble of residues, compute their relative frequencies log sum.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>list_residue</strong> (<em>Dict</em><em>[</em><em>str</em><em>,</em><em>Set</em><em>[</em><em>int</em><em>]</em><em>]</em>) – Ensemble of residues to compute frequencies log sum. It’s a dictionary with same format as DockingPP.pose.Pose residues_interface attribute (dictionary with molecule type as key and set of residues index as value).</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The log sum of residues relative frequencies.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="DockingPP.frequencies.Frequencies.getResidueFrequenciesSquareSum">
+<code class="sig-name descname">getResidueFrequenciesSquareSum</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">list_residue</span><span class="p">:</span> <span class="n">Dict<span class="p">[</span>str<span class="p">, </span>Set<span class="p">[</span>int<span class="p">]</span><span class="p">]</span></span></em><span class="sig-paren">)</span> &#x2192; float<a class="headerlink" href="#DockingPP.frequencies.Frequencies.getResidueFrequenciesSquareSum" title="Permalink to this definition">¶</a></dt>
+<dd><p>For a given ensemble of residues, compute their relative frequencies square sum.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>list_residue</strong> (<em>Dict</em><em>[</em><em>str</em><em>, </em><em>Set</em><em>[</em><em>int</em><em>]</em><em>]</em>) – Ensemble of residues to compute frequencies square sum. It’s a dictionary with same format as DockingPP.pose.Pose residues_interface attribute (dictionary with molecule type as key and set of residues index as value).</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The square sum of residues relative frequencies.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="DockingPP.frequencies.Frequencies.getResidueFrequenciesAverage">
+<code class="sig-name descname">getResidueFrequenciesAverage</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">list_residue</span><span class="p">:</span> <span class="n">Dict<span class="p">[</span>str<span class="p">, </span>Set<span class="p">[</span>int<span class="p">]</span><span class="p">]</span></span></em><span class="sig-paren">)</span> &#x2192; float<a class="headerlink" href="#DockingPP.frequencies.Frequencies.getResidueFrequenciesAverage" title="Permalink to this definition">¶</a></dt>
+<dd><p>For a given ensemble of residues, compute their relative frequencies sum normalized by the number of residues.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>list_residue</strong> (<em>Dict</em><em>[</em><em>str</em><em>, </em><em>Set</em><em>[</em><em>int</em><em>]</em><em>]</em>) – Ensemble of residues to compute frequencies square sum. It’s a dictionary with same format as DockingPP.pose.Pose residues_interface attribute (dictionary with molecule type as key and set of residues index as value).</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The normalized sum of residues relative frequencies.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="DockingPP.frequencies.Frequencies.getContactFrequenciesSum">
+<code class="sig-name descname">getContactFrequenciesSum</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">list_contact</span><span class="p">:</span> <span class="n">Set<span class="p">[</span>Tuple<span class="p">[</span>int<span class="p">, </span>int<span class="p">]</span><span class="p">]</span></span></em><span class="sig-paren">)</span> &#x2192; float<a class="headerlink" href="#DockingPP.frequencies.Frequencies.getContactFrequenciesSum" title="Permalink to this definition">¶</a></dt>
+<dd><p>For a given ensemble of contacts, compute their relative frequencies sum.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>list_contact</strong> (<em>Set</em><em>[</em><em>Tuple</em><em>[</em><em>int</em><em>, </em><em>int</em><em>]</em><em>]</em>) – Set of contacts to compute frequencies sum. It’s a set of tuple(i,j) with i the index of residue in receptor and j the index of residue in ligand.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The sum of contacts relative frequencies.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="DockingPP.frequencies.Frequencies.getContactFrequenciesLogSum">
+<code class="sig-name descname">getContactFrequenciesLogSum</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">list_contact</span><span class="p">:</span> <span class="n">Dict<span class="p">[</span>Tuple<span class="p">[</span>int<span class="p">, </span>int<span class="p">]</span><span class="p">, </span>int<span class="p">]</span></span></em><span class="sig-paren">)</span> &#x2192; float<a class="headerlink" href="#DockingPP.frequencies.Frequencies.getContactFrequenciesLogSum" title="Permalink to this definition">¶</a></dt>
+<dd><p>For a given ensemble of contacts, compute their relative frequencies log sum.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>list_contact</strong> (<em>Set</em><em>[</em><em>Tuple</em><em>[</em><em>int</em><em>, </em><em>int</em><em>]</em><em>]</em>) – Set of contacts to compute frequencies sum. It’s a set of tuple(i,j) with i the index of residue in receptor and j the index of residue in ligand.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The log sum of contacts relative frequencies.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="DockingPP.frequencies.Frequencies.getContactFrequenciesSquareSum">
+<code class="sig-name descname">getContactFrequenciesSquareSum</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">list_contact</span><span class="p">:</span> <span class="n">Dict<span class="p">[</span>Tuple<span class="p">[</span>int<span class="p">, </span>int<span class="p">]</span><span class="p">, </span>int<span class="p">]</span></span></em><span class="sig-paren">)</span> &#x2192; float<a class="headerlink" href="#DockingPP.frequencies.Frequencies.getContactFrequenciesSquareSum" title="Permalink to this definition">¶</a></dt>
+<dd><p>For a given ensemble of contacts, compute their relative frequencies square sum.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>list_contact</strong> (<em>Set</em><em>[</em><em>Tuple</em><em>[</em><em>int</em><em>, </em><em>int</em><em>]</em><em>]</em>) – Set of contacts to compute frequencies sum. It’s a set of tuple(i,j) with i the index of residue in receptor and j the index of residue in ligand.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The square sum of contacts relative frequencies.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="DockingPP.frequencies.Frequencies.getContactFrequenciesAverage">
+<code class="sig-name descname">getContactFrequenciesAverage</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">list_contact</span><span class="p">:</span> <span class="n">Dict<span class="p">[</span>Tuple<span class="p">[</span>int<span class="p">, </span>int<span class="p">]</span><span class="p">, </span>int<span class="p">]</span></span></em><span class="sig-paren">)</span> &#x2192; float<a class="headerlink" href="#DockingPP.frequencies.Frequencies.getContactFrequenciesAverage" title="Permalink to this definition">¶</a></dt>
+<dd><p>For a given ensemble of contacts, compute their relative frequencies sum normalized by the number of contacts.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>list_contact</strong> (<em>Set</em><em>[</em><em>Tuple</em><em>[</em><em>int</em><em>, </em><em>int</em><em>]</em><em>]</em>) – Set of contacts to compute frequencies sum. It’s a set of tuple(i,j) with i the index of residue in receptor and j the index of residue in ligand.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The normalized sum of contacts relative frequencies.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
 </div>
 
 
