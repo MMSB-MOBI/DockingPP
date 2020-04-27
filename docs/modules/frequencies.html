@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Frequencies &mdash; Docking_PP 2.0.0 documentation</title>
+  <title>frequencies &mdash; Docking_PP 2.0.0 documentation</title>
   
 
   
@@ -35,8 +35,8 @@
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Clustering" href="clustering.html" />
-    <link rel="prev" title="Pose" href="pose.html" /> 
+    <link rel="next" title="clustering" href="clustering.html" />
+    <link rel="prev" title="pose" href="pose.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -82,11 +82,11 @@
             
               <ul class="current">
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Modules</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="loader.html">Loader</a></li>
+<li class="toctree-l2"><a class="reference internal" href="loader.html">loader</a></li>
 <li class="toctree-l2"><a class="reference internal" href="dockingHandler.html">dockingHandler</a></li>
-<li class="toctree-l2"><a class="reference internal" href="pose.html">Pose</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Frequencies</a></li>
-<li class="toctree-l2"><a class="reference internal" href="clustering.html">Clustering</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pose.html">pose</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">frequencies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="clustering.html">clustering</a></li>
 </ul>
 </li>
 </ul>
@@ -136,7 +136,7 @@
         
           <li><a href="index.html">Modules</a> &raquo;</li>
         
-      <li>Frequencies</li>
+      <li>frequencies</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -156,9 +156,40 @@
            <div itemprop="articleBody">
             
   <div class="section" id="frequencies">
-<h1>Frequencies<a class="headerlink" href="#frequencies" title="Permalink to this headline">¶</a></h1>
-<p><strong>DockingPP.frequencies</strong> module</p>
-<dl class="py class">
+<h1>frequencies<a class="headerlink" href="#frequencies" title="Permalink to this headline">¶</a></h1>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#DockingPP.frequencies.Frequencies.getResidueFrequenciesSum" title="DockingPP.frequencies.Frequencies.getResidueFrequenciesSum"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Frequencies.getResidueFrequenciesSum</span></code></a>(…)</p></td>
+<td><p>For a given ensemble of residues, compute their relative frequencies sum.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#DockingPP.frequencies.Frequencies.getResidueFrequenciesLogSum" title="DockingPP.frequencies.Frequencies.getResidueFrequenciesLogSum"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Frequencies.getResidueFrequenciesLogSum</span></code></a>(…)</p></td>
+<td><p>For a given ensemble of residues, compute their relative frequencies log sum.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#DockingPP.frequencies.Frequencies.getResidueFrequenciesSquareSum" title="DockingPP.frequencies.Frequencies.getResidueFrequenciesSquareSum"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Frequencies.getResidueFrequenciesSquareSum</span></code></a>(…)</p></td>
+<td><p>For a given ensemble of residues, compute their relative frequencies square sum.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#DockingPP.frequencies.Frequencies.getResidueFrequenciesAverage" title="DockingPP.frequencies.Frequencies.getResidueFrequenciesAverage"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Frequencies.getResidueFrequenciesAverage</span></code></a>(…)</p></td>
+<td><p>For a given ensemble of residues, compute their relative frequencies sum normalized by the number of residues.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#DockingPP.frequencies.Frequencies.getContactFrequenciesSum" title="DockingPP.frequencies.Frequencies.getContactFrequenciesSum"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Frequencies.getContactFrequenciesSum</span></code></a>(…)</p></td>
+<td><p>For a given ensemble of contacts, compute their relative frequencies sum.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#DockingPP.frequencies.Frequencies.getContactFrequenciesLogSum" title="DockingPP.frequencies.Frequencies.getContactFrequenciesLogSum"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Frequencies.getContactFrequenciesLogSum</span></code></a>(…)</p></td>
+<td><p>For a given ensemble of contacts, compute their relative frequencies log sum.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#DockingPP.frequencies.Frequencies.getContactFrequenciesSquareSum" title="DockingPP.frequencies.Frequencies.getContactFrequenciesSquareSum"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Frequencies.getContactFrequenciesSquareSum</span></code></a>(…)</p></td>
+<td><p>For a given ensemble of contacts, compute their relative frequencies square sum.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#DockingPP.frequencies.Frequencies.getContactFrequenciesAverage" title="DockingPP.frequencies.Frequencies.getContactFrequenciesAverage"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Frequencies.getContactFrequenciesAverage</span></code></a>(…)</p></td>
+<td><p>For a given ensemble of contacts, compute their relative frequencies sum normalized by the number of contacts.</p></td>
+</tr>
+</tbody>
+</table>
+<span class="target" id="module-DockingPP.frequencies"></span><dl class="py class">
 <dt id="DockingPP.frequencies.Frequencies">
 <em class="property">class </em><code class="sig-name descname">Frequencies</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">poses</span><span class="p">:</span> <span class="n">List<span class="p">[</span><a class="reference internal" href="pose.html#DockingPP.pose.Pose" title="DockingPP.pose.Pose">DockingPP.pose.Pose</a><span class="p">]</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#DockingPP.frequencies.Frequencies" title="Permalink to this definition">¶</a></dt>
 <dd><p>An object that stores frequencies computed for a list of poses</p>
@@ -362,10 +393,10 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="clustering.html" class="btn btn-neutral float-right" title="Clustering" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="clustering.html" class="btn btn-neutral float-right" title="clustering" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="pose.html" class="btn btn-neutral float-left" title="Pose" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="pose.html" class="btn btn-neutral float-left" title="pose" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

@@ -5,5 +5,5 @@ default.profraw
 dockingPP.log
 example_results/
 notebook/usage_old.ipynb
-sphinx_doc/
+docs/build/*
 

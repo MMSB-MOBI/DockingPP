@@ -1,6 +1,11 @@
-Clustering 
------------
-**DockingPP.clustering** module
+clustering
+----------------------
+
+.. currentmodule:: DockingPP.clustering
+
+.. autosummary::
+    computeDistance
+    BSAS
 
 .. automodule:: DockingPP.clustering
     :members:

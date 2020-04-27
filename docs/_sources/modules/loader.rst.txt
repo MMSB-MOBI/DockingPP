@@ -1,6 +1,10 @@
-Loader
-=========
-**DockingPP.loader** module
+loader
+-----------------
+
+.. currentmodule:: DockingPP.loader
+
+.. autosummary::
+    loadZdock
 
 .. automodule:: DockingPP.loader 
     :members:
