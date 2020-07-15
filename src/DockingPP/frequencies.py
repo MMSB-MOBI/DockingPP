@@ -14,14 +14,14 @@ class Frequencies:
         self.count_residue : Dict[str, Dict[int,int]]= {"ligand": {}, "receptor": {}}
         """Dictionary that stores raw counts of residues at interface in poses. 
         """
-        self.available_scores = { "contacts_sum" : ("contacts", self.getContactFrequenciesSum),\
-                                  "contacts_average" : ("contacts", self.getContactFrequenciesAverage),\
-                                  "contacts_log_sum" : ("contacts", self.getContactFrequenciesLogSum),\
-                                  "contacts_square_sum" : ("contacts", self.getContactFrequenciesSquareSum),\
-                                  "residues_sum" : ("residues", self.getResidueFrequenciesSum),
-                                  "residues_average": ("residues", self.getResidueFrequenciesAverage),\
-                                  "residues_log_sum": ("residues", self.getResidueFrequenciesLogSum),\
-                                  "residues_square_sum": ("residues", self.getResidueFrequenciesSquareSum)}
+        self.available_scores = { "CONSRANK_U" : ("contacts", self.getContactFrequenciesSum),\
+                                  "CONSRANK" : ("contacts", self.getContactFrequenciesAverage),\
+                                  "contact_log_sum" : ("contacts", self.getContactFrequenciesLogSum),\
+                                  "contact_square_sum" : ("contacts", self.getContactFrequenciesSquareSum),\
+                                  "residue_sum" : ("residues", self.getResidueFrequenciesSum),
+                                  "residue_average": ("residues", self.getResidueFrequenciesAverage),\
+                                  "residue_log_sum": ("residues", self.getResidueFrequenciesLogSum),\
+                                  "residue_square_sum": ("residues", self.getResidueFrequenciesSquareSum)}
         """A dictionary that stores available scores for rescoring. These scores are computed for a given list of contacts or a given list of residues at interface from contacts relative frequencies or relative frequencies of residues at interface  calculated here. The available scores are stored with their name, their type (if we need frequencies of contacts or residues at interface to compute them), and the function to compute them.
         """
         

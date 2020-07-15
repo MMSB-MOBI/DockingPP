@@ -206,14 +206,14 @@ class DockingHandler:
             type_score (str): Score to use
 
                 Available type score
-                    * contacts_sum : sum of relative frequencies of each contact of the pose
-                    * contacts_average : contacts_sum normalised by number of contacts in the pose 
-                    * contacts_log_sum : sum of log of relative frequencies of each contact of the pose
-                    * contacts_square_sum : sum of square of relative frequencies of each contact of the pose
-                    * residues_sum : sum of relative frequencies of each interface residue (ligand and receptor) of the pose
-                    * residues_average : residues_sum normalised by number of interface residues in the pose
-                    * residues_log_sum : sum of log of relative frequencies of each interface residue of the pose
-                    * residues_square_sum : sum of square of relative frequencies of each interface residue of the pose
+                    * CONSRANK_U : sum of relative frequencies of each contact of the pose
+                    * CONSRANK : CONSRANK_U normalised by number of contacts in the pose 
+                    * contact_log_sum : sum of log of relative frequencies of each contact of the pose
+                    * contact_square_sum : sum of square of relative frequencies of each contact of the pose
+                    * residue_sum : sum of relative frequencies of each interface residue (ligand and receptor) of the pose
+                    * residue_average : residues_sum normalised by number of interface residues in the pose
+                    * residue_log_sum : sum of log of relative frequencies of each interface residue of the pose
+                    * residue_square_sum : sum of square of relative frequencies of each interface residue of the pose
                     * all : to compute all above scores
 
         Raises:
@@ -226,8 +226,8 @@ class DockingHandler:
             >>> DH.rescorePoses(2000, type_score = "all")
             >>> for p in DH.poses[:2]:
             >>>     print(p.index, p.rescoring)
-            1 {'contacts_sum': 38.180000000000014, 'contacts_average': 0.4061702127659576, 'contacts_log_sum': -94.55436888131206, 'contacts_square_sum': 17.90280000000001, 'residues_sum': 42.06, 'residues_average': 0.7378947368421053, 'residues_log_sum': -20.625622826512405, 'residues_square_sum': 33.8476}
-            2 {'contacts_sum': 38.00000000000001, 'contacts_average': 0.44186046511627913, 'contacts_log_sum': -75.18567402702058, 'contacts_square_sum': 18.285600000000002, 'residues_sum': 40.12, 'residues_average': 0.7569811320754717, 'residues_log_sum': -17.346104879674645, 'residues_square_sum': 32.776}
+            1 {'CONSRANK_U': 38.180000000000014, 'CONSRANK': 0.4061702127659576, 'contact_log_sum': -94.55436888131206, 'contact_square_sum': 17.90280000000001, 'residue_sum': 42.06, 'residue_average': 0.7378947368421053, 'residue_log_sum': -20.625622826512405, 'residues_square_sum': 33.8476}
+            2 {'CONSRANK_U': 38.00000000000001, 'CONSRANK': 0.44186046511627913, 'contact_log_sum': -75.18567402702058, 'contact_square_sum': 18.285600000000002, 'residue_sum': 40.12, 'residue_average': 0.7569811320754717, 'residue_log_sum': -17.346104879674645, 'residues_square_sum': 32.776}
 
         """
         logging.info(f'== Rescore poses ==\nNumber of poses : {nb_poses}\n Scores : {type_score}')
@@ -284,12 +284,12 @@ class DockingHandler:
                 top += nb_to_keep%nb_split
             yield(i, current_poses[i*nWidth:top])
 
-    def serializeRescoring(self, output_file:str, scores_to_write: List[str] = ["residues_sum", "residues_average", "residues_log_sum", "residues_square_sum", "contacts_sum", "contacts_average", "contacts_log_sum", "contacts_square_sum"]):
+    def serializeRescoring(self, output_file:str, scores_to_write: List[str] = ["residue_sum", "residue_average", "residue_log_sum", "residue_square_sum", "CONSRANK_U", "CONSRANK", "contact_log_sum", "contact_square_sum"]):
         """Write rescoring results in a file. 
 
         Args:
             output_file (str): File to write results. The first line is a comment that resumes the number of poses used. The second line is the header with pose index followed by scores as given in scores_to_write list. The next lines are the scores for each pose.
-            scores_to_write (List[str], optional): List of scores to write. The scores will be write in the given order. Defaults to ["residues_sum", "residues_average", "residues_log_sum", "residues_square_sum", "contacts_sum", "contacts_average", "contacts_log_sum", "contacts_square_sum"].
+            scores_to_write (List[str], optional): List of scores to write. The scores will be write in the given order. Defaults to ["residue_sum", "residue_average", "residue_log_sum", "residue_square_sum", "CONSRANK_U", "CONSRANK", "contact_log_sum", "contact_square_sum"].
 
         """
 
@@ -371,9 +371,9 @@ class DockingHandler:
             List[Tuple[int, DockingPP.pose.Pose]]: List of tuple where first element is the cluster number and second is the representative pose. 
 
         Examples:
-            For 1BJ1, get contact_sums clusters representatives and display the first 2 indexes 
+            For 1BJ1, get CONSRANK_U clusters representatives and display the first 2 indexes 
 
-            >>> representatives = DH.getRankedClusterRepresentatives("contacts_sum")
+            >>> representatives = DH.getRankedClusterRepresentatives("CONSRANK_U")
             >>> for clust in representatives[:2]:
             >>>       print("cluster", clust[0], "representative index", clust[1].index)
             cluster 0 representative index 16
@@ -408,9 +408,9 @@ class DockingHandler:
             List[Tuple[int, List[DockingPP.pose.Pose]]]: List of tuples where first element is cluster number and second is the list of poses inside the cluster.
 
         Examples:
-            For 1BJ1, get contacts_sum clusters and display pose index.
+            For 1BJ1, get CONSRANK_U clusters and display pose index.
 
-            >>> clusters = DH.getRankedClusters("contacts_sum")
+            >>> clusters = DH.getRankedClusters("CONSRANK_U")
             >>> for clust in clusters[:2]:
             >>>     print("cluster :", clust[0], "poses :", [p.index for p in clust[1]])
             cluster : 0 poses : [16, 1, 5, ...]
