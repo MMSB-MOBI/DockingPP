@@ -211,7 +211,11 @@ class DockingHandler:
                     * contact_log_sum : sum of log of relative frequencies of each contact of the pose
                     * contact_square_sum : sum of square of relative frequencies of each contact of the pose
                     * residue_sum : sum of relative frequencies of each interface residue (ligand and receptor) of the pose
+                    * residue_sum_ligand : sum of relative frequencies for ligand interface residues
+                    * residue_sum_receptor : sum of relative frequencies for receptor interface residues
                     * residue_average : residues_sum normalised by number of interface residues in the pose
+                    * residue_average_ligand : residues_sum normalised by number of interface residues in the pose, just for ligand residues
+                    * residue_average_receptor : residues_sum normalised by number of interface residues in the pose, just for ligand receptor
                     * residue_log_sum : sum of log of relative frequencies of each interface residue of the pose
                     * residue_square_sum : sum of square of relative frequencies of each interface residue of the pose
                     * all : to compute all above scores
@@ -244,12 +248,12 @@ class DockingHandler:
             scores_to_compute = self.freq.available_scores
         else:
             if not type_score in self.freq.available_scores:
-                raise error.InvalidScore(f"{score} score is not valid")
+                raise error.InvalidScore(f"{type_score} score is not valid")
             scores_to_compute = {type_score : self.freq.available_scores[type_score]}
 
         for pose in self.rescored_poses:
             for score, score_info in scores_to_compute.items():
-                pose.computeScore(score_info[0], score, score_info[1])
+                pose.computeScore(score, *score_info)
 
     def _ccmap_thread(self, eulers:List[Tuple[float, float, float]], translations: List[Tuple[float, float, float]], thread_number:int, output:List[Optional[int]], distance:float):
         """Prepare a thread for ccmap execution.

@@ -44,22 +44,27 @@ class Pose :
         except KeyError:
             raise error.InvalidRole(f"{role} is not a valid role.")
 
-    def computeScore(self, type_score: str, name_score:str, score_fn):
+    def computeScore(self, name_score:str, *score_info):
         """Compute the given score with given function. Complete rescoring attribute.
 
         Args:
             type_score (str): Global type of the score, if it's derived from contacts frequencies or residues interface frequencies. Can be contacts|residues.
             name_score (str): Name of the score
             score_fn ([type]): Function to compute score
+            score_info : Contains stored informations about current score. Obligatory : score_info[0] = type of score (contacts or residues), score_info[1] : function to compute score. Optional : score_info[2] : for residues, list of entities to compute with (["ligand"], ["receptor"] or both ["ligand", "receptor])
 
         Raises:
             error.InvalidScore: Raise if global type of the score is invalid
         """
+        type_score = score_info[0]
+        score_fn = score_info[1]
 
         if type_score == "contacts":
             score = score_fn(self.contacts)
         elif type_score == "residues":
-            score = score_fn(self.residues_interface)
+            if len(score_info) <= 2 :
+                raise error.InvalidArgument(f"Error in Frequencies.available_scores definitions. Need roles argument for score {name_score}") 
+            score = score_fn(self.residues_interface, score_info[2])
         else:
             raise error.InvalidScore(f"{type_score} is invalid. Choose contacts or residues")
 

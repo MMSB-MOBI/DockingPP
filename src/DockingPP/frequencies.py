@@ -1,5 +1,6 @@
 from typing import List, Dict, Tuple, Set
 import math
+import DockingPP.error as error
 
 class Frequencies:
     """An object that stores frequencies computed for a list of poses
@@ -18,10 +19,14 @@ class Frequencies:
                                   "CONSRANK" : ("contacts", self.getContactFrequenciesAverage),\
                                   "contact_log_sum" : ("contacts", self.getContactFrequenciesLogSum),\
                                   "contact_square_sum" : ("contacts", self.getContactFrequenciesSquareSum),\
-                                  "residue_sum" : ("residues", self.getResidueFrequenciesSum),
-                                  "residue_average": ("residues", self.getResidueFrequenciesAverage),\
-                                  "residue_log_sum": ("residues", self.getResidueFrequenciesLogSum),\
-                                  "residue_square_sum": ("residues", self.getResidueFrequenciesSquareSum)}
+                                  "residue_sum" : ("residues", self.getResidueFrequenciesSum, ["ligand", "receptor"]),
+                                  "residue_average": ("residues", self.getResidueFrequenciesAverage, ["ligand", "receptor"]),\
+                                  "residue_log_sum": ("residues", self.getResidueFrequenciesLogSum, ["ligand", "receptor"]),\
+                                  "residue_square_sum": ("residues", self.getResidueFrequenciesSquareSum, ["ligand", "receptor"]),\
+                                  "residue_average_ligand" : ("residues", self.getResidueFrequenciesAverage, ["ligand"]),\
+                                  "residue_average_receptor" : ("residues", self.getResidueFrequenciesAverage, ["receptor"]),\
+                                  "residue_sum_ligand" : ("residues", self.getResidueFrequenciesSum, ["ligand"]),\
+                                  "residue_sum_receptor" : ("residues", self.getResidueFrequenciesSum, ["receptor"])}
         """A dictionary that stores available scores for rescoring. These scores are computed for a given list of contacts or a given list of residues at interface from contacts relative frequencies or relative frequencies of residues at interface  calculated here. The available scores are stored with their name, their type (if we need frequencies of contacts or residues at interface to compute them), and the function to compute them.
         """
         
@@ -73,7 +78,7 @@ class Frequencies:
 
     #Maybe find a way to not have a single function for each score ???? 
 
-    def getResidueFrequenciesSum(self, list_residue:Dict[str,Set[int]]) -> float:
+    def getResidueFrequenciesSum(self, list_residue:Dict[str,Set[int]], roles:List[str]) -> float:
         """For a given ensemble of residues, compute their relative frequencies sum. 
 
         Args:
@@ -82,9 +87,9 @@ class Frequencies:
         Returns:
             float: The sum of residues relative frequencies.
         """
-        return sum([self.rel_frequencies_residue[role].get(idx, 1 / self.nb_poses_used) for role in list_residue for idx in list_residue[role]])
+        return sum([self.rel_frequencies_residue[role].get(idx, 1 / self.nb_poses_used) for role in roles for idx in list_residue[role]])
     
-    def getResidueFrequenciesLogSum(self, list_residue:Dict[str,Set[int]]) -> float:
+    def getResidueFrequenciesLogSum(self, list_residue:Dict[str,Set[int]], roles:List[str]) -> float:
         """For a given ensemble of residues, compute their relative frequencies log sum.
 
         Args:
@@ -93,9 +98,9 @@ class Frequencies:
         Returns:
             float: The log sum of residues relative frequencies.
         """
-        return sum([math.log(self.rel_frequencies_residue[role].get(idx, 1 / self.nb_poses_used)) for role in list_residue for idx in list_residue[role]])
+        return sum([math.log(self.rel_frequencies_residue[role].get(idx, 1 / self.nb_poses_used)) for role in roles for idx in list_residue[role]])
 
-    def getResidueFrequenciesSquareSum(self, list_residue:Dict[str, Set[int]]) -> float:
+    def getResidueFrequenciesSquareSum(self, list_residue:Dict[str, Set[int]], roles:List[str]) -> float:
         """For a given ensemble of residues, compute their relative frequencies square sum.
 
         Args:
@@ -104,9 +109,9 @@ class Frequencies:
         Returns:
             float: The square sum of residues relative frequencies.
         """
-        return sum([self.rel_frequencies_residue[role].get(idx, 1 / self.nb_poses_used)**2 for role in list_residue for idx in list_residue[role]])
+        return sum([self.rel_frequencies_residue[role].get(idx, 1 / self.nb_poses_used)**2 for role in roles for idx in list_residue[role]])
 
-    def getResidueFrequenciesAverage(self, list_residue:Dict[str, Set[int]]) -> float:
+    def getResidueFrequenciesAverage(self, list_residue:Dict[str, Set[int]], roles: List[str]) -> float:
         """For a given ensemble of residues, compute their relative frequencies sum normalized by the number of residues.
 
         Args:
@@ -115,8 +120,13 @@ class Frequencies:
         Returns:
             float: The normalized sum of residues relative frequencies.
         """
-        nb_residues = len([residues for role in list_residue for residues in list_residue[role]])
-        return self.getResidueFrequenciesSum(list_residue) / nb_residues
+        for r in roles: 
+            if not r in ["ligand", "receptor"]: 
+                raise error.InvalidArgument("getResidueFrequenciesAverage third argument must be both|ligand|receptor")
+
+        nb_residues = len([residues for role in roles for residues in list_residue[role]])
+
+        return self.getResidueFrequenciesSum(list_residue, roles) / nb_residues
 
     def getContactFrequenciesSum(self, list_contact: Set[Tuple[int, int]]) -> float: 
         """For a given ensemble of contacts, compute their relative frequencies sum.
