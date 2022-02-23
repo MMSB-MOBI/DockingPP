@@ -78,6 +78,6 @@ if __name__ == "__main__":
             DH.computeContactMap(ARGS["--thread"], max_poses )
             DH.computeFrequencies(ARGS["--nb_frequencies"])
             DH.rescorePoses(ARGS["--nb_rescoring"], ARGS["--score"])
-            DH.serializeRescoring(f'{ARGS["--output"]}/{compl}_scores.tsv')
+            DH.serializeRescoring(f'{ARGS["--output"]}/{compl}_scores.tsv', ARGS["--score"])
         
     logging.info(f"END in {time.time() - start} s")

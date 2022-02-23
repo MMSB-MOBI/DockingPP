@@ -1,6 +1,6 @@
 from typeguard import typechecked
 import DockingPP.typecheck as typecheck
-import pyproteinsExt.structure.coordinates as PDB
+import pypstruct.coordinates as PDB
 from typing import Tuple, TypedDict, List, Optional, Dict
 from DockingPP.pose import Pose
 import DockingPP.error as error
@@ -246,6 +246,7 @@ class DockingHandler:
 
         if type_score == "all": 
             scores_to_compute = self.freq.available_scores
+
         else:
             if not type_score in self.freq.available_scores:
                 raise error.InvalidScore(f"{type_score} score is not valid")
@@ -288,7 +289,7 @@ class DockingHandler:
                 top += nb_to_keep%nb_split
             yield(i, current_poses[i*nWidth:top])
 
-    def serializeRescoring(self, output_file:str, scores_to_write: List[str] = ["residue_sum", "residue_average", "residue_log_sum", "residue_square_sum", "CONSRANK_U", "CONSRANK", "contact_log_sum", "contact_square_sum"]):
+    def serializeRescoring(self, output_file:str, type_score: List[str] = ["residue_sum", "residue_average", "residue_log_sum", "residue_square_sum", "CONSRANK_U", "CONSRANK", "contact_log_sum", "contact_square_sum"]):
         """Write rescoring results in a file. 
 
         Args:
@@ -296,6 +297,14 @@ class DockingHandler:
             scores_to_write (List[str], optional): List of scores to write. The scores will be write in the given order. Defaults to ["residue_sum", "residue_average", "residue_log_sum", "residue_square_sum", "CONSRANK_U", "CONSRANK", "contact_log_sum", "contact_square_sum"].
 
         """
+        if type_score == "all": 
+            scores_to_write = self.freq.available_scores
+
+        else:
+            if not type_score in self.freq.available_scores:
+                raise error.InvalidScore(f"{type_score} score is not valid")
+            scores_to_write = {type_score : self.freq.available_scores[type_score]}
+
 
         if not self._nb_rescored_poses : 
             raise error.RescoringNotComputed("Poses has not been rescored, call rescorePoses")

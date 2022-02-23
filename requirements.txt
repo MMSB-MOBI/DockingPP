@@ -3,3 +3,4 @@ jupyter
 pyproteinsExt
 ccmap
 docopt
+pypstruct
