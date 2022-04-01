@@ -1,4 +1,4 @@
-from .loader import loadZdock
+from .loader import loadZdock , loadPDB
 import logging
 import sys
 
