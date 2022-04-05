@@ -6,7 +6,7 @@ import math
 class Pose :
     """Object to handle single docking pose
     """
-    def __init__(self, index:int, euler:Tuple[float, float, float], translation: Tuple[float, float, float]):
+    def __init__(self, index:int, euler:Tuple[float, float, float] = ( 0, 0, 0), translation: Tuple[float, float, float] = ( 0, 0, 0)):
         self.index : int = index
         """pose index"""
         self.euler : Tuple[float, float, float] = euler
@@ -19,6 +19,9 @@ class Pose :
         """Set of (i,j) tuples with i is the index of receptor residue and j is the index of ligand residue and i is in contact with j. Set with calls to addContact."""
         self.rescoring : Dict [str, float] = {}
         """Dictionary that stores rescoring for the pose. It has name of the score as key and score value as value. Set with calls to computeScore."""
+
+    def __repr__(self):
+        return f"#Pose object number {self.index}"
 
     def addContact(self, contact:Tuple[int, int]):
         """Add a contact to pose. 
