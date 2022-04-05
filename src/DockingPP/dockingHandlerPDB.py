@@ -93,7 +93,7 @@ class DockingHandlerPDB(DockingHandler):
         """
         
         if nb_poses == -1:
-            nb_poses = self._nb_cmap_poses
+            nb_poses = len(self.poses)
             print( "Number of poses : ",nb_poses)
             
             

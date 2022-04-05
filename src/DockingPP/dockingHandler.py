@@ -202,10 +202,11 @@ class DockingHandler:
             scores_to_write = self.freq.available_scores
 
         else:
-            if not type_score in self.freq.available_scores:
-                raise error.InvalidScore(f"{type_score} score is not valid")
-            scores_to_write = {
-                type_score: self.freq.available_scores[type_score]}
+            scores_to_write = {}
+            for score in type_score:
+                if not score in self.freq.available_scores:
+                    raise error.InvalidScore(f"{score} score is not valid")
+                scores_to_write[score] = self.freq.available_scores[score]
 
         if not self._nb_rescored_poses:
             raise error.RescoringNotComputed(
