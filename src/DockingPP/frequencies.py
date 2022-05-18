@@ -126,7 +126,8 @@ class Frequencies:
 
         nb_residues = len([residues for role in roles for residues in list_residue[role]])
 
-        return self.getResidueFrequenciesSum(list_residue, roles) / nb_residues
+        if nb_residues>0:
+            return self.getResidueFrequenciesSum(list_residue, roles) / nb_residues
 
     def getContactFrequenciesSum(self, list_contact: Set[Tuple[int, int]]) -> float: 
         """For a given ensemble of contacts, compute their relative frequencies sum.
@@ -170,4 +171,6 @@ class Frequencies:
         Returns:
             float: The normalized sum of contacts relative frequencies.
         """
-        return self.getContactFrequenciesSum(list_contact) / len(list_contact)
+        if len(list_contact)>0:
+            return self.getContactFrequenciesSum(list_contact) / len(list_contact)
+        #return self.getContactFrequenciesSum(list_contact) / len(list_contact)
