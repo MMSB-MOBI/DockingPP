@@ -125,7 +125,8 @@ class Frequencies:
                 raise error.InvalidArgument("getResidueFrequenciesAverage third argument must be both|ligand|receptor")
 
         nb_residues = len([residues for role in roles for residues in list_residue[role]])
-
+        
+        # return nan for complexes with no interface contacts ....
         if nb_residues>0:
             return self.getResidueFrequenciesSum(list_residue, roles) / nb_residues
 
@@ -171,6 +172,7 @@ class Frequencies:
         Returns:
             float: The normalized sum of contacts relative frequencies.
         """
+        # Return nan for complexes with no contacts ...
         if len(list_contact)>0:
             return self.getContactFrequenciesSum(list_contact) / len(list_contact)
         #return self.getContactFrequenciesSum(list_contact) / len(list_contact)
